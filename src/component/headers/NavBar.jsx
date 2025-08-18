@@ -9,9 +9,11 @@ import {
     FaBars,
 } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import LoginPopup from '../homepage/LoginPopup';
 
 const NavBar = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const [showLogin, setShowLogin] = useState(false);
 
     const handleLinkClick = () => {
         setIsOpen(false);
@@ -34,12 +36,13 @@ const NavBar = () => {
 
                 {/* Login button - Right side for both mobile and desktop */}
                 <div className="flex items-center">
-                    <Link
-                        to="/login"
+                    <button
+                        onClick={() => setShowLogin(true)}
                         className="text-white border border-white px-3 py-1 rounded text-sm hover:bg-white hover:text-[#1e1f90] transition-colors"
                     >
                         Login
-                    </Link>
+                    </button>
+                    <LoginPopup showLogin={showLogin} setShowLogin={setShowLogin} />
                 </div>
             </div>
 

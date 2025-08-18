@@ -10,10 +10,12 @@ const TopBar = () => {
                     <img
                         src="http://10.10.11.155:8081/HIS/hisglobal/mod/assets/img/assamlogonew.png"
                         alt="CGHS Logo"
-                        className="h-10"
+                        className="h-14 animate-spin-slow bg-white/10 backdrop-blur-sm p-1 rounded-lg border border-white/10 flex-shrink-0"
                     />
-                    <div className="leading-tight">
-                        <h1 className="text-[#0081ad] font-bold text-lg">AMSCL, Govt. of Assam</h1>
+                    <div className="leading-tight overflow-hidden">
+                        <h1 className="text-[#0081ad] font-bold text-lg relative inline-block">
+                            <span className="animate-color-flow">AMSCL, Govt. of Assam</span>
+                        </h1>
                         <p className="text-sm text-green-700 font-bold toplinebg">DVDMS (e-Aushadhi)</p>
                     </div>
                 </div>
@@ -22,12 +24,12 @@ const TopBar = () => {
                 <div className="flex flex-col sm:flex-row items-center text-sm gap-4">
                     <div className="flex flex-col items-center text-center">
                         {/* location */}
-                        <FaMapMarkerAlt size={20} color='#1e1f90'/>
+                        <FaMapMarkerAlt size={20} color='#1e1f90' />
                         <span className="mt-1">AMSCL, Guwahati, Govt. of Assam</span>
                     </div>
                     <div className="flex flex-col items-center text-center sm:border-l sm:px-4">
                         {/* mail */}
-                        <FaEnvelope size={20} color='#1e1f90'/>
+                        <FaEnvelope size={20} color='#1e1f90' />
                         <a href="mailto:mis.nhm-as@gov.in" className="">
                             <span className="mt-1">mail</span>
                             mis.nhm-as@gov.in</a>
