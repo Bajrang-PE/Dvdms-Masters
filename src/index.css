@@ -5,3 +5,16 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+.required {
+  color: #dc3545;
+  width: 100%;
+  margin-bottom: .25rem;
+  font-size: .875em;
+}
+
+.required-label::before {
+  content: '*';
+  color: red;
+  font-weight: bold;
+}

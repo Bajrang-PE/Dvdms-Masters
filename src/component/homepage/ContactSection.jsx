@@ -46,8 +46,8 @@ const ContactSection = () => {
     ];
 
     return (
-        <section className="py-8 bg-gradient-to-b from-blue-50 to-blue-100">
-            <div className="container mx-auto px-4 max-w-7xl">
+        <section className="py-8 bg-gradient-to-b from-blue-50 to-blue-100" id='contacts'>
+            <div className="mx-auto px-8">
                 <div className="text-left mb-4">
                     <h2 className="text-3xl font-bold text-blue-900 mb-2">NHM & AMSCL CONTACTS</h2>
                     <div className="w-24 h-1.5 bg-gradient-to-r from-blue-400 to-indigo-600 rounded-full"></div>
@@ -64,12 +64,12 @@ const ContactSection = () => {
                         </div>
                         <div className="">
                             <img
-                                src="http://10.10.11.155:8081/HIS/hisglobal/mod/assets/img/contact-image.jpg"
+                                src="/contactLocation.jpg"
                                 alt="NHM & AMSCL Locations"
                                 className="w-full h-full object-cover"
-                                onError={(e) => {
-                                    e.target.src = "https://via.placeholder.com/600x600?text=Map+Not+Available";
-                                }}
+                                // onError={(e) => {
+                                //     e.target.src = "https://via.placeholder.com/600x600?text=Map+Not+Available";
+                                // }}
                             />
                         </div>
                     </div>
@@ -128,9 +128,9 @@ const ContactSection = () => {
                                                             src={location.image}
                                                             alt={location.name}
                                                             className="w-full h-full object-cover"
-                                                            onError={(e) => {
-                                                                e.target.src = "https://via.placeholder.com/600x400?text=Image+Not+Available";
-                                                            }}
+                                                            // onError={(e) => {
+                                                            //     e.target.src = "https://via.placeholder.com/600x400?text=Image+Not+Available";
+                                                            // }}
                                                         />
                                                     </div>
                                                 </div>
@@ -141,8 +141,6 @@ const ContactSection = () => {
                             </div>
                         ))}
                     </div>
-
-
                 </div>
             </div>
         </section>

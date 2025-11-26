@@ -42,8 +42,8 @@ const AboutAmscl = () => {
     return (
         <>
             {/* About AMSCL section */}
-            <div className="bg-gray-50 py-12 px-6 md:px-12">
-                <div className="max-w-7xl mx-auto">
+            <div className="bg-gray-50 py-12 px-6 md:px-12" id='aboutus'>
+                <div className="mx-auto">
                     <div className="grid md:grid-cols-3 gap-12 mb-4">
                         <div className="md:col-span-1">
                             <h2 className="text-3xl font-semibold text-blue-900 mb-4">About AMSCL</h2>

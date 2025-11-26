@@ -1,6 +1,7 @@
 import { FaWarehouse, FaClipboardList, FaChartLine, FaFileInvoiceDollar, FaUsersCog, FaChartPie, FaPills, FaQuestion, FaArrowRight, FaBoxes, FaTruck, FaFirstAid, FaGlobeAmericas, FaBoxOpen, FaTruckLoading, FaHeartbeat } from 'react-icons/fa';
 
 const Services = () => {
+    
     const services = [
         {
             icon: <FaPills className="w-8 h-8" />,
@@ -94,8 +95,8 @@ const Services = () => {
 
     return (
         <>
-            <section className="py-12 bg-gradient-to-b from-white to-blue-50">
-                <div className="container mx-auto px-4 max-w-7xl">
+            <section className="py-12 bg-gradient-to-b from-white to-blue-50" id='services'>
+                <div className="px-8 mx-auto">
                     <div className="text-left mb-8">
                         <h2 className="text-3xl font-bold text-blue-900 mb-2">SERVICES</h2>
                         <p className="text-xl text-blue-600 font-medium mb-4">
@@ -130,7 +131,7 @@ const Services = () => {
             </section>
 
             <section className="py-8 bg-white">
-                <div className="container mx-auto px-4 max-w-7xl">
+                <div className="mx-auto px-8">
                     <div className="flex flex-col lg:flex-row gap-6 items-stretch"> {/* Changed to items-stretch */}
                         {/* Cards Section - Takes 2/3 width */}
                         <div className="lg:w-2/3">
@@ -185,7 +186,7 @@ const Services = () => {
                         <div className="lg:w-1/3 flex mb-4">
                             <div className="bg-gray-100 rounded-lg overflow-hidden w-full">
                                 <img
-                                    src="http://10.10.11.155:8081/HIS/hisglobal/mod/assets/img/features-img.png"
+                                    src="/features-img.png"
                                     alt="Medical Supply Chain"
                                     className="w-full h-full object-cover"
                                 />

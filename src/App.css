@@ -63,20 +63,45 @@
 
 /* Add these animations to your app.css */
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  20%, 60% { transform: translateX(-3px); }
-  40%, 80% { transform: translateX(3px); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  20%,
+  60% {
+    transform: translateX(-3px);
+  }
+
+  40%,
+  80% {
+    transform: translateX(3px);
+  }
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes pulse {
- 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-  0%{opacity: 1;}
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+
+  0% {
+    opacity: 1;
+  }
 }
 
 /* Utility classes to use with Tailwind */
@@ -90,4 +115,123 @@
 
 .animate-pulse {
   animation: pulse 2s cubic-bezier(0.5, 0.6, 0.8, 1) infinite;
+}
+
+.nav-tab {
+  text-decoration: none;
+  color: inherit;
+}
+
+.nav-tab:hover {
+  text-decoration: underline;
+}
+
+
+.top-bar {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.header-bar {
+  background-color: #052963 !important;
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, .13);
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 10;
+}
+
+.logo-image {
+  width: 100%;
+  height: auto;
+  max-width: 40px;
+}
+
+.header-image {
+  font-size: 1rem !important;
+  border: none !important;
+  cursor: pointer;
+  transition: all 250ms !important;
+  gap: 0.5rem;
+  background: linear-gradient(to bottom right, rgb(250 125 9), rgb(185 90 1));
+  box-shadow: inset 0 1px 0 0 rgba(255, 161, 73, 0.4), 0 2px 0 0 #894200, 0 4px 0 0 #894200, 0 6px 14px 0 rgba(250, 125, 9, 0.6);
+  margin: 10px;
+  color: white !important;
+}
+
+.header-image:hover,
+.new-btn-blue:hover {
+  /* transform: scale(0.95); */
+  animation: pulse-animation 1s infinite;
+}
+
+.datatable-header {
+  /* background: #005b88; */
+  background-color: #00203f !important;
+  /* background: linear-gradient(135deg, #05213c, #05396c); */
+  color: #FBC02D !important;
+  border-radius: 5px;
+}
+
+.cms-login-btn {
+  background-color: #00203f !important;
+  color: #FBC02D !important;
+  transition: all 0.3s ease;
+}
+
+.cms-login-btn:hover {
+  background-color: #033669 !important;
+  color: #f7c74e !important;
+  transition: font-size 0.3s ease;
+}
+
+.cms-login .btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+.home-footer {
+  background-color: #00203f;
+  padding-top: 1.5rem !important;
+}
+
+.border-btm {
+  border-bottom: 4px solid #2aacea;
+  width: 50px;
+}
+
+@media screen and (max-width: 767px) {
+  .border-btm {
+    justify-self: center;
+  }
+}
+
+.golden {
+  color: #f3a811 !important;
+}
+.fs-13 {
+  font-size: 13px !important;
+}
+.home-headings {
+  color: #052963;
+  text-shadow: 7px 5px 5px rgba(0, 0, 0, .13) !important;
+}
+
+.functionality-card:hover,
+.state-card:hover {
+  transform: scale(1.05);
+  background: #f5f5f5;
+}
+
+.state-card {
+  width: auto !important;
+  height: auto !important;
+  transition: transform 0.2s ease;
+  border-radius: 15px !important;
+  margin: 10px;
+  box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .13) !important;
+}
+.card-title {
+  font-weight: bold;
+  color: #052963 !important;
 }

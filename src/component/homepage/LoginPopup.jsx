@@ -1,22 +1,67 @@
 import React, { useState } from 'react';
 import { FaUser, FaLock, FaEye, FaEyeSlash, FaRedo, FaUndo, FaTimes } from 'react-icons/fa';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { fetchPostData } from '../../utils/ApiHook';
 
-const LoginPopup = ({ showLogin, setShowLogin }) => {
-  const [userId, setUserId] = useState('');
+const LoginPopup = ({ showLogin, setShowLogin,logoUrl }) => {
   const [password, setPassword] = useState('');
   const [captcha, setCaptcha] = useState('F 3 6 k');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
+  const [captchaText, setCaptchaText] = useState('');
+  const [error, setError] = useState({
+    'usernameErr': "", 'passwordErr': "", 'captchaErr': ""
+  });
+
+  const location = useLocation();
+  const navigate = useNavigate();
+  const username = location.state?.username;
+
+  // const handleLogin = (password) => {
+  //   // here you can validate password with API
+  //   navigate("/dashboard", { state: { username, stateCode } });
+  // };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setError('Not a Valid Request!');
+    try {
+      let isValid = true;
+
+      if (!username?.trim() || username?.trim() === '') {
+        setError(prev => ({ ...prev, "usernameErr": "username is missing!" }));
+        isValid = false;
+      }
+      if (!password?.trim() || password?.trim() === '') {
+        setError(prev => ({ ...prev, "passwordErr": "Please enter password" }));
+        isValid = false;
+      }
+      if (!captchaText?.trim() || captchaText?.trim() === '') {
+        setError(prev => ({ ...prev, "captchaErr": "Please enter captcha!" }));
+        isValid = false;
+      }
+      if (isValid) {
+        const val = {
+          "gnumUserid": "20000001",
+          "gstrLoginId": username,
+          "password": password    //"Assam!2019"
+        }
+        fetchPostData('/auth/login-by-password', val).then((data) => {
+          if (data?.status === 1) {
+            console.log(data, 'data')
+            navigate('menus')
+          } else {
+            alert(data?.message);
+          }
+        })
+      }
+    } catch (error) {
+      console.log(error)
+    }
   };
 
   const handleReset = () => {
-    setUserId('');
     setPassword('');
-    setError('');
+    setError({ 'usernameErr': "", 'passwordErr': "", 'captchaErr': "" });
+    refreshCaptcha('');
   };
 
   const refreshCaptcha = () => {
@@ -40,11 +85,11 @@ const LoginPopup = ({ showLogin, setShowLogin }) => {
         <div className="flex justify-between items-center border-b p-2">
           <div className="flex items-center">
             <img
-              src="http://10.10.11.155:8081/HIS/hisglobal/mod/assets/img/assamlogonew.png"
+              src={logoUrl}
               alt="Logo"
               className="h-10 mr-3 animate-spin-slow rounded rounded-lg"
             />
-            <h2 className="text-2xl text-indigo-800">Login</h2>
+            <h2 className="text-2xl !text-indigo-800">Login</h2>
           </div>
           <button
             onClick={() => setShowLogin(false)}
@@ -56,12 +101,7 @@ const LoginPopup = ({ showLogin, setShowLogin }) => {
 
         <div className="w-full h-1 bg-gradient-to-r from-blue-400 to-indigo-600 rounded-full"></div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {error && (
-            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 animate-shake">
-              <p>{error}</p>
-            </div>
-          )}
+        <form onSubmit={handleSubmit} className="p-6 space-y-3">
 
           <div className="space-y-2">
             <label className="block text-gray-700">User Id :</label>
@@ -71,13 +111,19 @@ const LoginPopup = ({ showLogin, setShowLogin }) => {
               </div>
               <input
                 type="text"
-                value={userId}
-                onChange={(e) => setUserId(e.target.value)}
-                className="w-full px-2 pl-8 py-2 border border-gray-400 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 text-black"
+                value={username}
+                // onChange={(e) => setUserId(e.target.value)}
+                className="w-full px-2 !pl-8 py-2 border border-gray-400 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-500"
                 placeholder="Enter User Id"
+                disabled
+                readOnly
               />
-
             </div>
+            {error?.usernameErr &&
+              <div className="required">
+                {error?.usernameErr}
+              </div>
+            }
           </div>
 
           <div className="space-y-2">
@@ -89,13 +135,13 @@ const LoginPopup = ({ showLogin, setShowLogin }) => {
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-2 pl-8 py-2 border border-gray-400 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 text-black"
+                onChange={(e) => { setPassword(e.target.value); }}
+                className="w-full px-2 !pl-8 py-2 border border-gray-400 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-800"
                 placeholder="Enter Password"
               />
               <button
                 type="button"
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                className="!absolute !inset-y-0 !right-0 pr-3 !flex items-center"
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? (
@@ -105,6 +151,11 @@ const LoginPopup = ({ showLogin, setShowLogin }) => {
                 )}
               </button>
             </div>
+            {error?.passwordErr &&
+              <div className="required">
+                {error?.passwordErr}
+              </div>
+            }
           </div>
 
           <div className="space-y-2">
@@ -113,10 +164,13 @@ const LoginPopup = ({ showLogin, setShowLogin }) => {
               <div className="flex-1 relative">
                 <input
                   type="text"
-                  className="w-full px-4 py-2 border border-gray-400 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 text-black"
+                  className="w-full px-4 py-2 border border-gray-400 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-800"
                   placeholder="Enter Captcha"
+                  value={captchaText}
+                  onChange={(e) => { setCaptchaText(e.target.value); }}
                 />
               </div>
+
               <div className="flex items-center space-x-2">
                 <div className="bg-gray-200 px-4 py-2 rounded-lg font-mono text-gray-700 select-none">
                   {captcha}
@@ -124,26 +178,31 @@ const LoginPopup = ({ showLogin, setShowLogin }) => {
                 <button
                   type="button"
                   onClick={refreshCaptcha}
-                  className="p-2 text-gray-600 hover:text-blue-600 transition-colors cursor-pointer border border-yellow-800 rounded"
+                  className="p-2 text-gray-600 hover:text-blue-600 transition-colors cursor-pointer !border border-yellow-800 rounded"
                   title="Refresh Captcha"
                 >
                   <FaRedo className="animate-spin-on-hover" />
                 </button>
               </div>
             </div>
+            {error?.captchaErr &&
+              <div className="required">
+                {error?.captchaErr}
+              </div>
+            }
           </div>
 
           <div className="pt-4 flex space-x-3">
             <button
               type="submit"
-              className="flex-1 bg-gradient-to-r from-indigo-600 to-blue-600 text-white py-1 rounded-lg  transition-colors cursor-pointer animate-shake hover:text-[#00d9dc] text-lg border hover:border-yellow-900"
+              className="flex-1 bg-gradient-to-r from-indigo-600 to-blue-600  py-1 !rounded-lg  !transition-colors cursor-pointer animate-shake !hover:text-[#00d9dc] !text-lg !border !hover:border-yellow-900"
             >
               Login
             </button>
             <button
               type="button"
               onClick={handleReset}
-              className="flex-1 bg-gradient-to-r from-yellow-600 to-red-300 text-gray-800 py-1 rounded-lg  transition-colors flex items-center justify-center space-x-2 cursor-pointer hover:text-[#941714] text-lg border border-yellow-600 hover:border-yellow-900"
+              className="flex-1 bg-gradient-to-r from-yellow-600 to-red-300 text-gray-800 py-1 !rounded-lg  transition-colors flex items-center justify-center space-x-2 cursor-pointer hover:text-[#941714] text-lg border !border-yellow-600 !hover:border-yellow-900"
             >
               <FaUndo className="text-sm" />
               <span>Reset</span>

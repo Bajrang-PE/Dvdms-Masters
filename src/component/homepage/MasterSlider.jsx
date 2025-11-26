@@ -6,8 +6,8 @@ const MasterSlider = () => {
     const [animateAMSCL, setAnimateAMSCL] = useState(false);
 
     const slides = [
-        { image: "http://10.10.11.155:8081/HIS/hisglobal/mod/assets/img/slider/1.jpg" },
-        { image: "http://10.10.11.155:8081/HIS/hisglobal/mod/assets/img/slider/2.jpg" },
+        { image: "/slider1.jpg" },
+        { image: "/slider2.jpg" },
     ];
 
     // Initialize animations on first load
@@ -73,7 +73,7 @@ const MasterSlider = () => {
                     to equitable, affordable and quality health care services in the
                 </div>
                 <img
-                    src="http://10.10.11.155:8081/HIS/hisglobal/mod/assets/img/state-of-assam.png"
+                    src="/state-of-assam.png"
                     className="mt-3 max-h-[4rem]"
                     alt="State of Assam"
                 />
