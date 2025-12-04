@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import InputBox from '../../commons/InputBox';
 import SelectBox from '../../commons/SelectBox';
+import DropDownCombo from '../../commons/DropDownCombo';
 
 const PatientComplaintFormJH = () => {
 
@@ -8,24 +9,70 @@ const PatientComplaintFormJH = () => {
         patientName: '',
         mobileNo: '',
         address: '',
-        district: 'All',
+        district: '',
         healthFacility: '',
         medicine: '',
-        complaintType: 'Unavailability',
+        complaintType: '',
         comments: ''
     });
 
-    const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
-    };
+    const [errors, setErrors] = useState({
+        patientNameErr: '',
+        mobileNoErr: '',
+        districtErr: '',
+        healthFacilityErr: '',
+        medicineErr: '',
+        commentsErr: ''
+    })
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+    const handleSubmit = () => {
         console.log('Form submitted:', formData);
     };
+
+    const handleValidation = (e) => {
+        e.preventDefault();
+        let isValid = true;
+
+        if (!formData?.patientName?.trim()) {
+            setErrors(prev => ({ ...prev, "patientNameErr": "Patient name is required!" }))
+            isValid = false;
+        }
+        if (!formData?.mobileNo?.trim()) {
+            setErrors(prev => ({ ...prev, "mobileNoErr": "Mobile number is required!" }))
+            isValid = false;
+        }
+        if (!formData?.district?.trim()) {
+            setErrors(prev => ({ ...prev, "districtErr": "Please select district!" }))
+            isValid = false;
+        }
+        if (!formData?.healthFacility?.trim()) {
+            setErrors(prev => ({ ...prev, "healthFacilityErr": "Please select health facility!" }))
+            isValid = false;
+        }
+        if (!formData?.medicine?.trim()) {
+            setErrors(prev => ({ ...prev, "medicineErr": "Please select medicine!" }))
+            isValid = false;
+        }
+        if (!formData?.comments?.trim()) {
+            setErrors(prev => ({ ...prev, "commentsErr": "Comments is required!" }))
+            isValid = false;
+        }
+
+        if (isValid) {
+            handleSubmit();
+        }
+    }
+
+    const handleChange = (e) => {
+        const { name, value } = e?.target;
+        const errName = name + "Err";
+
+        if (name) {
+            setFormData({ ...formData, [name]: value });
+            setErrors({ ...errors, [errName]: '' });
+        }
+    };
+
 
     return (
         <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg shadow-md p-6" id='pateintcompjh'>
@@ -33,10 +80,10 @@ const PatientComplaintFormJH = () => {
                 Patient Complaint Details:
             </h2>
 
-            <form onSubmit={handleSubmit} className="space-y-2 bg-[#5f9ea0] p-6 rounded-lg shadow-sm">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <form onSubmit={handleValidation} className="space-y-2 bg-[#5f9ea0] py-8 px-10 rounded-lg shadow-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 md:gap-8 mb-0">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2 required-label">
+                        <label className="block text-sm font-medium text-gray-800 mb-2 required-label">
                             Patient Name:
                         </label>
                         <InputBox
@@ -45,12 +92,12 @@ const PatientComplaintFormJH = () => {
                             onChange={handleChange}
                             placeholder="Enter patient name"
                             className="bg-gray-50"
-                            required={true}
+                            error={errors?.patientNameErr}
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2 required-label">
-                            *Mobile No.:
+                        <label className="block text-sm font-medium text-gray-800 mb-2 required-label">
+                            Mobile No.:
                         </label>
                         <InputBox
                             name="mobileNo"
@@ -58,15 +105,15 @@ const PatientComplaintFormJH = () => {
                             onChange={handleChange}
                             type="number"
                             placeholder="Enter mobile number"
-                            required={true}
                             className="bg-gray-50"
+                            error={errors?.mobileNoErr}
                         />
                     </div>
                 </div>
 
-                {/* Address - Full Width */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                {/* Address */}
+                <div className='mb-0'>
+                    <label className="block text-sm font-medium text-gray-800 mb-2">
                         Address:
                     </label>
                     <textarea
@@ -79,54 +126,56 @@ const PatientComplaintFormJH = () => {
                     />
                 </div>
 
-                {/* Second Row - District & Health Facility */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/*District & Health Facility */}
+                <div className="grid grid-cols-1 md:grid-cols-2 md:gap-8 mb-0">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2 required-label">
-                            *Districts:
+                        <label className="block text-sm font-medium text-gray-800 mb-2 required-label">
+                            Districts:
                         </label>
                         <SelectBox
                             name="district"
                             value={formData.district}
                             onChange={handleChange}
-                            required
                             className="bg-gray-50"
+                            error={errors?.districtErr}
+                            options={[{ value: "ramgarh", label: "Ramgarh" }]}
                         >
                         </SelectBox>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2 required-label">
-                            *Health Facility:
+                        <label className="block text-sm font-medium text-gray-800 mb-2 required-label">
+                            Health Facility:
                         </label>
                         <SelectBox
                             name="healthFacility"
                             value={formData.healthFacility}
                             onChange={handleChange}
-                            required
                             className="bg-gray-50"
+                            error={errors?.healthFacilityErr}
+                            options={[{ value: "kuchnhi", label: "Kuch Bhi Nahi he" }]}
                         >
                         </SelectBox>
                     </div>
                 </div>
 
-                {/* Third Row - Medicine & Complaint Type */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Medicine & Complaint Type */}
+                <div className="grid grid-cols-1 md:grid-cols-2 md:gap-8 mb-0">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2 required-label">
-                            *Drug (Medicine):
+                        <label className="block text-sm font-medium text-gray-800 mb-2 required-label">
+                            Drug (Medicine):
                         </label>
-                        <SelectBox
+                        <DropDownCombo
                             name="medicine"
                             value={formData.medicine}
                             onChange={handleChange}
-                            required
                             className="bg-gray-50"
-                            options={[{ value: "vaxofarma", label: "Vaxofarma" }]}
+                            options={[{ value: "khatam", label: "Khatam Ho Gayi" },{ value: "nodena", label: "Kal Milegi" }]}
+                            error={errors?.medicineErr}
                         >
-                        </SelectBox>
+                        </DropDownCombo>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-800 mb-2">
                             Complaint Type:
                         </label>
                         <SelectBox
@@ -134,6 +183,7 @@ const PatientComplaintFormJH = () => {
                             value={formData.complaintType}
                             onChange={handleChange}
                             className="bg-gray-50"
+                            options={[{ value: "cmptyp", label: "Ab tu bhi complaint karega bhai" }]}
                         >
                         </SelectBox>
                     </div>
@@ -141,14 +191,13 @@ const PatientComplaintFormJH = () => {
 
                 {/* Comments - Full Width */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2 required-label">
-                        *Comments:
+                    <label className="block text-sm font-medium text-gray-800 mb-2 required-label">
+                        Comments:
                     </label>
                     <textarea
                         name="comments"
                         value={formData.comments}
                         onChange={handleChange}
-                        required
                         rows="3"
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 bg-gray-50"
                         placeholder="Enter your comments here..."

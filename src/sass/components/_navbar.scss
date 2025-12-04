@@ -1,0 +1,95 @@
+@use '../abstracts/variables' as *;
+@use 'sass:color';
+
+.masters {
+  &__navbar {
+    width: 100%;
+    padding: 1rem 2rem;
+
+    &--text {
+      font-family: $primary-font;
+      font-weight: 500;
+      font-size: 2rem;
+      margin: 0;
+      color: $primary-color;
+    }
+
+    &--control-panel {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid $underline-color;
+    }
+
+    &--btn-container {
+      flex: 0 1 20%;
+      display: flex;
+      gap: 1.5rem;
+      justify-content: flex-end;
+
+      &-button {
+        padding: 1rem 2rem;
+        font-family: $secondary-font;
+        font-size: 1.4rem;
+        font-weight: 500;
+        background-color: $primary-color;
+        color: white;
+        border-radius: 5px;
+        box-shadow: $box-shadow-minimal;
+        transition: all 0.3s ease;
+
+        &:hover {
+          background-color: color.adjust($primary-color, $lightness: -10%);
+        }
+
+        &-filter {
+          background-color: $secondary-color;
+          &:hover {
+            background-color: color.adjust($secondary-color, $lightness: -10%);
+          }
+        }
+
+        &-modify {
+          background-color: $secondary-color;
+          &:hover {
+            background-color: color.adjust($secondary-color, $lightness: -10%);
+          }
+        }
+
+        &-delete {
+          background-color: $error-red;
+          &:hover {
+            background-color: color.adjust($error-red, $lightness: -10%);
+          }
+        }
+
+        &-view {
+          background-color: $warning-yellow;
+          &:hover {
+            background-color: color.adjust($warning-yellow, $lightness: -10%);
+          }
+        }
+
+        &:active {
+          transform: scale(0.95);
+        }
+      }
+    }
+
+    &--filters {
+      border-bottom: 1px solid $underline-color;
+      display: flex;
+      gap: 3rem;
+      align-items: center;
+      flex-wrap: wrap;
+
+      &-summary {
+        font-family: $secondary-font;
+        font-size: 1.5rem;
+        font-weight: 500;
+      }
+    }
+  }
+}

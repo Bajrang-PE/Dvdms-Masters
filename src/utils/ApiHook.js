@@ -1,8 +1,11 @@
 import axios from 'axios';
 
-const BaseUrl = '  http://10.226.27.173:8091';
+// const BaseUrl = '  http://10.226.27.173:8091';
 // const BaseUrl = 'http://10.226.17.6:8084';
+// const BaseUrl = 'http://10.226.29.202:8091/'; //jhk assam
 
+// const BaseUrl='http://10.226.29.154:8080/api'   //AD AS
+const BaseUrl = 'http://10.226.27.173:8096/api/'    //VIS JHK
 
 axios.defaults.baseURL = BaseUrl;
 
@@ -54,23 +57,24 @@ export const fetchData = async (url, params = null) => {
     try {
         const response = await axios.get(url, { params: params || "" });
 
-        const token = response.headers['authorization'] ||
-            response.headers['Authorization'] ||
-            response.headers?.get?.('authorization') ||
-            response.headers?.get?.('Authorization');
+        // const token = response.headers['authorization'] ||
+        //     response.headers['Authorization'] ||
+        //     response.headers?.get?.('authorization') ||
+        //     response.headers?.get?.('Authorization');
 
         const decryptedData = response?.data;
+        return decryptedData;
 
-        if (token) {
-            return {
-                ...decryptedData,
-                headers: {
-                    authorization: token.replace('Bearer', ''),
-                },
-            };
-        } else {
-            return decryptedData;
-        }
+        // if (token) {
+        //     return {
+        //         ...decryptedData,
+        //         headers: {
+        //             authorization: token.replace('Bearer', ''),
+        //         },
+        //     };
+        // } else {
+        //     return decryptedData;
+        // }
 
 
     } catch (error) {
@@ -88,4 +92,23 @@ export const fetchPostData = async (url, data) => {
         console.error("Error in fetchData:", error);
         throw error;
     }
+};
+
+export const fetchDeleteData = async (url, payload) => {
+    try {
+        const response = await axios.delete(url, { data: payload });
+        return response.data;
+    } catch (error) {
+        console.log('API Error:', error);
+    }
+};
+
+export const fetchUpdateData = async (url, data) => {
+    try {
+        const response = await axios.put(url, data);
+        return response.data;
+    } catch (error) {
+        console.log('API Error:', error);
+    }
+
 };

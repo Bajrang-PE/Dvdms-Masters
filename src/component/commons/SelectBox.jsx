@@ -23,8 +23,8 @@ const SelectBox = ({
         required={required}
         onChange={onChange}
         onBlur={onBlur}
-        className={`w-full px-4 py-2 border ${
-          error ? "border-red-500" : "border-gray-300"
+        className={`w-full px-4 py-1 border ${
+          error ? "ring-1 ring-red-500" : "border-gray-300"
         } rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 ${className}`}
       >
         <option value="">{placeholder}</option>
@@ -34,7 +34,7 @@ const SelectBox = ({
           </option>
         ))}
       </select>
-      {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
+      {error && <span className="text-sm text-[#9b0000] mt-1 ms-1">{error}</span>}
     </div>
   );
 };

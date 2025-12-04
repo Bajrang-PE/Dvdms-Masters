@@ -1,0 +1,29 @@
+//colors
+$primary-color: #1277b5;
+$secondary-color: #5bc0de;
+$underline-color: #dddddd;
+$dim-white: whitesmoke;
+$pure-white: white;
+$dim-black: #1e1e1e;
+$warning-yellow: #f0ad4e;
+$error-red: #d9534f;
+
+//Shadows
+$box-spherical-shadow: rgba(0, 0, 0, 0.17) 0px -23px 25px 0px inset,
+  rgba(0, 0, 0, 0.15) 0px -36px 30px 0px inset,
+  rgba(0, 0, 0, 0.1) 0px -79px 40px 0px inset, rgba(0, 0, 0, 0.06) 0px 2px 1px,
+  rgba(0, 0, 0, 0.09) 0px 4px 2px, rgba(0, 0, 0, 0.09) 0px 8px 4px,
+  rgba(0, 0, 0, 0.09) 0px 16px 8px, rgba(0, 0, 0, 0.09) 0px 32px 16px;
+
+$box-spherical-light-shadow: rgba(0, 0, 0, 0.15) 0px -23px 25px 0px inset,
+  rgba(0, 0, 0, 0.11) 0px -36px 30px 0px inset, rgba(0, 0, 0, 0.06) 0px 2px 1px,
+  rgba(0, 0, 0, 0.09) 0px 4px 2px, rgba(0, 0, 0, 0.09) 0px 8px 4px,
+  rgba(0, 0, 0, 0.09) 0px 16px 8px, rgba(0, 0, 0, 0.09) 0px 32px 16px;
+
+$box-shadow-text-fields: rgba(0, 0, 0, 0.09) 0px 3px 12px;
+
+$box-shadow-minimal: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+
+//fonts
+$primary-font: 'Roboto', sans-serif;
+$secondary-font: 'Poppins', sans-serif;

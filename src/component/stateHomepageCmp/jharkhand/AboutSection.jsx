@@ -8,7 +8,7 @@ const AboutSection = () => {
                     <div className="grid md:grid-cols-2 gap-8 items-start">
                         {/* About Section */}
                         <div className="overflow-hidden">
-                            <div className="p-4 md:p-2">
+                            <div className="py-4 md:p-2">
                                 <h2 className="text-2xl md:text-3xl font-bold text-indigo-800 mb-4">
                                     About
                                 </h2>

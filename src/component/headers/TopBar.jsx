@@ -8,7 +8,6 @@ const TopBar = (props) => {
 
     const [showModal, setShowModal] = useState(false);
 
-
     const onClose = () => {
         setShowModal(false);
     }

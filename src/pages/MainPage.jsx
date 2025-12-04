@@ -6,7 +6,6 @@ import CmsLogin from "../component/mainpage/CmsLogin";
 import StateUts from "../component/mainpage/StateUts";
 import Footer from "../component/mainpage/Footer";
 import { fetchData, fetchPostData } from "../utils/ApiHook";
-// import { getUserState } from "../../utils/api";
 
 export default function MainPage() {
   const [username, setUsername] = useState("");
@@ -15,15 +14,22 @@ export default function MainPage() {
 
 
   const handleSubmit = async () => {
-    
+
     try {
       const val = { "gstrLoginId": username }
       fetchPostData("/auth/login-by-userName", val).then((data) => {
         if (data?.status === 1) {
           console.log(data, 'data');
           const stateName = data?.data?.gstrStateshort || ''
+          const userId = data?.data?.gnumUserid || ''
           if (stateName) {
-            navigate(`/home/${stateName}`, { state: { username } });
+            const data = {
+              state: stateName,
+              userId: userId,
+              username: username
+            }
+            navigate(`/home/${stateName}`, { state: { username, userId } });
+            localStorage.setItem('data', JSON.stringify(data));
           } else {
             console.log('state code not return');
           }
@@ -34,8 +40,6 @@ export default function MainPage() {
     } catch (error) {
 
     }
-    // const stateCode = await getUserState(username); 
-    // navigate(`/home/${'AS'}`, { state: { username } });
   };
 
   const onCloseModal = () => {

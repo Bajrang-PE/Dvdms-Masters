@@ -1,0 +1,210 @@
+@use '../abstracts/variables' as *;
+@use 'sass:color';
+
+.datatable {
+  width: 100%;
+  margin-bottom: 1rem;
+  font-family: Arial, sans-serif;
+  border: 1px solid $underline-color;
+  table-layout: fixed;
+  border-radius: 5px;
+
+  &-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+
+    &-buttons {
+      height: auto;
+      position: absolute;
+      right: 4%;
+      top: -1%;
+      box-shadow: 0 1rem 2rem rgba($dim-black, 0.35);
+      border-radius: 7px;
+      z-index: 100;
+    }
+
+    &-search {
+      &--input {
+        width: 20rem;
+        padding: 0.6rem 1rem;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        background-color: #fff;
+        color: #333;
+        outline: none;
+        font-family: $secondary-font;
+        font-size: 1.5rem;
+        font-weight: 500;
+        outline: none;
+        transition: border 0.2s ease, box-shadow 0.2s ease;
+
+        &::placeholder {
+          color: #aaa;
+        }
+
+        &:focus {
+          border-color: $primary-color;
+          box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
+        }
+      }
+    }
+
+    &-toggler {
+      height: 3.5rem;
+      width: 3.5rem;
+      background-color: $primary-color;
+      border-radius: 7px;
+      box-shadow: $box-shadow-minimal;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+      font-size: 1.7rem;
+      color: $pure-white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:active {
+        transform: scale(0.98);
+      }
+    }
+
+    &--btn {
+      display: block;
+      width: 100%;
+      padding: 1rem;
+      font-family: $secondary-color;
+      font-size: 1.3rem;
+      font-weight: 500;
+      background-color: $pure-white;
+      text-align: left;
+      border-bottom: 1px solid rgba($underline-color, 0.9);
+      transition: background-color 0.3s ease;
+
+      &:hover {
+        background-color: $underline-color;
+      }
+    }
+  }
+
+  &__container {
+    margin-top: 2rem;
+    position: relative;
+
+    &--forTable {
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      box-shadow: $box-shadow-minimal;
+    }
+  }
+
+  & th,
+  & td {
+    padding: 1rem 1.5rem;
+    text-align: left;
+  }
+
+  & th {
+    background-color: $primary-color;
+    color: $pure-white;
+    font-weight: 600;
+    font-family: $primary-font;
+    font-size: 1.6rem;
+    border-bottom: 2px solid #ddd;
+  }
+
+  & td {
+    color: $dim-black;
+    font-size: 1.6rem;
+    font-family: $secondary-font;
+    border-right: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+  }
+
+  & tr {
+    font-weight: 400;
+    &:hover {
+      background-color: rgba(169, 169, 169, 0.5);
+      font-weight: 600;
+    }
+
+    &:nth-child(even) {
+      background-color: rgba($underline-color, 0.8);
+
+      &:hover {
+        background-color: rgba(169, 169, 169, 0.5);
+      }
+    }
+
+    &.selected {
+      background-color: #add8e6; /* Light blue background when row is selected */
+    }
+  }
+
+  &__paginationContainer {
+    padding: 1rem 2rem;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    &-select {
+      font-family: $secondary-font;
+      font-weight: 400;
+      font-size: 1.2rem;
+      padding: 5px;
+      outline: none;
+      border: none;
+      box-shadow: 0 0 1rem rgba($dim-black, 0.356);
+    }
+
+    &-text {
+      font-family: $secondary-font;
+      font-weight: 500;
+      font-size: 1.5rem;
+    }
+
+    &-buttons {
+      margin-top: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      &--btn {
+        padding: 1rem;
+        font-family: $secondary-color;
+        font-size: 1.3rem;
+        font-weight: 500;
+        border: 1px solid $underline-color;
+        text-align: left;
+        border-bottom: 1px solid rgba($underline-color, 0.9);
+        transition: all 0.3s ease;
+
+        &:hover {
+          background-color: $underline-color;
+        }
+
+        &-pages {
+          background-color: $primary-color;
+          color: $pure-white;
+          font-weight: 600;
+          flex: 1;
+          text-align: center;
+          &:hover {
+            background-color: color.adjust($primary-color, $lightness: -10%);
+          }
+        }
+
+        &:active {
+          transform: scale(0.98);
+        }
+      }
+    }
+  }
+}
+
+.checkbox__col {
+  width: 4rem;
+  text-align: center;
+  padding: 0 5px;
+}

@@ -1,0 +1,63 @@
+@use '../abstracts/variables' as *;
+
+.mini-table-wrapper {
+  max-width: 100%;
+  background: $pure-white;
+  border: 1px solid $underline-color;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  font-family: $primary-font;
+  color: $primary-color;
+  padding: 1rem;
+
+  &.no-data {
+    color: gray;
+    font-style: italic;
+    text-align: center;
+    padding: 2rem;
+  }
+}
+
+.vertical-table {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
+}
+
+.vertical-table-row {
+  background-color: $dim-white;
+  border-radius: 6px;
+  padding: 1rem;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.05);
+
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 1rem 3rem;
+  align-items: center;
+
+  // border bottom for each key-value pair except last one
+  .vertical-table-cell {
+    padding: 0.25rem 0;
+    border-bottom: 1px solid #ddd;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    display: contents; // to allow the two spans to use grid properly
+  }
+
+  .label {
+    font-weight: 700;
+    font-size: 2rem;
+    color: $primary-color;
+  }
+
+  .value {
+    letter-spacing: 1px;
+    font-family: $secondary-font;
+    font-size: 1.5rem;
+    color: $dim-black;
+  }
+}

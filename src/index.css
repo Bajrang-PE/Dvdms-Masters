@@ -7,7 +7,7 @@
 }
 
 .required {
-  color: #dc3545;
+  color: #9b0000;
   width: 100%;
   margin-bottom: .25rem;
   font-size: .875em;
@@ -18,3 +18,4 @@
   color: red;
   font-weight: bold;
 }
+

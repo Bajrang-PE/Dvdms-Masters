@@ -1,0 +1,10 @@
+.service__navbar--btn-container {
+  flex: 0 1 23%;
+  display: flex;
+  gap: 1.5rem;
+  justify-content: flex-end;
+}
+
+.service__navbar--filter {
+  border-bottom: 1px solid #dddddd;
+}

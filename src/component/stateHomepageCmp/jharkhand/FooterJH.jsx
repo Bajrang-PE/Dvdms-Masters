@@ -1,6 +1,5 @@
 import React from "react";
 import { FaEnvelope } from "react-icons/fa";
-import { Link } from "react-router-dom";
 
 const FooterJH = () => {
 
@@ -10,7 +9,7 @@ const FooterJH = () => {
         { title: "Features", link: "#featuresjh" },
         { title: "Link", link: "#linkjh" },
         { title: "Gallery", link: "#galleryjh" },
-        { title: "Patient Complaint", link: "#" },
+        { title: "Patient Complaint", link: "#pateintcompjh" },
         { title: "Contact", link: "#contactjh" },
     ]
 
@@ -87,7 +86,7 @@ const FooterJH = () => {
                 </div>
             </footer>
             <div className="text-center bg-black text-gray-200 border-t border-gray-700 pt-2">
-                <span>© 2017 CDAC Noida. All rights reserved CDAC</span><br />
+                <span>© 2025 CDAC Noida. All rights reserved CDAC</span><br />
                 <a href="https://drive.google.com/drive/folders/1lRjM6siI8F4tYu_9aYcEmvyxpHIO8bbY?usp=sharing" className="mt-1 text-decoration-none"> <span className="text-gray-300 hover:text-[#daa005]"> Download Mobile APK </span></a>
             </div>
         </>

@@ -1,0 +1,140 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+@use 'sass:color';
+
+.rateContract {
+  &__heading {
+    font-family: $secondary-font;
+    font-size: 1.7rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+  }
+
+  &__filterSection {
+    display: flex;
+
+    &--filters {
+      flex: 0 1 64%;
+    }
+    &--chart {
+      padding-top: 1.3rem;
+      flex: 0 1 36%;
+    }
+  }
+
+  &__status {
+    width: 100%;
+    display: block;
+    align-items: center;
+    display: flex;
+    margin-bottom: 5rem;
+    gap: 5rem;
+
+    &--container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      height: 8rem;
+      color: white;
+      flex: 0 1 17rem;
+      box-shadow: rgba(0, 0, 0, 0.2) 0px 12px 28px 0px,
+        rgba(0, 0, 0, 0.1) 0px 2px 4px 0px,
+        rgba(255, 255, 255, 0.05) 0px 0px 0px 1px inset;
+      border-radius: 1rem;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      overflow: hidden;
+      z-index: 5;
+      transform-style: preserve-3d;
+
+      // shine effect
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -75%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(
+          120deg,
+          rgba(255, 255, 255, 0) 0%,
+          rgba(255, 255, 255, 0.2) 50%,
+          rgba(255, 255, 255, 0) 100%
+        );
+        transform: skewX(-20deg);
+        opacity: 0;
+        transition: all 0.6s ease-out;
+        pointer-events: none;
+      }
+
+      // subtle zoom on hover
+      &:hover {
+        transform: translateY(-4px) scale(1.02);
+      }
+
+      // make the shine slide
+      &:hover::before {
+        left: 125%;
+        opacity: 1;
+      }
+
+      &:active {
+        transform: scale(0.98);
+      }
+    }
+  }
+  &__container {
+    display: flex;
+    width: 100%;
+    gap: 3rem;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 5rem;
+    &--dropdown {
+      flex: 0 1 25rem;
+    }
+  }
+
+  &__radioOptions {
+    width: 100%;
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    margin-bottom: 3rem;
+
+    &--controls {
+      width: 100%;
+      display: flex;
+      gap: 2rem;
+
+      &-btn {
+        @include primaryButton;
+      }
+
+      &-input {
+        width: 30rem;
+        padding: 1rem 2rem;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        background-color: #ddd;
+        outline: none;
+        font-family: $secondary-font;
+        font-size: 1.5rem;
+        font-weight: 500;
+        outline: none;
+        transition: all 0.4s ease;
+
+        &::placeholder {
+          color: #aaa;
+        }
+
+        &:focus {
+          border-color: $primary-color;
+          box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
+          background-color: $pure-white;
+        }
+      }
+    }
+  }
+}

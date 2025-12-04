@@ -25,10 +25,10 @@ const InputBox = ({
         required={required}
         onChange={onChange}
         onBlur={onBlur}
-        className={`w-full px-4 py-2 border ${error ? "border-red-500" : "border-gray-300"
+        className={`w-full px-4 py-1 border ${error ? "ring-1 ring-red-500" : "ring-gray-500"
           } rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-opacity-50 focus:border-blue-500 transition-all duration-200 ${className}`}
       />
-      {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
+      {error && <span className="text-sm text-[#9b0000] mt-1 ms-1">{error}</span>}
     </div>
   );
 };

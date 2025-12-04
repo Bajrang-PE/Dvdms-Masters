@@ -1,0 +1,53 @@
+@use '../../abstracts/variables' as *;
+@use '../../abstracts/mixins' as *;
+
+.rateContractAddJHK {
+  padding: 1rem 2rem;
+  &__heading {
+    font-family: $primary-font;
+    font-size: 2.5rem;
+    color: $primary-color;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  &__label {
+    font-family: $secondary-color;
+    font-size: 1.8rem;
+    font-weight: 500;
+    display: block;
+    margin-bottom: 1rem;
+  }
+
+  &__input {
+    @include primaryFormInput;
+  }
+
+  &__container {
+    position: relative;
+    display: grid;
+    grid-template-rows: auto;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+    border-radius: 6px;
+    border: 1px solid rgba($color: #ddd, $alpha: 0.95);
+    padding: 4rem 1rem;
+
+    &-heading {
+      position: absolute;
+      top: -2%;
+      left: 0;
+      background-color: $primary-color;
+      font-family: $primary-font;
+      font-size: 1.5rem;
+      font-weight: 400;
+      color: $pure-white;
+      padding: 1rem;
+      border-radius: 6px;
+      letter-spacing: 2px;
+      user-select: none;
+    }
+  }
+}

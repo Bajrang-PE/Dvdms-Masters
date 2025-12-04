@@ -3,7 +3,7 @@ import { FaUser, FaLock, FaEye, FaEyeSlash, FaRedo, FaUndo, FaTimes } from 'reac
 import { useLocation, useNavigate } from 'react-router-dom';
 import { fetchPostData } from '../../utils/ApiHook';
 
-const LoginPopup = ({ showLogin, setShowLogin,logoUrl }) => {
+const LoginPopup = ({ showLogin, setShowLogin, logoUrl }) => {
   const [password, setPassword] = useState('');
   const [captcha, setCaptcha] = useState('F 3 6 k');
   const [showPassword, setShowPassword] = useState(false);
@@ -14,7 +14,10 @@ const LoginPopup = ({ showLogin, setShowLogin,logoUrl }) => {
 
   const location = useLocation();
   const navigate = useNavigate();
-  const username = location.state?.username;
+  const user = localStorage.getItem("data");
+  const userDt = JSON.parse(user);
+  const { username, userId, state } = userDt || null;
+
 
   // const handleLogin = (password) => {
   //   // here you can validate password with API
@@ -40,13 +43,21 @@ const LoginPopup = ({ showLogin, setShowLogin,logoUrl }) => {
       }
       if (isValid) {
         const val = {
-          "gnumUserid": "20000001",
-          "gstrLoginId": username,
-          "password": password    //"Assam!2019"
+          "gnumUserid": userId || '',
+          "gstrLoginId": username || '',
+          "password": password || ''    //"Assam!2019"
         }
+
         fetchPostData('/auth/login-by-password', val).then((data) => {
           if (data?.status === 1) {
             console.log(data, 'data')
+            const datas = {
+              state: data?.data?.stateCode,
+              userId: userId,
+              username: username,
+              isLogin: 'true'
+            }
+            localStorage.setItem('data', JSON.stringify(datas));
             navigate('menus')
           } else {
             alert(data?.message);
