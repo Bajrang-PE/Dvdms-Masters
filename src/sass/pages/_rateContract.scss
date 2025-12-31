@@ -1,0 +1,152 @@
+@use "../abstracts/variables" as *;
+@use "../abstracts/mixins" as *;
+@use "../utilities/remConvertor" as *;
+@use "sass:color";
+
+.rateContract {
+  &__heading {
+    font-family: $secondary-font;
+    font-size: rem10(1.7);
+    font-weight: 500;
+
+    &--count {
+      font-family: $secondary-font;
+      font-size: rem10(1.5);
+      font-weight: 400;
+      opacity: 0.8;
+    }
+  }
+
+  &__filterSection {
+    display: flex;
+
+    &--filters {
+      flex: 0 1 64%;
+    }
+    &--chart {
+      // padding-top: 1.3rem;
+      flex: 0 1 30%;
+    }
+  }
+
+  &__status {
+    width: 100%;
+    display: block;
+    align-items: center;
+    display: flex;
+    margin-bottom: rem10(5);
+    gap: rem10(5);
+
+    &--container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      position: relative;
+      height: rem10(8);
+      color: white;
+      flex: 0 1 rem10(17);
+      box-shadow: rgba(0, 0, 0, 0.2) 0px 12px 28px 0px,
+        rgba(0, 0, 0, 0.1) 0px 2px 4px 0px,
+        rgba(255, 255, 255, 0.05) 0px 0px 0px 1px inset;
+      border-radius: rem10(1);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      overflow: hidden;
+      z-index: 5;
+      transform-style: preserve-3d;
+
+      // shine effect
+      &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -75%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(
+          120deg,
+          rgba(255, 255, 255, 0) 0%,
+          rgba(255, 255, 255, 0.2) 50%,
+          rgba(255, 255, 255, 0) 100%
+        );
+        transform: skewX(-20deg);
+        opacity: 0;
+        transition: all 0.6s ease-out;
+        pointer-events: none;
+      }
+
+      // subtle zoom on hover
+      &:hover {
+        transform: translateY(-4px) scale(1.02);
+      }
+
+      // make the shine slide
+      &:hover::before {
+        left: 125%;
+        opacity: 1;
+      }
+
+      &:active {
+        transform: scale(0.98);
+      }
+    }
+  }
+  &__container {
+    display: flex;
+    width: 100%;
+    gap: rem10(3);
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: rem10(5);
+    &--dropdown {
+      flex: 0 1 rem10(25);
+    }
+  }
+
+  &__radioOptions {
+    width: 100%;
+    display: flex;
+    gap: rem10(2);
+    align-items: center;
+    margin-bottom: rem10(3);
+
+    &--controls {
+      width: 100%;
+      display: flex;
+      gap: rem10(2);
+
+      &-btn {
+        @include primaryButton;
+      }
+
+      &-input {
+        width: rem10(30);
+        padding: rem10(1) rem10(2);
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        background-color: #ddd;
+        outline: none;
+        font-family: $secondary-font;
+        font-size: rem10(1.5);
+        font-weight: 500;
+        outline: none;
+        transition: all 0.4s ease;
+
+        &::placeholder {
+          color: #aaa;
+        }
+
+        &:focus {
+          border-color: $Teal-Primary;
+          box-shadow: 0 0 0 2px rgba($Teal-Primary, 0.2);
+          background-color: $pure-white;
+        }
+      }
+    }
+  }
+}
+
+.highcharts-container {
+  height: rem10(30) !important;
+}

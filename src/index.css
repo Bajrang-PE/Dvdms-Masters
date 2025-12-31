@@ -1,0 +1,20 @@
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, Poppins, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.required {
+  color: #9b0000;
+  width: 100%;
+  margin-bottom: 0.25rem;
+  font-size: 0.875em;
+}
+
+.required-label::before {
+  content: "*";
+  color: red;
+  font-weight: bold;
+}

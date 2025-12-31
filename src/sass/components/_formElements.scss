@@ -1,0 +1,211 @@
+@use "../abstracts/variables" as *;
+@use "../abstracts/mixins" as *;
+@use "../utilities/remConvertor" as *;
+
+.Wrapper {
+  display: flex;
+  flex-direction: column;
+  font-family: $secondary-font;
+  margin: rem10(1) 0;
+  position: relative;
+  width: rem10(25);
+
+  &__search {
+    border-radius: rem10(1.5);
+    border: 1px solid $primary-color;
+    font-family: $secondary-font;
+    font-weight: 400;
+    padding: rem10(1);
+    font-size: rem10(1.5);
+    width: 100%;
+    opacity: 0.7;
+    transition: opacity 0.4s ease, box-shadow 0.6s ease;
+
+    &:focus {
+      opacity: 1;
+      box-shadow: $box-shadow-text-fields;
+      outline: none;
+    }
+  }
+
+  &__label {
+    margin-bottom: rem10(1);
+    color: black;
+    font-size: rem10(1.7);
+    font-weight: 500;
+  }
+
+  &__select {
+    appearance: none;
+    width: 100%;
+    cursor: pointer;
+    user-select: none;
+    backdrop-filter: blur(8px);
+    border: 1.5px solid #ddd;
+    border-radius: 6px;
+    background-color: $underline-color;
+    outline: none;
+    padding: rem10(1) rem10(2);
+    box-shadow: $box-shadow-text-fields;
+    font-size: rem10(1.4);
+    font-family: $secondary-font;
+    font-weight: 400;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    background-image: url("data:image/svg+xml;utf8,<svg fill='%23008080' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: rem10(2);
+
+    &:focus {
+      border: 1px solid indigo;
+      box-shadow: none;
+    }
+
+    &--menu {
+      position: absolute;
+      z-index: 9999;
+      top: 100%;
+      left: 0;
+      right: 0;
+      height: rem10(24);
+      overflow: hidden;
+      font-family: $secondary-font;
+      font-size: rem10(1.5);
+      border-radius: rem10(1.5);
+      font-weight: 400;
+      background-color: $pure-white;
+      box-shadow: 0 rem10(1) rem10(2) rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(6px);
+    }
+
+    &--option {
+      padding: rem10(1);
+      cursor: pointer;
+      transition: background-color 0.1s ease-in, color 0.3s ease-in-out;
+      &:hover {
+        background-color: rgba($Teal-Primary, 0.3);
+      }
+    }
+  }
+
+  &__input {
+    font-family: $secondary-font;
+    padding: rem10(0.75) rem10(1);
+    width: rem10(32);
+    font-size: rem10(1.5);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: rem10(0.5);
+    outline: none;
+    letter-spacing: 2px;
+    color: #222;
+    transition: border 0.2s ease, box-shadow 0.2s ease;
+
+    &::placeholder {
+      color: #aaa;
+      opacity: 0.7;
+      font-family: $secondary-font;
+    }
+
+    &:focus {
+      border: 1px solid $primary-color;
+      box-shadow: $box-shadow-text-fields;
+      background-color: white;
+    }
+  }
+}
+
+.custom-datepicker {
+  @include primaryFormInput;
+}
+
+.react-datepicker {
+  font-family: $secondary-font !important;
+  font-size: rem10(1.5) !important;
+  background-color: $dim-white !important;
+  color: $dim-black !important;
+  border: 1px solid rgba(#ddd, 0.8) !important;
+  border-radius: rem10(0.3) !important;
+  overflow: hidden;
+  box-shadow: 0 rem10(1) rem10(1) rgba($dim-black, 0.2);
+
+  &__portal {
+    position: fixed;
+    height: unset !important;
+    width: unset !important;
+    top: unset !important;
+    left: unset !important;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    z-index: 2147483647;
+  }
+
+  &__current-month {
+    display: none;
+  }
+
+  &__header__dropdown {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: rem10(1);
+  }
+
+  &__month-dropdown-container,
+  &__year-dropdown-container {
+    margin: 0 !important;
+  }
+
+  &__month-select,
+  &__year-select {
+    padding: 3px;
+    font-family: $secondary-font;
+    font-size: rem10(1.4);
+    font-weight: 400;
+    outline: none;
+    border: none;
+    box-shadow: 0 1px 2px rgba($dim-black, 0.2);
+    border-radius: 3px;
+
+    & option {
+      &:hover {
+        background-color: $primary-color !important;
+        font-weight: 600 !important;
+        color: white;
+      }
+    }
+  }
+
+  &__navigation {
+    &-icon {
+      top: 30% !important;
+
+      &--previous {
+        right: 20% !important;
+      }
+
+      &--next {
+        left: 20% !important;
+      }
+    }
+  }
+
+  &__day {
+    position: relative;
+    transition: all 0.2s ease;
+    &:hover {
+      background-color: $primary-color !important;
+      font-weight: 600 !important;
+      color: white;
+    }
+
+    &--disabled {
+      cursor: not-allowed !important;
+      &:hover {
+        background-color: unset !important;
+        font-weight: unset !important;
+        color: unset !important;
+      }
+    }
+  }
+}

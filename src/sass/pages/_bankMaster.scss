@@ -1,0 +1,42 @@
+@use "../abstracts/variables" as *;
+@use "../abstracts/mixins" as *;
+@use "../utilities/remConvertor" as *;
+
+.bankmaster {
+  &__heading {
+    font-family: $primary-font;
+    font-size: rem10(2.5);
+    color: $Teal-Primary;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: rem10(2);
+  }
+
+  &__label {
+    font-family: $secondary-color;
+    font-size: rem10(1.8);
+    font-weight: 500;
+    display: block;
+    margin-bottom: rem10(1);
+  }
+
+  &__input {
+    @include primaryFormInput;
+  }
+
+  &__container {
+    margin-bottom: rem10(2);
+
+    &-controls {
+      margin-top: rem10(4);
+      display: flex;
+      gap: rem10(1);
+      align-items: center;
+      justify-content: center;
+
+      &-btn {
+        @include primaryButton;
+      }
+    }
+  }
+}

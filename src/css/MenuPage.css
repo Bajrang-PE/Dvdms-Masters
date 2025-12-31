@@ -1,0 +1,115 @@
+.menu-card {
+  background: whitesmoke;
+  border-radius: 18px;
+  transition: 0.3s;
+  z-index: 1;
+  position: relative;
+  box-shadow: 0 0.625rem 0.625rem rgba(0, 0, 0, 0.25); /* 10px 10px */
+}
+
+.menu-icon {
+  background: #e7f0ff;
+  padding: 10px;
+  border-radius: 12px;
+  font-size: 25px;
+}
+
+.menu-item {
+  border-bottom: 1px solid #eee;
+  padding: 5px 0;
+}
+
+.menu-title {
+  font-size: 0.9375rem; /* 15px */
+  padding: 0.625rem; /* 10px */
+  font-weight: 400;
+  font-family: "Poppins", sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.menu-title:hover {
+  font-weight: 500;
+  background-color: #097080;
+  color: white;
+}
+
+.submenu {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease-in-out;
+}
+
+.submenu.open {
+  max-height: 300px;
+}
+
+.submenu-item {
+  padding: 6px 0 6px 15px;
+  font-size: 14px;
+  color: #444;
+  font-weight: 500;
+  cursor: pointer;
+  margin: 1px;
+}
+
+.submenu-item:hover {
+  background-color: #097080;
+  color: white;
+}
+
+.rotate {
+  transform: rotate(180deg);
+  transition: 0.3s ease;
+}
+
+.menu-scroll {
+  height: 70vh;
+  overflow: auto;
+  scrollbar-width: thin;
+  padding: 0.625rem 1.25rem; /* 10px 20px */
+}
+
+.menu-heading {
+  font-size: 1.25rem; /* 20px */
+  font-weight: 500;
+  font-family: "Roboto", sans-serif;
+  opacity: 0.7;
+  text-align: center;
+}
+
+.main-menu-body {
+  background: linear-gradient(
+    110deg,
+    hsl(0deg 0% 96%) 0%,
+    hsl(179deg 7% 96%) 0%,
+    hsl(180deg 14% 95%) 1%,
+    hsl(180deg 21% 95%) 2%,
+    hsl(180deg 27% 95%) 4%,
+    hsl(180deg 33% 95%) 7%,
+    hsl(180deg 39% 95%) 12%,
+    hsl(180deg 44% 95%) 17%,
+    hsl(180deg 50% 95%) 25%,
+    hsl(180deg 55% 95%) 34%,
+    hsl(180deg 59% 94%) 44%,
+    hsl(180deg 64% 94%) 55%,
+    hsl(180deg 68% 94%) 65%,
+    hsl(180deg 73% 94%) 74%,
+    hsl(180deg 77% 94%) 82%,
+    hsl(180deg 80% 94%) 87%,
+    hsl(180deg 84% 94%) 92%,
+    hsl(180deg 88% 94%) 95%,
+    hsl(180deg 91% 93%) 98%,
+    hsl(180deg 94% 93%) 99%,
+    hsl(180deg 97% 93%) 100%,
+    hsl(180deg 100% 93%) 100%
+  );
+  position: relative;
+  overflow: hidden;
+  height: 100vh;
+}
+
+.acrmenu {
+  text-decoration: none;
+  color: inherit;
+}

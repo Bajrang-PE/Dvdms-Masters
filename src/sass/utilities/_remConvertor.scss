@@ -1,0 +1,9 @@
+@use "sass:math";
+
+@function rem10($value) {
+  @if type-of($value) != "number" {
+    @error "r10() expects a number, got #{$value}";
+  }
+
+  @return math.div($value * 10, 16) * 1rem;
+}
