@@ -9,7 +9,7 @@ const Header = ({ openLoginModal }) => {
         <nav className="navbar navbar-expand-lg navbar-light fixed-top">
             <div className="container-fluid">
                 <a className="navbar-brand" href="#">
-                    <i className="fas fa-pills me-2"></i>Unified<span className="fw-bold">DVDMS</span>
+                    <i className="fas fa-pills me-2"></i>Unified<span className="fw-bold ms-2">DVDMS</span>
                 </a>
 
                 <button
@@ -56,7 +56,7 @@ const Header = ({ openLoginModal }) => {
                                 onClick={openLoginModal}
                             >
                                 <i className="fas fa-sign-in-alt me-2"></i>
-                                <span className="d-none d-md-inline">State Login</span>
+                                <span className="d-none d-md-inline">Login</span>
                                 <span className="d-inline d-md-none">Login</span>
                             </button>
                         </div>
@@ -72,7 +72,7 @@ const Header = ({ openLoginModal }) => {
                             onClick={openLoginModal}
                         >
                             <i className="fas fa-sign-in-alt me-2"></i>
-                            <span className="d-none d-md-inline">State Login</span>
+                            <span className="d-none d-md-inline">Login</span>
                             <span className="d-inline d-md-none">Login</span>
                         </button>
 

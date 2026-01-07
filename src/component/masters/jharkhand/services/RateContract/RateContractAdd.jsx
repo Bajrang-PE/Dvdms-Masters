@@ -8,6 +8,7 @@ import {
   RadioButton,
 } from "../../../../commons/FormElements";
 import {
+  addContractdetails,
   getBgDetailList,
   getContractDetails,
   getExistingRC,
@@ -29,11 +30,11 @@ const existingRcTableCols = [
   { header: "BG Details", field: "bgAmt" },
 ];
 const bgdetailsTableCols = [
-  { header: "BG Amount (₹)", field: "suppName" },
-  { header: "BG From Date", field: "levelType" },
-  { header: "BG To Date", field: "rate" },
-  { header: "BG No.", field: "hstnumRcNo" },
-  { header: "Refund Amount", field: "bgValidity" },
+  { header: "BG Amount (₹)", field: "bg_amt" },
+  { header: "BG From Date", field: "bg_frm_date" },
+  { header: "BG To Date", field: "bg_to_date" },
+  { header: "BG No.", field: "hstnum_bg_no" },
+  { header: "Refund Amount", field: "hstnum_refund_amount" },
 ];
 
 export default function RateContractAddForm() {
@@ -51,7 +52,8 @@ export default function RateContractAddForm() {
   );
 
   const [whetherImported, setWhetherImported] = useState("No");
-  const [drugName, setDrugName] = useState("0");
+  const [drugName, setDrugName] = useState(0);
+  const [itemID, setItemID] = useState(0);
   const [suppliers, setSuppliers] = useState([]);
 
   const taxTypes = [{ label: "GST", value: "3" }];
@@ -76,6 +78,7 @@ export default function RateContractAddForm() {
     bankName: "",
     branchName: "",
     bankIfscCode: "",
+    bankID: "",
 
     //tender detail
     contractedQty: "",
@@ -91,6 +94,7 @@ export default function RateContractAddForm() {
     deliveryDay: "",
     discount: "",
     remarks: "",
+    tenderDate: ""
   };
 
   function addFormReducer(state, action) {
@@ -163,6 +167,8 @@ export default function RateContractAddForm() {
                 bankName: data?.data[0]?.bank_name,
                 branchName: data?.data[0]?.hststr_branch_name,
                 bankIfscCode: data?.data[0]?.hststr_ifsc_code,
+                bankID: data?.data[0]?.hstnum_bank_id,
+                tenderDate: data?.data[0]?.tender_date,
               },
             });
           }
@@ -219,13 +225,22 @@ export default function RateContractAddForm() {
     const { supplierName, tenderNo } = formState;
 
     getBgDetailList(998, supplierName, contractID, tenderNo)?.then((res) => {
-      console.log("res", res);
+      if (res?.status === 1) {
+        setBgList(res?.data);
+      } else {
+        setBgList([]);
+      }
     });
   };
 
   useEffect(() => {
-    if (formState?.supplierName) {
+    if (formState?.supplierName && formState?.tenderNo) {
       fetchBGListDt();
+    }
+  }, [formState?.supplierName, formState?.tenderNo]);
+
+  useEffect(() => {
+    if (formState?.supplierName) {
       getContractDetailsWithTender();
     } else {
       dispatcher({
@@ -311,9 +326,71 @@ export default function RateContractAddForm() {
     }
 
     if (isValid) {
-      alert('chala ja...')
+      saveContractdetails();
     }
 
+  }
+
+  const saveContractdetails = () => {
+
+    const val = {
+      "gnumHospitalCode": 998,
+      "gnumCancelSeatid": "",
+      "hstnumContractTypeId": contractID,
+      "hstnumBankId": formState?.bankID,
+      "hstnumBranchId": formState?.branchName,
+      "hststrIfscCode": formState?.bankIfscCode,
+      "hstnumBgAmt": parseInt(bgList[0]?.bg_amt || '0'),
+      "hstnumBgNo": bgList[0]?.hstnum_bg_no || '',
+      "strTenderDateDtls": formState?.tenderDate,
+      "hstnumSupplierId": parseInt(formState?.supplierName),
+      "hstnumStoreId": storeID,
+      "hstnumItembrandId": parseInt(drugName),
+      "gnumSeatid": 10001,
+      "gnumIsvalid": 1,
+      "hstnumItemId": parseInt(itemID || 0),
+
+      "hststrTenderNo": formState?.tenderNo?.toString(),//s
+      "hstnumContractQty": parseInt(formState?.contractedQty),
+      "hstnumShelfLife": parseInt(formState?.shelfLife),
+      "hstnumBatchSize": parseInt(formState?.noOfBatches),
+      "hstnumImportedFlag": whetherImported === "Yes" ? 1 : 0,
+      "sstnumLevelTypeId": parseInt(formState?.level),
+      "hstnumAllocationOrderQty": parseInt(formState?.allocationQty),
+      "hstnumTaxType": parseInt(formState?.taxType),
+      "hstnumRateUnitId": parseInt(formState?.unit),
+      "hstnumRate": parseInt(formState?.rate),
+      "hstnumDeliveryDays": parseInt(formState?.deliveryDay),
+      "hstnumCgst": parseInt(formState?.cgst),
+      "hstnumSgst": parseInt(formState?.sgst),
+      "hstnumDiscount": parseInt(formState?.discount),
+      "gstrRemarks": formState?.remarks,
+      "hstdtContractFrmdate": formState?.contractFrom,
+      "hstdtContractTodate": formState?.contractTo,
+      "hstnumDccRequireFlag": formState?.isDccMandatory ? 1 : 0
+    }
+
+    const formData = new FormData();
+
+    formData.append("rateContractDto", JSON.stringify(val));
+
+    if (selectedFile) {
+      formData.append("file", selectedFile, selectedFile?.name);
+    }
+
+    // for (let pair of formData.entries()) {
+    //   console.log(pair[0] + ': ', pair[1]);
+    // }
+    addContractdetails(formData)?.then((data) => {
+      if (data?.status === 1) {
+        alert('Rate Contract Added Successfully');
+        handleReset();
+        dispatch(hidePopup());
+      } else {
+        alert(data?.message);
+      }
+      console.log('data', data)
+    })
 
   }
 
@@ -321,17 +398,12 @@ export default function RateContractAddForm() {
     setSelectedFile(event.target.files[0]);
   };
 
-  // function handleFileUpload() {
-  //   const formData = new FormData();
-  //   formData.append("file", selectedFile, selectedFile?.name);
-  //   console.log(selectedFile);
-  //   uploadFileTenderdetails(formData)?.then(() => {
-  //     console.log("res", res);
-  //   });
-  // }
+  function handleFileUpload(selectedFile) {
+    const formData = new FormData();
+    formData.append("file", selectedFile, selectedFile?.name);
+    return formData;
+  }
 
-  console.log('formState', formState)
-  console.log('selectedFile', selectedFile)
 
   return (
     <section className="rateContractAddJHK">
@@ -360,6 +432,7 @@ export default function RateContractAddForm() {
               options={drugList}
               onChange={(e) => {
                 setDrugName(e?.target?.value);
+                setItemID(drugList?.find(dt => dt?.value == e?.target?.value)?.itemId || null)
               }}
               name={"drugName"}
               value={drugName}
@@ -371,6 +444,7 @@ export default function RateContractAddForm() {
             }
           </div>
         </div>
+
       </div>
       <h4 className="bg-[#097080] text-white p-2 rounded">
         Existing Rate Contract
@@ -802,9 +876,9 @@ export default function RateContractAddForm() {
         <div style={{ marginBottom: "3rem" }}>
           <DataTable
             masterName={"Existing Rate Contract"}
-            ref={dataTableRef}
+            ref={null}
             columns={bgdetailsTableCols}
-            data={existingRCs}
+            data={bgList}
           />
         </div>
       </div>

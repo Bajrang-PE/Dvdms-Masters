@@ -18,7 +18,7 @@ const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 
 function App() {
   return (
-    <BrowserRouter>
+    // <BrowserRouter>
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
           <Route path="/" element={<MainPage2 />} />
@@ -27,14 +27,14 @@ function App() {
 
           {/* Example protected route */}
           <Route element={<PrivateRoute />}>
-            <Route path="/home/:stateCode/menus" element={<MenuPage />} />
+            {/* <Route path="/home/:stateCode/menus" element={<MenuPage />} /> */}
             <Route path="/home/:stateCode/menus/*" element={<MasterRoute />} />
           </Route>
 
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>
-    </BrowserRouter>
+    // </BrowserRouter>
   );
 }
 

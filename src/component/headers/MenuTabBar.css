@@ -1,0 +1,50 @@
+.menu-tab-container {
+  display: flex;
+  align-items: center;
+  background: #dff6ff;
+  padding: 4px;
+  gap: 5px;
+  overflow-x: auto;
+  white-space: nowrap;
+  border-bottom: 1px solid #9ad6f0;
+}
+
+/* Individual Tab */
+.menu-tab-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 10px;
+  background: #ffffff;
+  border: 1px solid #6ec1e4;
+  border-radius: 18px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #004c6d;
+  transition: all 0.2s ease;
+}
+
+/* Active Tab */
+.menu-tab-item.active {
+  background: #ffe066;
+  border-color: #f4b400;
+  color: #000;
+  font-weight: 600;
+}
+
+/* Hover */
+.menu-tab-item:hover {
+  background: #f0f9ff;
+}
+
+/* Close Button */
+.menu-tab-close {
+  font-size: 14px;
+  font-weight: bold;
+  color: #555;
+  cursor: pointer;
+}
+
+.menu-tab-close:hover {
+  color: #d32f2f;
+}

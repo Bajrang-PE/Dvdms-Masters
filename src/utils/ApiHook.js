@@ -1,11 +1,11 @@
 import axios from "axios";
 
-// const BaseUrl = '  http://10.226.27.173:8091';
+// const BaseUrl = '  http://10.226.27.173:8094';
 // const BaseUrl = 'http://10.226.17.6:8084';
 // const BaseUrl = 'http://10.226.29.202:8091';
 
 //const BaseUrl = "http://10.226.29.154:8080/api"; //AD AS
-const BaseUrl = "http://10.226.29.202:8091"; //Main Gateway
+const BaseUrl = "http://10.226.30.86:8091"; //Main Gateway
 
 axios.defaults.baseURL = BaseUrl;
 
@@ -106,5 +106,22 @@ export const fetchUpdateData = async (url, data) => {
     return response.data;
   } catch (error) {
     console.log("API Error:", error);
+  }
+};
+
+
+// New function specifically for FormData/multipart requests
+export const fetchPostFormData = async (url, formData) => {
+  try {
+    const response = await axios.post(url, formData, {
+      headers: {
+        // Don't set Content-Type - let browser set it with boundary
+        // This is important for FormData to work correctly
+      },
+    });
+    return response;
+  } catch (error) {
+    console.error("Error in fetchFormData:", error);
+    throw error;
   }
 };

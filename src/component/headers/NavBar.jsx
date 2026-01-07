@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaBars } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import LoginPopup from "../homepage/LoginPopup";
@@ -6,7 +6,13 @@ import LoginPopup from "../homepage/LoginPopup";
 const NavBar = (props) => {
   const { logoUrl, menuItems } = props;
   const [isOpen, setIsOpen] = useState(false);
-  const [showLogin, setShowLogin] = useState(true);
+  const [showLogin, setShowLogin] = useState(false);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setShowLogin(true);
+    }, 1000)
+  }, [])
 
   const handleLinkClick = () => {
     setIsOpen(false);
@@ -24,7 +30,7 @@ const NavBar = (props) => {
 
         {/* Desktop Nav Links - Left side */}
         <div className="hidden md:flex items-center space-x-6">
-          <NavLinks onLinkClick={() => {}} menuItems={menuItems} />
+          <NavLinks onLinkClick={() => { }} menuItems={menuItems} />
         </div>
 
         {/* Login button - Right side for both mobile and desktop */}

@@ -59,15 +59,15 @@ const Hero = ({ openLoginModal }) => {
     return (
         <section id="home" className="hero-section">
             <div className="container-fluid">
-                <div className="row align-items-center">
+                <div className="row">
                     <div className="col-lg-5">
-                        <h1 className="hero-title"> Unified DVDMS Management System</h1>
+                        <h1 className="hero-title"> Unified Drugs and Vaccine Distribution Management System</h1>
                         <p className="hero-subtitle">
                             A unified platform for all states to manage drug procurement, storage, distribution,
                             and quality assurance with real-time tracking and reporting.
                         </p>
                         <button className="btn btn-light btn-lg hero-btn" onClick={openLoginModal}>
-                            <i className="fas fa-sign-in-alt me-2"></i>Access Your State Portal
+                            <i className="fas fa-sign-in-alt me-2"></i>Login
                         </button>
                     </div>
 

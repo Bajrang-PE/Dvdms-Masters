@@ -23,7 +23,7 @@ const LoginModal = ({ show, onClose, onLogin, setUsername, username }) => {
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content">
           <div className="modal-header">
-            <h4 className="modal-title"><i className="fas fa-sign-in-alt me-2"></i>State Portal Login</h4>
+            <h4 className="modal-title"><i className="fas fa-sign-in-alt me-2"></i>DVDMS Login</h4>
             <button type="button" className="btn-close btn-close-white" onClick={onClose}></button>
           </div>
 
@@ -65,7 +65,7 @@ const LoginModal = ({ show, onClose, onLogin, setUsername, username }) => {
               </div> */}
 
               <button type="submit" className="login-btn mt-3">
-                <i className="fas fa-sign-in-alt me-2"></i>Login to State Portal
+                <i className="fas fa-sign-in-alt me-2"></i>Login
               </button>
             </form>
 

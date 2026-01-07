@@ -12,10 +12,11 @@ import BankBranchMasterJH from "../component/masters/jharkhand/admin/lists/BankB
 // import CommitteeTypeList from "../component/masters/assam/admin/lists/CommiteeTypeMasterList";
 import RateContractAddAssam from "../component/masters/assam/services/RateContract/RateContractAdd";
 import BankMasterList from "../component/masters/assam/admin/lists/BankMasterList";
+import MenuTabBar from "../component/headers/MenuTabBar";
+import MenuPage from "../pages/MenuPage";
 
 const MasterRoute = () => {
   const { stateCode } = useParams();
-  console.log("Page loaded ", stateCode);
   return (
     <>
       {stateCode && stateCode === "AS" && (
@@ -40,7 +41,10 @@ const MasterRoute = () => {
           bg={"#00000073"}
         />
       )}
+      <MenuTabBar />
       <Routes>
+        <Route path="/" element={<MenuPage />} />
+
         {/* ASSAM */}
         {stateCode === "AS" && (
           <Route element={<AssamPrivateRoute />}>

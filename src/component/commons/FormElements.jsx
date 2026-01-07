@@ -65,9 +65,8 @@ export function ComboDropDown({
 
   return (
     <div
-      className={`Wrapper ${addOnClass} ${
-        isDisabled ? "Wrapper--disabled" : ""
-      }`}
+      className={`Wrapper ${addOnClass} ${isDisabled ? "Wrapper--disabled" : ""
+        }`}
       ref={wrapperRef}
     >
       {label && <label className="Wrapper__label">{label}</label>}
@@ -167,6 +166,8 @@ export const DatePickerComponent = ({
   allowMin = false,
   disableFutureDates = false,
   labelBold = false,
+  disabled = false,
+  isRequired = false
 }) => {
   const handleChange = (date) => {
     setSelectedDate(date);
@@ -180,7 +181,7 @@ export const DatePickerComponent = ({
 
   return (
     <div>
-      <label htmlFor={labelFor} className="bankmaster__label">
+      <label htmlFor={labelFor} className={`bankmaster__label ${isRequired ? 'required-label' : ""}`}>
         {labelBold ? <b>{labelText}</b> : labelText}
       </label>
       <DatePicker
@@ -197,6 +198,7 @@ export const DatePickerComponent = ({
         showMonthDropdown
         dropdownMode="select"
         yearDropdownItemNumber={20}
+        disabled={disabled}
       />
     </div>
   );

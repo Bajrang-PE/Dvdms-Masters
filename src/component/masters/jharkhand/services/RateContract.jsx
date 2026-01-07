@@ -3,9 +3,11 @@ import ServiceNavbar from "../../../commons/ServiceNavbar";
 import { ComboDropDown } from "../../../commons/FormElements";
 import DataTable from "../../../commons/Datatable";
 import {
+  cancelRateContract,
   getContractTypes,
   getDrugNames,
   getRateContractList,
+  getRcGraphData,
   getStoreName,
   getSuppliers,
 } from "../../../../api/Jharkhand/api/rateContractAPI";
@@ -20,6 +22,9 @@ import {
   setSupplierData,
 } from "../../../../features/Ratecontract/rateContractJHKSlice";
 import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faRotateRight, faXmark } from "@fortawesome/free-solid-svg-icons";
+import PieChart from "../../../commons/PieChart";
 
 const columns = [
   { header: "Supplier Name", field: "suppName" },
@@ -33,36 +38,46 @@ const columns = [
 ];
 
 const statusList = [
+  { label: "All", value: "0" },
   { label: "Active", value: "1" },
-  { label: "Cancel", value: "0" },
+  { label: "Cancel", value: "2" },
+  { label: "Draft Save", value: "9" },
+  { label: "Approval Pending", value: "7" },
+  { label: "Rejected", value: "5" },
 ];
 
+const chartColors = {
+  red: "linear-gradient(90deg, rgba(54, 187, 174, 1), #319795, #2c7a7b)",
+  blue: "linear-gradient(90deg, #fdc554ff, #d89536ff, #d3871cff)",
+  orange: "linear-gradient(90deg, #d45d63ff, #dc3545, #b6202fff)",
+  green: "linear-gradient(90deg, #997f64ff, #816749, #5b4431)",
+  yellow: "linear-gradient(90deg, #55677eff, #475569, #334155)",
+  white: "linear-gradient(90deg, #55677eff, #475569, #334155)",
+};
+
 export default function RateContractJH() {
-  const buttonDataset = [
-    { label: "Add", onClick: handleRateContractAdd },
-    { label: "Tender Details", onClick: handleTenderDetails },
-  ];
 
   // const { contractDetails } = useSelector((state) => state.rateContractJHK);
   const dispatch = useDispatch();
 
   const [contractTypes, setContractTypes] = useState([]);
   const [selectedContractType, setSelectedContractType] = useState();
-
   const [suppliers, setSuppliers] = useState([]);
-  const [selectedSupplier, setSelectedSupplier] = useState();
-
+  const [selectedSupplier, setSelectedSupplier] = useState('0');
   const [drugList, setDrugList] = useState([]);
-  const [selectedDrug, setSelectedDrug] = useState();
-
+  const [selectedDrug, setSelectedDrug] = useState('0');
   const [storeName, setStoreName] = useState();
   const [stores, setStores] = useState([]);
-
   const [userSelection, setUserSelection] = useState("");
-
-  const [activeStatus, setActiveStatus] = useState("1");
-
+  const [activeStatus, setActiveStatus] = useState("");
   const [tableData, setTableData] = useState([]);
+  const [pieChartData, setPieChartData] = useState([]);
+
+  const [selectedRowRc, setSelectedRowRc] = useState(null);
+
+  const handleRowSelect = (row) => {
+    setSelectedRowRc(row);
+  }
 
   const componentsList = [
     { mappingKey: "Tender", componentName: RateContractTenderForm },
@@ -70,6 +85,19 @@ export default function RateContractJH() {
   ];
 
   const navigate = useNavigate();
+
+  const buttonDataset = [
+    { label: "Add", onClick: handleRateContractAdd },
+    { label: "Tender Details", onClick: handleTenderDetails },
+    ...(selectedRowRc?.length > 0 && activeStatus !== '2'
+      ? [{ label: "Cancel", onClick: cencelRateContractData, color: "#bb5e00", icon: <FontAwesomeIcon icon={faXmark} className="mr-1" /> }]
+      : []
+    ),
+    ...(selectedRowRc?.length > 0 && activeStatus === '1'
+      ? [{ label: "Renew", onClick: renewRateContractData, color: "#03772fff", icon: <FontAwesomeIcon icon={faRotateRight} className="mr-1" /> }]
+      : []
+    )
+  ];
 
   //refs
   const dataTableRef = useRef();
@@ -120,7 +148,7 @@ export default function RateContractJH() {
         });
         setSuppliers(supplierList);
         dispatch(setSupplierData(supplierList));
-        setSelectedSupplier(supplierList.at(0).value);
+        // setSelectedSupplier(supplierList.at(0).value);
       } catch (err) {
         console.log("Failed to fetch data.", err);
       }
@@ -128,19 +156,21 @@ export default function RateContractJH() {
 
     const loadDruglist = async () => {
       try {
-        let drugList = [{ label: "All", value: "0" }];
+        let drugList = [];
         const data = await getDrugNames(998);
         data?.data.forEach((element) => {
           const drugId = element.brandid_itemid.split("^").at(0);
+          const itId = element.brandid_itemid.split("^").at(1);
           const obj = {
             label: element.item_name,
             value: drugId,
+            itemId: itId
           };
           drugList.push(obj);
         });
 
         setDrugList(drugList);
-        setSelectedDrug(drugList.at(0).value);
+        // setSelectedDrug(drugList.at(0).value);
         dispatch(setDrugsList(drugList));
       } catch (err) {
         console.log("Failed to fetch drugs.", err);
@@ -173,27 +203,98 @@ export default function RateContractJH() {
   }, [dispatch]);
 
   useEffect(() => {
+    if (storeName && selectedContractType) {
+      getGraphDataForRc();
+    }
+  }, [selectedSupplier, selectedContractType, selectedDrug, storeName]);
+
+  useEffect(() => {
     const timeout = setTimeout(() => {
-      if (!selectedSupplier || !selectedContractType) return;
-
-      getRateContractList(
-        998,
-        selectedSupplier,
-        selectedContractType,
-        activeStatus,
-        storeName,
-        selectedDrug
-      ).then((data) => setTableData(data?.data || []));
-    }, 400); // wait 400ms after last change
-
+      if (!selectedSupplier || !selectedContractType || !activeStatus) return;
+      getRateContractList(998, selectedSupplier, selectedContractType, activeStatus, storeName, selectedDrug).then((data) => setTableData(data?.data || []));
+    }, 200);
     return () => clearTimeout(timeout);
-  }, [
-    selectedSupplier,
-    selectedContractType,
-    activeStatus,
-    selectedDrug,
-    storeName,
-  ]);
+  }, [activeStatus]);
+
+  function cencelRateContractData() {
+    const val = {
+      gnumHospitalCode: 998,
+      hstnumRcId: selectedRowRc[0]?.rcId,
+      hststrCancelRmks: "",
+      gnumSeatid: 14462
+    }
+    if (selectedRowRc[0]?.isValid === "2") {
+      alert('Mare hue ko kitna maroge, hmm');
+    } else {
+      cancelRateContract(val)?.then((data) => {
+        if (data?.status === 1) {
+          alert("Rate contract canceled")
+          getRateContractList(
+            998,
+            selectedSupplier,
+            selectedContractType,
+            activeStatus,
+            storeName,
+            selectedDrug
+          ).then((data) => setTableData(data?.data || []));
+        } else {
+          console.log(data?.message)
+        }
+      })
+    }
+  }
+
+  function renewRateContractData() {
+    const val = {
+      gnumHospitalCode: 998,
+      hstnumRcId: selectedRowRc[0]?.rcId,
+      hststrCancelRmks: "",
+      gnumSeatid: 14462
+    }
+    if (selectedRowRc[0]?.isValid === "2") {
+      alert('Mare hue ko kitna maroge, hmm');
+    } else {
+      cancelRateContract(val)?.then((data) => {
+        if (data?.status === 1) {
+          alert("Rate contract canceled")
+          getRateContractList(
+            998,
+            selectedSupplier,
+            selectedContractType,
+            activeStatus,
+            storeName,
+            selectedDrug
+          ).then((data) => setTableData(data?.data || []));
+        } else {
+          console.log(data?.message)
+        }
+      })
+    }
+  }
+
+  const getGraphDataForRc = () => {
+    getRcGraphData(998, storeName, selectedSupplier, selectedContractType, selectedDrug)?.then((data) => {
+      if (data?.status === 1) {
+        let statusData = [];
+
+        data?.data.forEach((item) => {
+          const { count, label, status, color } = item;
+          statusData.push({
+            name: label,
+            y: Number(count),
+            status,
+            datapointColor: chartColors[color],
+          });
+        });
+        setPieChartData(statusData);
+      } else {
+        setPieChartData([]);
+      }
+      console.log('data', data);
+    })
+  }
+
+  console.log('pieChartData', pieChartData)
 
   return (
     <>
@@ -203,10 +304,11 @@ export default function RateContractJH() {
         userSelection={userSelection}
         componentsList={componentsList}
         isLargeDataset={true}
+        filtersVisibleOnLoad={true}
       >
         <div className="rateContract__filterSection">
           <div className="rateContract__filterSection--filters">
-            <div className="rateContract__container">
+            <div className="rateContract__container mb-4">
               <ComboDropDown
                 options={stores}
                 onChange={(e) => {
@@ -255,7 +357,43 @@ export default function RateContractJH() {
                 addOnClass="rateContract__container--dropdown"
               />
             </div>
+
+            {pieChartData.length > 0 && (
+              <div className="rateContract__status mb-4">
+                {pieChartData.map((data, index) => {
+                  return (
+                    <div
+                      key={index}
+                      className="rateContract__status--container"
+                      style={{ backgroundImage: data.datapointColor }}
+                      onClick={() => {
+                        setActiveStatus(data.status);
+                      }}
+                    >
+                      <h2
+                        className="rateContract__heading text-center"
+                        style={{ userSelect: "none" }}
+                      >
+                        {data.name}
+                      </h2>
+                      <h4
+                        className="rateContract__heading--count"
+                        style={{ userSelect: "none" }}
+                      >
+                        {data.y}
+                      </h4>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
           </div>
+          {pieChartData.length > 0 && (
+            <div className="rateContract__filterSection--chart">
+              <PieChart data={pieChartData?.filter(dt => dt?.name !== "All" || dt?.status !== "0")} />
+            </div>
+          )}
         </div>
       </ServiceNavbar>
       <div>
@@ -264,6 +402,7 @@ export default function RateContractJH() {
           ref={dataTableRef}
           columns={columns}
           data={tableData}
+          handleRowSelect={handleRowSelect}
         />
       </div>
     </>
