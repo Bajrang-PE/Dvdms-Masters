@@ -1,14 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { FaBars, FaChartLine } from "react-icons/fa";
 import { RiAdminLine } from "react-icons/ri";
 import { BsChevronDown } from "react-icons/bs";
 import "../css/MenuPage.css";
-import MenuTopBar from "../component/headers/MenuTopBar";
 import { Link, useParams } from "react-router-dom";
 import { getMenuList } from "../api/Assam/services/rateContractAPI";
+import { UnifiedContext } from "../context/UnifiedContext";
 
 const MenuCard = ({ icon, title, menu, borderClr }) => {
   const [activeIndex, setActiveIndex] = useState(null);
+  const { openTab } = useContext(UnifiedContext);
+  const { stateCode } = useParams();
 
   const toggle = (i) => {
     setActiveIndex(activeIndex === i ? null : i);
@@ -49,6 +51,14 @@ const MenuCard = ({ icon, title, menu, borderClr }) => {
                 <Link
                   className="acrmenu w-100"
                   to={item?.link ? item?.link : ""}
+                  onClick={() =>
+                    openTab({
+                      id: item.link,
+                      title: item.title,
+                      path: `${item.link}`,
+                      closable: true
+                    }, stateCode)
+                  }
                 >
                   {" "}
                   {item.title}
@@ -63,6 +73,14 @@ const MenuCard = ({ icon, title, menu, borderClr }) => {
                     <Link
                       className="acrmenu w-100 d-block"
                       to={s?.link ? s?.link : ""}
+                      onClick={() =>
+                        openTab({
+                          id: item.link,
+                          title: item.title,
+                          path: `${item.link}`,
+                          closable: true
+                        }, stateCode)
+                      }
                     >
                       {s?.title}
                     </Link>
@@ -130,7 +148,7 @@ const MenuPage = () => {
 
   return (
     <>
-      {stateCode && stateCode === "AS" && (
+      {/* {stateCode && stateCode === "AS" && (
         <MenuTopBar
           title={"AMSCL, Govt. of Assam"}
           subtitle={"DVDMS (e-Aushadhi)"}
@@ -151,7 +169,7 @@ const MenuPage = () => {
           isLocation={true}
           bg={"#00000073"}
         />
-      )}
+      )} */}
 
       <div className="main-menu-body">
         <div className="container py-5">

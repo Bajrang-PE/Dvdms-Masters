@@ -1,5 +1,6 @@
 import { Navigate, Outlet, useParams } from "react-router-dom";
 import NotFoundPage from "../pages/NotFoundPage";
+// import MenuTabBar from "../component/headers/MenuTabBar";
 
 export default function PrivateRoute() {
   // const token = localStorage.getItem("userToken");
@@ -14,5 +15,11 @@ export default function PrivateRoute() {
 
   if (!hasStateAccess(stateCode)) return <NotFoundPage />;
 
-  return <Outlet />;
+  return (
+    <>
+      {/* <MenuTabBar /> */}
+      <Outlet />
+    </>
+
+  )
 }

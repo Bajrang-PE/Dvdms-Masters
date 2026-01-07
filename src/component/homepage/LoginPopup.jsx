@@ -68,7 +68,7 @@ const LoginPopup = ({ showLogin, setShowLogin, logoUrl }) => {
             localStorage.setItem("data", JSON.stringify(datas));
             navigate(`/home/${datas.state}/menus`);
           } else {
-            alert(resp?.message);
+            console.log(resp?.message);
           }
         });
       }

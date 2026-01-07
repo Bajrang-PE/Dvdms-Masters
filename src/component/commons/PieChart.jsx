@@ -29,6 +29,9 @@ const PieChart = ({ title = "", data }) => {
     chart: {
       type: "pie",
     },
+    credits: {
+      enabled: false
+    },
     title: {
       text: title,
       style: {
@@ -39,7 +42,7 @@ const PieChart = ({ title = "", data }) => {
     legend: {
       enabled: true,
       align: "right",
-      verticalAlign: "top",
+      verticalAlign: "middle",
       layout: "vertical",
       itemMarginTop: 8,
       itemMarginBottom: 8,
@@ -67,7 +70,7 @@ const PieChart = ({ title = "", data }) => {
 
     plotOptions: {
       pie: {
-        innerSize: "30%",
+        innerSize: "70%",
         allowPointSelect: true,
         cursor: "pointer",
         showInLegend: true,
