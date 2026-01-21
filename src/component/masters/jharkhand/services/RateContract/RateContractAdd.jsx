@@ -837,7 +837,7 @@ export default function RateContractAddForm() {
         </h4>
 
         <div>
-          <label htmlFor="ifscCode" className="employeeMaster__label">
+          <label htmlFor="file" className="employeeMaster__label">
             Specification (pdf) :
           </label>
           <input

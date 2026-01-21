@@ -90,11 +90,11 @@
   }
 
   &__container {
-    margin-top: rem10(2);
+    margin-top: rem10(1);
     position: relative;
 
     &--forTable {
-      padding: rem10(1) rem10(2);
+      padding: rem10(1) rem10(1);
       border-radius: 8px;
       box-shadow: $box-shadow-minimal;
     }

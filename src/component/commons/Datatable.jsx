@@ -252,7 +252,7 @@ const DataTable = forwardRef(({ masterName, columns, data, isSearchReq = true, i
   // Pagination Logic
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-  const currentRows = isPagination ? sortedData : sortedData?.slice(indexOfFirstRow, indexOfLastRow);
+  const currentRows = isPagination ? sortedData?.slice(indexOfFirstRow, indexOfLastRow) : sortedData;
 
   const handleRowsPerPageChange = event => {
     setRowsPerPage(parseInt(event.target.value, 10));

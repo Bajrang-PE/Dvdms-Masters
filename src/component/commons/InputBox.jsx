@@ -26,7 +26,7 @@ const InputBox = ({
         onChange={onChange}
         onBlur={onBlur}
         className={`w-full px-4 py-1 border ${error ? "ring-1 ring-red-500" : "ring-gray-500"
-          } rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-opacity-50 focus:border-blue-500 transition-all duration-200 ${className}`}
+          } rounded-lg focus:outline-none focus:border-blue-500 transition-all duration-200 ${className}`}
       />
       {error && <span className="text-sm text-[#9b0000] mt-1 ms-1">{error}</span>}
     </div>

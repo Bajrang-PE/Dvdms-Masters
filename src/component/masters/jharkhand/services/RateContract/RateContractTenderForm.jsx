@@ -596,7 +596,7 @@ export default function RateContractTenderForm() {
             className=""
             type="text"
             name={"refundAmt"}
-            placeholder="Enter Tender Number"
+            placeholder="Enter..."
             value={refundValues[index] || ""}
             disabled={selectedRowId?.index !== index}
             onChange={(e) => { handleRefundChange(index, e?.target?.value); }}

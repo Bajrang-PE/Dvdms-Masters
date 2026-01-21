@@ -10,6 +10,7 @@ export function ComboDropDown({
   name,
   addOnClass = "",
   isDisabled = false,
+  isRequired = false,
 }) {
   const DROPDOWN_HEIGHT = 180;
 
@@ -69,7 +70,7 @@ export function ComboDropDown({
         }`}
       ref={wrapperRef}
     >
-      {label && <label className="Wrapper__label">{label}</label>}
+      {label && <label className={`Wrapper__label ${isRequired ? 'required-label' : ""}`}>{label}</label>}
 
       <div
         className="Wrapper__select"
@@ -98,6 +99,7 @@ export function ComboDropDown({
                 key={filteredOptions[index].value}
                 className="Wrapper__select--option"
                 onClick={() => handleSelect(filteredOptions[index])}
+                value={filteredOptions[index].value}
               >
                 {filteredOptions[index].label}
               </div>

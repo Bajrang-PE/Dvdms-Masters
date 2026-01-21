@@ -14,6 +14,8 @@ import RateContractAddAssam from "../component/masters/assam/services/RateContra
 import BankMasterList from "../component/masters/assam/admin/lists/BankMasterList";
 import MenuTabBar from "../component/headers/MenuTabBar";
 import MenuPage from "../pages/MenuPage";
+import SingleProgPoDeskJH from "../component/masters/jharkhand/services/SingleProgPoDeskJH";
+import SupplierInterfaceDeskJH from "../component/masters/jharkhand/services/SupplierInterfaceDeskJH";
 
 const MasterRoute = () => {
   const { stateCode } = useParams();
@@ -63,18 +65,12 @@ const MasterRoute = () => {
           <Route element={<JharkhandPrivateRoute />}>
             {/* SERVICES */}
             <Route path="/rate-contract" element={<RateContractJH />} />
-            {/* <Route path="/rate-contract/add" element={<RateContractAddForm />} />  */}
+            <Route path="/single-prog-po-desk" element={<SingleProgPoDeskJH />} />
+            <Route path="/supplier-interface-desk" element={<SupplierInterfaceDeskJH />} />
 
             {/* ADMIN */}
             <Route path="/bank-master" element={<BankMasterJH />} />
-            <Route
-              path="/bank-branch-master"
-              element={<BankBranchMasterJH />}
-            />
-            {/* <Route
-              path="/committee-type-master"
-              element={<CommitteeTypeList />}
-            />  */}
+            <Route path="/bank-branch-master" element={<BankBranchMasterJH />} />
           </Route>
         )}
 

@@ -35,6 +35,7 @@
     "react-router-dom": "^7.7.0",
     "react-virtuoso": "^4.16.1",
     "sass": "^1.94.2",
+    "suneditor-react": "^3.6.1",
     "swiper": "^11.2.10",
     "xlsx": "^0.18.5"
   },
