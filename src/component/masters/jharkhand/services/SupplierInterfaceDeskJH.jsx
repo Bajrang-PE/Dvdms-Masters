@@ -5,9 +5,13 @@ import DataTable from '../../../commons/Datatable';
 import { useDispatch } from 'react-redux';
 import { setSupplier } from '../../../../features/jharkhand/JH_Slice';
 import { showPopup } from '../../../../features/commons/popupSlice';
-import { getSuppIntDeskListData, getSuppIntDeskSuppliersCmb } from '../../../../api/Jharkhand/services/SupplierInterfaceDeskAPI_JH';
+import { getSuppIntDeskBankDetails, getSuppIntDeskListData, getSuppIntDeskSuppliersCmb } from '../../../../api/Jharkhand/services/SupplierInterfaceDeskAPI_JH';
 import { MasterViewModal } from '../MasterViewModal';
 import DeliveryDetails from './SupplierInterfaceDeskJH/DeliveryDetails';
+import SuppIntDccRequest from './SupplierInterfaceDeskJH/SuppIntDccRequest';
+import BillAndReceiveDetails from './SupplierInterfaceDeskJH/BillAndReceiveDetails';
+import SuppIntBatchDetails from './SupplierInterfaceDeskJH/SuppIntBatchDetails';
+import SuppIntQrDetails from './SupplierInterfaceDeskJH/SuppIntQrDetails';
 
 
 const SupplierInterfaceDeskJH = () => {
@@ -32,23 +36,27 @@ const SupplierInterfaceDeskJH = () => {
     const [tableData, setTableData] = useState([]);
     const [selectedRowRc, setSelectedRowRc] = useState(null);
     const [userSelection, setUserSelection] = useState("");
-    const [bankListData, setBankListData] = useState([{ gstrBankName: "BgBank", bankAdd: "Bas Thoda Aage he", bankAccNo: "00XX00XX00", bankIfsc: "IFSC098754", bankBranch: "Ye Nhi He" }]);
+    const [bankListData, setBankListData] = useState([]);
 
     const componentsList = [
-        { mappingKey: "batchDetails", componentName: (props) => (<MasterViewModal data={bankListData} columns={bankColumns} openPage={'bankDetail'} />) },
+        { mappingKey: "batchDetails", componentName: (props) => (<SuppIntBatchDetails selectedData={selectedRowRc} actionType={'bankDetail'} />) },
         { mappingKey: "bankDetail", componentName: (props) => (<MasterViewModal data={bankListData} columns={bankColumns} openPage={'bankDetail'} />) },
         { mappingKey: "delivery", componentName: (props) => (<DeliveryDetails selectedData={selectedRowRc} actionType={'delivery'} />) },
         { mappingKey: "View", componentName: (props) => (<MasterViewModal data={bankListData} columns={bankColumns} openPage={'bankDetail'} />) },
+        { mappingKey: "dccReq", componentName: (props) => (<SuppIntDccRequest selectedData={selectedRowRc} actionType={'dccReq'} />) },
+        { mappingKey: "recDtl", componentName: (props) => (<BillAndReceiveDetails selectedData={selectedRowRc} actionType={'recDtl'} />) },
+        { mappingKey: "billDtl", componentName: (props) => (<BillAndReceiveDetails selectedData={selectedRowRc} actionType={'billDtl'} />) },
+        { mappingKey: "qrDtl", componentName: (props) => (<SuppIntQrDetails selectedData={selectedRowRc} actionType={'qrDtl'} />) },
     ];
 
     const buttonDataset = [
 
         { label: "Batch Details", onClick: (() => { handleActionComp('batchDetails') }), icon: " " },
         { label: "Bank Detail", onClick: (() => { handleActionComp('bankDetail') }), icon: " " },
-        { label: "Dcc Request", onClick: (() => { handleActionComp('dccReq') }), icon: " " },
 
-        ...(selectedRowRc?.length === 0 ?
+        ...(selectedRowRc?.length > 0 ?
             [
+                { label: "Dcc Request", onClick: (() => { handleActionComp('dccReq') }), icon: " " },
                 { label: "Receive Details", onClick: (() => { handleActionComp('recDtl') }), icon: " " },
                 { label: "Bill Details", onClick: (() => { handleActionComp('billDtl') }), icon: " " },
                 { label: "QR Details", onClick: (() => { handleActionComp('qrDtl') }), icon: " " },
@@ -95,6 +103,17 @@ const SupplierInterfaceDeskJH = () => {
         })
     }
 
+    const getBankDetails = (suppId) => {
+        getSuppIntDeskBankDetails(998, suppId)?.then((res) => {
+            if (res?.status === 1) {
+                setBankListData([res?.data]);
+            } else {
+                setBankListData([]);
+            }
+        })
+    }
+
+
     useEffect(() => {
         getSupplierNameDrpData();
     }, [])
@@ -102,6 +121,7 @@ const SupplierInterfaceDeskJH = () => {
     useEffect(() => {
         if (suppName && activeStatus) {
             getListData(suppName, activeStatus);
+            getBankDetails(suppName);
         }
     }, [suppName, activeStatus])
 
@@ -128,11 +148,11 @@ const SupplierInterfaceDeskJH = () => {
     ];
 
     const bankColumns = [
-        { label: 'Bank Name', key: 'gstrBankName' },
-        { label: 'Bank Branch Name', key: 'bankBranch' },
-        { label: 'Bank IFSC Code', key: 'bankIfsc' },
-        { label: 'Account Number', key: 'bankAccNo' },
-        { label: 'Bank Address', key: 'bankAdd' },
+        { label: 'Bank Name :', key: 'bank_name' },
+        { label: 'Bank Branch Name :', key: 'branch_id' },
+        { label: 'Bank IFSC Code :', key: 'ifsc_code' },
+        { label: 'Account Number :', key: 'account_no' },
+        { label: 'Bank Address :', key: 'bank_address' },
     ]
 
     return (

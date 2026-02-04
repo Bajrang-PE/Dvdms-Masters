@@ -3,18 +3,19 @@ import { ComboDropDown, DatePickerComponent, InputField } from '../../../../comm
 import ReactDataTable from '../../../../commons/ReactDataTable';
 import { useDispatch, useSelector } from 'react-redux';
 import { hidePopup } from '../../../../../features/commons/popupSlice';
-import { getSuppIntDeskDeliveryDetails } from '../../../../../api/Jharkhand/services/SupplierInterfaceDeskAPI_JH';
+import { deleteSuppIntDeskDelDetail, fetchSuppIntDeskItemDetails, getSuppIntDeskConsigneeWrhsCmb, getSuppIntDeskDeliveryDetails, getSuppIntDeskDrugCmbData, getSuppIntDeskPrevBatchDtls, getSuppIntDeskScheduleNoCmb, getSuppIntDeskVeiwDeldetail } from '../../../../../api/Jharkhand/services/SupplierInterfaceDeskAPI_JH';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faAdd, faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
-import SelectBox from '../../../../commons/SelectBox';
-import InputBox from '../../../../commons/InputBox';
+import { faAdd, faEye, faMinus, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { Modal } from 'react-bootstrap';
+import { MasterViewModal } from '../../MasterViewModal';
+import MiniTable from '../../../../commons/Minitable';
+import { isISODateString, parseDate } from '../../../../commons/utilFunctions';
 
 const DeliveryDetails = (props) => {
 
     const { selectedData, actionType } = props;
 
     console.log('selectedData', selectedData)
-    console.log('actionType', actionType)
 
     const { value: supplierID, label: supplierName } = useSelector(
         (state) => state.jhMst.supplierID
@@ -41,7 +42,8 @@ const DeliveryDetails = (props) => {
 
         drugName: "",
 
-        storeId: ""
+        storeId: "",
+        remarks: ""
     }
 
     const reducerActions = (state, action) => {
@@ -63,12 +65,33 @@ const DeliveryDetails = (props) => {
     const [preDelDetailList, setPreDelDetailList] = useState([]);
     const [poDetails, setPoDetails] = useState();
     const [delModeDrpData, setDelModeDrpData] = useState([]);
+    const [scheduleNoDrpData, setScheduleNoDrpData] = useState([]);
+    const [consigneeWrhsDrpData, setConsigneeWrhsDrpData] = useState([]);
+    const [prevBatchDetailsDrpData, setPrevBatchDetailsDrpData] = useState([]);
+    const [itemDetails, setItemDetails] = useState([]);
+    const [unitDrpData, setUnitDrpData] = useState([]);
+    const [drugNameDrpData, setDrugNameDrpData] = useState([]);
+    const [viewModal, setViewModal] = useState(false);
+    const [viewDetails, setViewDetails] = useState([]);
+    const [viewStatus, setViewStatus] = useState('view');
+    const [selectedRows, setSelectedRows] = useState([]);
+    const [clickedRow, setClickedrow] = useState();
+    const [isViewBalQtyModal, setIsViewBalQtyModal] = useState(false);
+
+
+    const [rows, setRows] = useState([
+        { batchNo: "", menuFacName: "", mfgDate: "", expDate: "", unit: "", suppQtyLimit: "", NPCDCS: "", totalQty: '' }
+    ]);
+
+    const [addedRows, setAddedRows] = useState([]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         // const errname = name + "Err";
         if (name === 'tAndcAccept') {
             dispatcher({ type: "SET_VALUE", name: name, value: e.target.checked });
+        } else if (name === "scheduleNo") {
+            dispatcher({ type: "SET_VALUES", payload: { "scheduleNo": value, "expDelDate": value?.split('^')[1] } });
         } else {
             dispatcher({ type: "SET_VALUE", name: name, value });
         }
@@ -107,8 +130,31 @@ const DeliveryDetails = (props) => {
                 }
             });
             getDeliveryDetails(selectedData[0]?.hstnum_po_no, selectedData[0]?.hstnum_store_id);
+            getConsigneeWrhsDrpData(selectedData[0]?.hstnum_po_no, selectedData[0]?.hstnum_store_id);
         }
     }, [selectedData])
+
+    useEffect(() => {
+        if (values?.consigneeWarehouse) {
+            getScheduleNoDrpData(selectedData[0]?.hstnum_po_no, selectedData[0]?.hstnum_store_id, values?.consigneeWarehouse);
+        }
+    }, [values?.consigneeWarehouse])
+
+    useEffect(() => {
+        if (values?.consigneeWarehouse && values?.scheduleNo) {
+            getDrugNameDrpData(selectedData[0]?.hstnum_po_no, selectedData[0]?.hstnum_store_id, values?.scheduleNo?.split('^')[0], values?.consigneeWarehouse);
+        }
+    }, [values?.consigneeWarehouse, values?.scheduleNo])
+
+    useEffect(() => {
+        if (values?.drugName) {
+            // getPrevBatchDetails(selectedData[0]?.hstnum_supplier_id, values?.drugName);
+            getItemDetailsWithBatchUnitCmb();
+        } else {
+            // setPrevBatchDetailsDrpData([]);
+        }
+    }, [values?.drugName])
+
 
     const getDeliveryDetails = (poNum, poStId) => {
         getSuppIntDeskDeliveryDetails(998, poNum, poStId)?.then((res) => {
@@ -119,9 +165,81 @@ const DeliveryDetails = (props) => {
                     value: data?.hstnumDeliverymodeId,
                     label: data?.hststrDeliverymodeName
                 }))
+
                 setDelModeDrpData(delCmb || []);
             }
-            console.log('res', res)
+        })
+    }
+
+    const getScheduleNoDrpData = (poNum, poStId, delStId) => {
+        getSuppIntDeskScheduleNoCmb(998, poStId, delStId, poNum)?.then((res) => {
+            if (res?.status === 1) {
+                const drpData = res?.data?.map((dt) => ({
+                    value: dt?.sch_id,
+                    label: dt?.hstnum_schedule_no
+                }))
+                setScheduleNoDrpData(drpData);
+            }
+        })
+    }
+
+    const getConsigneeWrhsDrpData = (poNum, poStId) => {
+        getSuppIntDeskConsigneeWrhsCmb(998, poStId, 10281800001)?.then((res) => {
+            if (res?.status === 1) {
+                const drpData = res?.data?.map((dt) => ({
+                    value: dt?.consignee_id,
+                    label: dt?.consignee_name
+                }))
+                setConsigneeWrhsDrpData(drpData);
+            } else {
+                setConsigneeWrhsDrpData([]);
+            }
+        })
+    }
+
+    const getDrugNameDrpData = (poNo, stId, schNo, delStId) => {
+        getSuppIntDeskDrugCmbData(998, poNo, stId, schNo, delStId)?.then((res) => {
+            if (res?.status === 1) {
+                const drpData = res?.data?.map((dt) => ({
+                    value: dt?.hstnum_item_id,
+                    label: dt?.item_name,
+                    itemBrandId: dt?.hstnum_itembrand_id
+                }))
+                setDrugNameDrpData(drpData);
+            } else {
+                setDrugNameDrpData([]);
+            }
+        })
+    }
+
+    const getItemDetailsWithBatchUnitCmb = () => {
+        const val = {
+            gnumHospitalCode: 998,
+            hstnumItemId: values?.drugName,
+            hstnumPoNo: selectedData[0]?.hstnum_po_no,
+            poStoreId: selectedData[0]?.hstnum_store_id,
+            hstnumSupplierId: selectedData[0]?.hstnum_supplier_id,
+            deliveryStoreId: values?.consigneeWarehouse,
+            hstnumScheduleNo: values?.scheduleNo?.split('^')[0],
+            hstnumItembrandId: drugNameDrpData?.find(dt => dt?.value == values?.drugName)?.itemBrandId,
+            // StrItemBrandId: drugNameDrpData?.find(dt => dt?.value == values?.drugName)?.itemBrandId,
+        }
+
+        fetchSuppIntDeskItemDetails(val)?.then((res) => {
+            if (res?.status === 1) {
+                const mdArr = res?.data?.batchCombo?.map((dt) => ({
+                    ...dt,
+                    value: `${dt?.hststr_batch_no}^${dt?.hstdt_expiry_date}^${dt?.hstdt_manuf_date}^${dt?.manuf_name}^${dt?.hstnum_supplier_id}^${dt?.hstnum_dccsupply_qty_limit}^${dt?.hstnum_dcc_request_id}`
+                }))
+                setPrevBatchDetailsDrpData(mdArr);
+                setUnitDrpData(res?.data?.unitCombo);
+                setItemDetails(res?.data?.itemDtl);
+            } else {
+                setPrevBatchDetailsDrpData([]);
+                setUnitDrpData({});
+                setItemDetails([]);
+            }
+            console.log('fetchSuppIntDeskItemDetails', res)
         })
     }
 
@@ -154,6 +272,13 @@ const DeliveryDetails = (props) => {
             selector: row => row?.hststrSuppReceiptNo,
             sortable: true,
             wrap: true,
+            cell: (row, index) =>
+                <span
+                    style={{ color: 'blue', cursor: 'pointer' }}
+                    onClick={() => alert('bbb')}
+                >
+                    {row?.hststrSuppReceiptNo}
+                </span>
         },
         {
             name: (<span className='text-center'>Supplier Invoice Date</span>),
@@ -181,107 +306,224 @@ const DeliveryDetails = (props) => {
         },
         {
             name: (<span className='text-center'>Action</span>),
-            cell: (row, index) =>
-                <div style={{ position: 'absolute', top: 3, left: 0 }}>
-                    <button>bb</button>
+            cell: row =>
+                <div style={{ position: 'absolute', top: 4, left: 10 }}>
+                    <span className="btn btn-sm text-white py-0 d-flex gap-1" >
+                        <button className="btn btn-success btn-sm px-1 py-0 rounded rounded-5 fs-13" title={"View Record"} onClick={() => { viewRecord(row, 'view') }}>
+                            <FontAwesomeIcon icon={faEye} size="xs" />
+                        </button>
 
+                        {row?.action === 1 &&
+                            <button
+                                className="btn btn-danger btn-sm px-1 py-0 rounded rounded-5 fs-13"
+                                title={`Delete Details`}
+                                // disabled={row?.rcCount !== 0}
+                                onClick={() => { viewRecord(row, 'delete') }}>
+                                <FontAwesomeIcon icon={faTrash} size="xs" />
+                            </button>
+                        }
+
+                    </span>
                 </div>,
             sortable: false,
             width: "8%"
         },
+
     ]
 
     const drugColumns = [
         {
             name: (<span className='text-center'>S.No.</span>),
-            selector: row => row[0],
+            selector: (row, index) => index + 1,
             sortable: true,
             wrap: true,
-            width: "9%"
+            width: "8%"
         },
         {
             name: (<span className='text-center'>Drug Name</span>),
-            selector: row => row[9],
+            selector: row => row?.drugName || '---',
             sortable: true,
             wrap: true,
         },
         {
             name: (<span className='text-center'>Manufacturer Name</span>),
-            selector: row => row[1]?.split('#')[0],
+            selector: row => row?.menuFacName,
             sortable: true,
             wrap: true,
         },
         {
             name: (<span>Batch No.</span>),
-            selector: row => row[1]?.split('#')[1],
+            selector: row => row?.batchNoName,
             sortable: true,
             wrap: true,
         },
         {
             name: (<span className='text-center'>Expiry Date</span>),
-            selector: row => row[1]?.split('#')[4],
+            selector: row => row?.expDate,
             sortable: true,
             wrap: true,
         },
         {
             name: (<span className='text-center'>Mfg. Date</span>),
-            selector: row => row[1]?.split('#')[0] - row[1]?.split('#')[1],
+            selector: row => row?.mfgDate,
             sortable: true,
             wrap: true,
         },
         {
             name: (<span className='text-center'>Balance Qty. (No.)</span>),
-            selector: row => row[1]?.split('#')[0] - row[1]?.split('#')[1],
+            selector: row => row?.balanceQty,
             sortable: true,
             wrap: true,
         },
         {
             name: (<span className='text-center'>Delivered Qty. (No.)</span>),
-            selector: row => row[1]?.split('#')[0] - row[1]?.split('#')[1],
+            selector: row => row?.NPCDCS,
             sortable: true,
             wrap: true,
         },
         {
             name: (<span className='text-center'>Action</span>),
             cell: (row, index) =>
-                <div style={{ position: 'absolute', top: 3, left: 0 }}>
-                    <button>bb</button>
+                <div style={{ position: 'absolute' }}>
+                    <button
+                        className="btn btn-danger btn-sm px-1 py-0 rounded rounded-5 fs-13"
+                        title={`Delete Details`}
+                        onClick={() => { handleRemoveRow(index, 'cart') }}
+                    >
+                        <FontAwesomeIcon icon={faTrash} size="xs" />
+                    </button>
                 </div>,
             sortable: false,
-            width: "9%"
+            width: "7%"
         },
     ]
 
-    const [rows, setRows] = useState([
-        { batchNo: "", menuFacName: "", mfgDate: "", expDate: "", unit: "", suppQtyLimit: "", NPCDCS: "", totalQty: '' }
-    ]);
-
     const handleAddRow = () => {
+
         const newRow = {
-            columnNo: rows.length + 1,
-            columnForReport: "",
-            columnAlignment: "",
-            columnWidth: ""
+            batchNo: "", menuFacName: "", mfgDate: "", expDate: "", unit: "", suppQtyLimit: "", NPCDCS: "", totalQty: ''
         };
         setRows([...rows, newRow]);
     };
 
-    const handleRemoveRow = (index) => {
-        if (rows.length > 0) {
-            const updatedRows = rows
-                .filter((_, i) => i !== index)
-                .map((r, i) => ({ ...r, columnNo: i + 1 }));
-            setRows(updatedRows);
+    const handleRemoveRow = (index, key) => {
+        if (key === "cart") {
+            if (addedRows.length > 0) {
+                const updatedRows = addedRows
+                    .filter((_, i) => i !== index)
+                    .map((r, i) => ({ ...r, columnNo: i + 1 }));
+                setAddedRows(updatedRows);
+            } else {
+                alert("No rows available");
+            }
         } else {
-            alert("No rows available");
+            if (rows.length > 0) {
+                const updatedRows = rows
+                    .filter((_, i) => i !== index)
+                    .map((r, i) => ({ ...r, columnNo: i + 1 }));
+                setRows(updatedRows);
+            } else {
+                alert("No rows available");
+            }
         }
+
     };
 
     const handleInputChange = (index, field, value) => {
-        const updatedRows = [...rows];
-        updatedRows[index][field] = value;
-        setRows(updatedRows);
+
+        if (field === "batchNo") {
+            if (!value) return;
+            const [batchNo, expDate, mfgDate, menuFacName, supplierId, suppQtyLimit, requestId] = value.split("^");
+            const updatedRows = [...rows];
+
+            updatedRows[index] = {
+                ...updatedRows[index],
+                batchNo: value,
+                expDate,
+                mfgDate,
+                menuFacName,
+                suppQtyLimit,
+                NPCDCS: "",
+                unit: "",
+                batchNoName: batchNo,
+                supplierId,
+                requestId,
+                balanceQty: itemDetails?.balance_qty,
+                drugName: drugNameDrpData?.find(dt => dt?.value == values?.drugName)?.label
+            };
+
+            setRows(updatedRows);
+        } else {
+            const updatedRows = [...rows];
+            updatedRows[index][field] = value;
+            setRows(updatedRows);
+        }
     };
+
+
+    const viewRecord = (row, mode) => {
+        setClickedrow(row);
+        getSuppIntDeskVeiwDeldetail(998, row?.hstnumPoNo, row?.hstnumScheduleNo, row?.hstnumStoreId, row?.hstnumDeliveryNo)?.then((res) => {
+            if (res?.status === 1) {
+                setViewStatus(mode);
+                setViewDetails(res?.data)
+                setViewModal(true);
+            } else {
+                setViewDetails([])
+                setViewModal(false);
+                setViewStatus('view');
+            }
+        })
+    }
+
+    const deleteRecord = () => {
+        const val = {
+            strHospitalCode: 998,
+            strScheduleNo: clickedRow?.hstnumScheduleNo,
+            strDeliveryStoreId: clickedRow?.hstnumStoreId,
+            strDeliveryNo: clickedRow?.hstnumDeliveryNo,
+            strDeleteRemarks: values?.remarks?.toString(),
+            strPoNo: clickedRow?.hstnumPoNo,
+            strSeatId: SEAT_ID,
+            strMultiRowBatchNo: selectedRows,
+            strDccRequestNo: clickedRow?.strDccRequestNo?.toString() || null,
+        }
+        deleteSuppIntDeskDelDetail(val)?.then((res) => {
+            console.log('res', res)
+        })
+    }
+
+    const addToCart = () => {
+        setAddedRows(rows);
+    }
+
+    const onCloseModal = () => {
+        setViewModal(false);
+        setIsViewBalQtyModal(false);
+    }
+
+    const handleRowSelect = (rowId) => {
+        setSelectedRows((prev) => {
+            if (prev.includes(rowId)) {
+                return prev.filter(id => id !== rowId);
+            }
+            return [...prev, rowId];
+        });
+    };
+
+    const balQtyModalColumns = [
+        { label: 'Ordered Qty. [A] :', key: 'hstnum_order_qty' },
+        { label: 'Stop Qty. [B] :', key: 'hstnum_stop_qty' },
+        { label: 'Received Qty. till Date [C] :', key: 'hstnum_supplied_qty' },
+        { label: 'Rejected Qty. till Date [D] :', key: 'hstnum_rejected_qty' },
+        { label: 'Shortage Qty. till Date [E] :', key: 'hstnum_shortage_qty' },
+        { label: 'Rejected Qty. After Verify [F] :', key: 'hstnum_rejqty_aft_verify' },
+        { label: 'Supplier Return Qty. [G] :', key: 'hstnum_supp_return_qty' },
+        { label: 'Replacement Order Qty. till Date [H] :', key: 'repl_order_qty' },
+        { label: 'Balanced Qty. [(A-B)-(C-D-E-H)] :', key: 'balance_qty' },
+    ]
+
+    console.log('itemSetails', itemDetails)
 
     return (
         <>
@@ -339,7 +581,7 @@ const DeliveryDetails = (props) => {
                 <h4 className="employeeMaster__container-heading">Supplier Delivery Details</h4>
 
                 <ComboDropDown
-                    options={[{ label: "New", value: 1 }]}
+                    options={consigneeWrhsDrpData}
                     onChange={handleChange}
                     name={"consigneeWarehouse"}
                     label={'Consignee Warehouse :'}
@@ -347,7 +589,7 @@ const DeliveryDetails = (props) => {
                 />
 
                 <ComboDropDown
-                    options={[{ label: "New", value: 1 }]}
+                    options={scheduleNoDrpData}
                     onChange={handleChange}
                     name={"scheduleNo"}
                     label={'Schedule No.:'}
@@ -501,7 +743,7 @@ const DeliveryDetails = (props) => {
                 <h4 className="employeeMaster__container-heading">Delivery Drug Details</h4>
 
                 <ComboDropDown
-                    options={[{ label: "New", value: 1 }]}
+                    options={drugNameDrpData}
                     onChange={handleChange}
                     name={"drugName"}
                     label={'Drug Name:'}
@@ -543,17 +785,24 @@ const DeliveryDetails = (props) => {
                         <tbody>
                             <tr className='' style={{ fontSize: "11px" }}>
                                 <td className='p-1 text-end' colSpan={5}>Balance Qty. (InUnit)</td>
-                                <td className='p-1 fw-bolder text-info-emphasis text-center'>127</td>
-                                <td className='p-1'>127</td>
+                                <td className='p-1 fw-bolder text-info-emphasis text-center cursor-pointer'
+                                    onClick={() => { setIsViewBalQtyModal(true) }}
+                                >{itemDetails?.balance_qty}</td>
+                                <td className='p-1'>{itemDetails?.balance_qty}</td>
                             </tr>
                             {rows.map((row, index) => (
                                 <tr key={index}>
                                     <td className='p-1'>
                                         <select name="batchNo" className="form-select form-select-sm" value={row?.batchNo} onChange={(e) => handleInputChange(index, 'batchNo', e.target.value)}>
                                             <option value="">Select</option>
-                                            <option value="1">One</option>
-                                            <option value="2">Two</option>
-                                            <option value="3">Three</option>
+                                            {/* <option value="2">Two</option> */}
+                                            {prevBatchDetailsDrpData?.length > 0 && prevBatchDetailsDrpData?.map((drg, index) => (
+                                                <option
+                                                    value={drg?.value}
+                                                    key={index}
+                                                >{drg?.hststr_batch_no}</option>
+                                            ))
+                                            }
                                         </select>
                                     </td>
 
@@ -565,6 +814,7 @@ const DeliveryDetails = (props) => {
                                             name='menuFacName'
                                             value={row?.menuFacName}
                                             onChange={(e) => handleInputChange(index, 'menuFacName', e.target.value)}
+                                            readOnly
                                         />
                                     </td>
 
@@ -576,6 +826,7 @@ const DeliveryDetails = (props) => {
                                             name='mfgDate'
                                             value={row?.mfgDate}
                                             onChange={(e) => handleInputChange(index, 'mfgDate', e.target.value)}
+                                            readOnly
                                         />
                                     </td>
                                     <td className='p-1'>
@@ -586,14 +837,15 @@ const DeliveryDetails = (props) => {
                                             name='expDate'
                                             value={row?.expDate}
                                             onChange={(e) => handleInputChange(index, 'expDate', e.target.value)}
+                                            readOnly
                                         />
                                     </td>
                                     <td className='p-1'>
                                         <select name='unit' value={row?.unit} className="form-select form-select-sm" onChange={(e) => handleInputChange(index, 'unit', e.target.value)}>
                                             <option value="">Select</option>
-                                            <option value="1">One</option>
-                                            <option value="2">Two</option>
-                                            <option value="3">Three</option>
+                                            {unitDrpData?.length > 0 && unitDrpData?.map((unit, index) => (
+                                                <option value={unit?.unit_id}>{unit?.unit_name}</option>
+                                            ))}
                                         </select>
                                     </td>
                                     <td className='p-1'>
@@ -604,6 +856,7 @@ const DeliveryDetails = (props) => {
                                             name='suppQtyLimit'
                                             value={row?.suppQtyLimit}
                                             onChange={(e) => handleInputChange(index, 'suppQtyLimit', e.target.value)}
+                                            readOnly
                                         />
                                     </td>
                                     <td className='p-1'>
@@ -633,7 +886,7 @@ const DeliveryDetails = (props) => {
                     <div className='text-end pt-2'>
                         <button
                             className="btn btn-secondary btn-sm"
-                            onClick={""}
+                            onClick={addToCart}
                         >
                             <FontAwesomeIcon icon={faPlus} className="mr-1 fw-bold text-warning" size='lg' />
                             Add To Cart
@@ -651,7 +904,7 @@ const DeliveryDetails = (props) => {
             </div>
 
             <div style={{ marginBottom: "2rem" }}>
-                <ReactDataTable title={'drugDetails'} column={drugColumns} data={[]} isSearchReq={false} isPagination={false} />
+                <ReactDataTable title={'drugDetails'} column={drugColumns} data={addedRows} isSearchReq={false} isPagination={false} />
             </div>
 
 
@@ -675,6 +928,125 @@ const DeliveryDetails = (props) => {
                     Close
                 </button>
             </div>
+
+            {viewModal &&
+                <Modal show={true} onHide={onCloseModal} size={'xl'} dialogClassName="dialog-min" style={{ zIndex: "1201" }}>
+                    <Modal.Header closeButton className='py-1 px-2 cms-login'>
+
+                        <b><h6 className='m-1 p-0'>
+                            {viewStatus === "delete" ? `Delete Drug For [ JMHIDPCL ]` : `Drug Details`}</h6></b>
+
+                    </Modal.Header>
+                    <Modal.Body className='px-2 py-1'>
+                        <table className="table text-center mb-0 table-bordered" style={{ borderColor: "#23646e" }}>
+                            <thead className="text-white">
+                                <tr className='m-0' style={{ fontSize: "13px", verticalAlign: "middle" }}>
+                                    <th className='p-2'>{'Drug Name'}</th>
+                                    <th className='p-2'>{'Batch No.'}</th>
+                                    <th className='p-2'>{'Manufacturer Name'}</th>
+                                    <th className='p-2'>{'Mfg. Date'}</th>
+                                    <th className='p-2'>{'Expiry Date'}</th>
+                                    <th className='p-2'>{'Supply Qty.'}</th>
+                                    <th className='p-2'>{viewStatus === "delete" ? "Option" : 'Programme Name'}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {viewDetails?.length > 0 && viewDetails?.map((dt, index) => (
+                                    <tr className='' style={{ fontSize: "12px" }} key={index}>
+                                        <td className='p-2'>{dt?.item_name}</td>
+                                        <td className='p-2 '>{dt?.hststr_batch_no}</td>
+                                        <td className='p-2'>{dt?.get_supp_dtl}</td>
+                                        <td className='p-2'>{dt?.manuf_date}</td>
+                                        <td className='p-2'>{dt?.exp_date}</td>
+                                        <td className='p-2'>{dt?.supp_qty}</td>
+                                        {viewStatus === "delete" ?
+                                            <td className='p-2 fw-bolder text-info-emphasis text-center'>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedRows.includes(dt.hststr_batch_no)}
+                                                    onChange={() => { handleRowSelect(dt.hststr_batch_no) }}
+                                                />
+                                            </td>
+                                            :
+                                            <td className='p-2 fw-bolder text-info-emphasis text-center'>
+                                                {dt?.prg_name}
+                                            </td>
+                                        }
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                        {viewStatus === "delete" &&
+                            <div className='py-4 px-10'>
+                                <label htmlFor="remarks" className="">
+                                    Remarks :
+                                </label>
+                                <textarea
+                                    id="remarks"
+                                    className="form-control"
+                                    type="text"
+                                    name={"remarks"}
+                                    placeholder="Enter here..."
+                                    value={values?.remarks}
+                                    onChange={(e) => { dispatcher({ type: "SET_VALUE", name: "remarks", value: e?.target?.value }); }}
+                                />
+                            </div>
+                        }
+
+                        <hr className='my-2' />
+                        <div className='text-center'>
+                            {viewStatus === "delete" ?
+                                <button className='btn cms-login-btn m-1 btn-sm' onClick={deleteRecord}>
+                                    <i className="fa fa-trash me-1"></i> Delete
+                                </button>
+                                :
+                                <button className='btn cms-login-btn m-1 btn-sm' onClick={onCloseModal}>
+                                    <i className="fa fa-broom me-1"></i> Close
+                                </button>
+                            }
+                        </div>
+                    </Modal.Body>
+                </Modal>
+
+            }
+
+            {isViewBalQtyModal &&
+                <Modal show={true} onHide={onCloseModal} size={'md'} dialogClassName="dialog-min" style={{ zIndex: "1201" }}>
+                    <Modal.Header closeButton className='py-1 px-2 cms-login'>
+                        <b><h6 className='m-1 p-0'>Drug Bal. Qty. Detail(s)</h6></b>
+
+                    </Modal.Header>
+                    <Modal.Body className='px-2 py-1'>
+
+                        {/* <MiniTable columns={balQtyModalColumns} data={[itemDetails]} /> */}
+                        <div className='vertical-table'>
+                            {[itemDetails].map((row, rowIndex) => (
+                                <div key={rowIndex} className="vertical-table-row">
+                                    {balQtyModalColumns.map(({ key, label }) => {
+                                        return (
+                                            <div key={key} className="vertical-table-cell">
+                                                <span className="label">{label}</span>
+                                                <span className="value">
+                                                    {" "}
+                                                    {isISODateString(row[key]) ? parseDate(row[key]) : row[key]}
+                                                </span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            ))}
+                        </div>
+                        <div className="bankmaster__container-controls">
+                            <button
+                                className="bankmaster__container-controls-btn"
+                                onClick={onCloseModal}
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </Modal.Body>
+                </Modal>
+            }
         </>
     );
 }

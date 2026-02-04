@@ -606,8 +606,6 @@ export default function RateContractTenderForm() {
     },
   ]
 
-  console.log('refundValues', refundValues)
-  console.log('selectedRowId', selectedRowId)
 
   return (
     <>

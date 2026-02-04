@@ -309,6 +309,10 @@ h6 {
     border: none;
 }
 
+.dialog-min .modal-content {
+    background: #b7c0c2;
+}
+
 .modal-header {
     background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
     color: white;

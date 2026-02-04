@@ -111,7 +111,7 @@ export const modifySinglePoDwhPoCancelSave = async (data) => {
 export const modifySinglePoDwhPoModifySave = async (data) => {
     try {
         const response = await fetchPostData(
-            `/jhk-services/api/v1/single-po-gen/po-modify-details`, data
+            `/jhk-services/api/v1/single-po-gen/update-po`, data
         );
         return response.data;
     } catch (err) {

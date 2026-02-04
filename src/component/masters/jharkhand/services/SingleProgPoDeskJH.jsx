@@ -37,9 +37,9 @@ const SingleProgPoDeskJH = () => {
 
   const componentsList = [
     { mappingKey: "Generate", componentName: (props) => (<GenerateSingleProgPoJH selectedData={selectedRowRc} actionType={"Generate"} />) },
-    { mappingKey: "Modify", componentName: (props) => (<SingleProgPoModifyJH selectedData={selectedRowRc} actionType={"Modify"} />) },
+    { mappingKey: "Modify", componentName: (props) => (<SingleProgPoModifyJH selectedData={selectedRowRc} actionType={"Modify"} getAllListData={getAllListData}/>) },
     { mappingKey: "Cancel", componentName: (props) => (<CancelSingleProgPoJH selectedData={selectedRowRc} actionType={"Cancel"} />) },
-    { mappingKey: "View", componentName: (props) => (<SingleProgPoModifyJH selectedData={selectedRowRc} actionType={"View"} />) },
+    { mappingKey: "View", componentName: (props) => (<SingleProgPoModifyJH selectedData={selectedRowRc} actionType={"View"} getAllListData={getAllListData}/>) },
   ];
 
   const columns = [

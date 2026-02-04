@@ -80,7 +80,7 @@ export function ComboDropDown({
         {selectedOption ? selectedOption.label : "Please Select"}
       </div>
 
-      {filteredOptions.length > 0 && isOpen && !isDisabled && (
+      {isOpen && !isDisabled && (
         <div className="Wrapper__select--menu">
           <input
             type="text"
@@ -90,21 +90,31 @@ export function ComboDropDown({
             className="Wrapper__search"
             disabled={isDisabled}
           />
-
-          <Virtuoso
-            style={{ height: DROPDOWN_HEIGHT }}
-            totalCount={filteredOptions.length}
-            itemContent={(index) => (
-              <div
-                key={filteredOptions[index].value}
-                className="Wrapper__select--option"
-                onClick={() => handleSelect(filteredOptions[index])}
-                value={filteredOptions[index].value}
-              >
-                {filteredOptions[index].label}
-              </div>
-            )}
-          />
+          {filteredOptions.length > 0 ?
+            <Virtuoso
+              style={{ height: DROPDOWN_HEIGHT }}
+              totalCount={filteredOptions.length}
+              itemContent={(index) => (
+                <div
+                  key={filteredOptions[index].value}
+                  className="Wrapper__select--option"
+                  onClick={() => handleSelect(filteredOptions[index])}
+                  value={filteredOptions[index].value}
+                >
+                  {filteredOptions[index].label}
+                </div>
+              )}
+            />
+            :
+            <div
+              key={""}
+              className="Wrapper__select--option"
+              // onClick={() => handleSelect(filteredOptions[index])}
+              value={''}
+            >
+              {"No Records!"}
+            </div>
+          }
         </div>
       )}
     </div>

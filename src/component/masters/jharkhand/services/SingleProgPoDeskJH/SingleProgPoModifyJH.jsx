@@ -9,7 +9,7 @@ import RichTextEditor from '../../../../commons/RichTextEditor';
 import { getSinglePoComponentDetails, getSinglePoDwhPoDetails, getSinglePoTestingData, modifySinglePoDwhPoModifySave } from '../../../../../api/Jharkhand/services/SingleProgPoDeskAPI_JH';
 
 const SingleProgPoModifyJH = (props) => {
-    const { selectedData, actionType } = props;
+    const { selectedData, actionType, getAllListData } = props;
 
     const { value: storeID, label: storeName } = useSelector(
         (state) => state.rateContractJHK.storeID
@@ -294,8 +294,9 @@ const SingleProgPoModifyJH = (props) => {
         modifySinglePoDwhPoModifySave(val)?.then((data) => {
             if (data?.status === 1) {
                 alert("Po Modified successfully");
-                // handleClose();
-                // handleReset();
+                handleClose();
+                handleReset();
+                getAllListData();
             } else {
                 alert('failed');
             }
@@ -515,7 +516,7 @@ const SingleProgPoModifyJH = (props) => {
                     <ReactDataTable
                         title={''}
                         column={poDetailsCols}
-                        data={poDetailsList}
+                        data={poDetailsList?.length > 0 ? poDetailsList : []}
                         isSearchReq={false}
                         isPagination={false}
                     />
@@ -671,15 +672,15 @@ const SingleProgPoModifyJH = (props) => {
                     Close
                 </button>
             </div>
-             <style>
-        {`
+            <style>
+                {`
           .inner ol{
                list-style: auto !important;
           }
         `}
-      </style>
+            </style>
         </section>
-       
+
     );
 }
 
