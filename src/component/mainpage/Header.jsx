@@ -19,7 +19,7 @@ const Header = ({ setShowCmsLogin }) => {
                             </a>
                             <div className="dvdms-outer">
                                 <div className="dvdms-title ms-2 mt-1">
-                                    <h5 className="text-white mb-0" style={{ fontSize: "larger" }}>Centralized Dvdms</h5>
+                                    <h5 className="text-white mb-0" style={{ fontSize: "larger" }}>Unified Dvdms</h5>
                                     <p className="text-white mb-0" style={{ fontSize: "13px" }}>Ministry of Health &amp; Family Welfare<br /> (Govt. of India)</p>
                                 </div>
                             </div>

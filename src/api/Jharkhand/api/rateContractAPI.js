@@ -1,4 +1,4 @@
-import { fetchData, fetchPostData } from "../../../utils/ApiHook";
+import { fetchData, fetchDeleteData, fetchPostData, fetchPostFormData, fetchUpdateData } from "../../../utils/ApiHook";
 
 export const getContractTypes = async (hospitalCode) => {
   try {
@@ -17,7 +17,7 @@ export const getLevelTypeCmb = async (hospitalCode) => {
     const response = await fetchData(
       `/jhk-services/api/v1/rate-contract-dtl/level-type-combo?hospCode=${hospitalCode}`
     );
-    return response;
+    return response?.data;
   } catch (error) {
     console.error("Error fetching items:", error);
     throw error;
@@ -29,7 +29,7 @@ export const getUnitCombo = async (hospitalCode) => {
     const response = await fetchData(
       `/jhk-services/api/v1/rate-contract-dtl/unit-combo?hospCode=${hospitalCode}`
     );
-    return response;
+    return response?.data;
   } catch (error) {
     console.error("Error fetching items:", error);
     throw error;
@@ -41,7 +41,7 @@ export const getSuppliers = async (hospitalCode) => {
     const response = await fetchData(
       `/jhk-services/api/v1/rate-contract-dtl/supplier-combo?hospCode=${hospitalCode}`
     );
-    return response.data;
+    return response.data?.data;
   } catch (error) {
     console.error("Error fetching items:", error);
     throw error;
@@ -53,7 +53,7 @@ export const getSuppliersWithContractCmb = async (hospitalCode, contractId) => {
     const response = await fetchData(
       `/jhk-services/api/v1/rate-contract-dtl/contract-dtls-supp-cmb?hospCode=${hospitalCode}&contractTypeId=${contractId}`
     );
-    return response;
+    return response?.data;
   } catch (error) {
     console.error("Error fetching items:", error);
     throw error;
@@ -149,7 +149,7 @@ export const getBgDetailList = async (hospitalCode, suppID, rcId, tenderNo) => {
     const response = await fetchData(
       `/jhk-services/api/v1/rate-contract-dtl/bg-details?hospCode=${hospitalCode}&supplierId=${suppID}&rcId=${rcId}&tenderNo=${tenderNo}`
     );
-    return response;
+    return response?.data;
   } catch (error) {
     console.error("Error fetching Existing RCs:", error);
     throw error;
@@ -161,7 +161,7 @@ export const getContractDetails = async (hospitalCode, suppID, tenderNo) => {
     const response = await fetchData(
       `/jhk-services/api/v1/rate-contract-dtl/contract-details?hospCode=${hospitalCode}&supplierId=${suppID}&tenderNo=${tenderNo}`
     );
-    return response;
+    return response?.data;
   } catch (error) {
     console.error("Error fetching Existing RCs:", error);
     throw error;
@@ -173,7 +173,43 @@ export const getTenderNumber = async (hospitalCode, suppID) => {
     const response = await fetchData(
       `/jhk-services/api/v1/rate-contract-dtl/tender-no?hospCode=${hospitalCode}&supplierId=${suppID}`
     );
-    return response;
+    return response?.data;
+  } catch (error) {
+    console.error("Error fetching Existing RCs:", error);
+    throw error;
+  }
+};
+
+export const getExistingSuppliers = async (hospitalCode, tenderNo) => {
+  try {
+    const response = await fetchData(
+      `/jhk-services/api/v1/rate-contract-dtl/supplier-details?hospCode=${hospitalCode}&tenderNo=${tenderNo}`
+    );
+    return response?.data;
+  } catch (error) {
+    console.error("Error fetching Existing RCs:", error);
+    throw error;
+  }
+};
+
+export const getRcGraphData = async (hospitalCode, storeId, suppId, contractTypId, itemBrandId) => {
+  try {
+    const response = await fetchData(
+      `/jhk-services/api/v1/rate-contract-dtl/graph-data?hospitalCode=${hospitalCode}&storeId=${storeId}&supplierId=${suppId}&contractTypeId=${contractTypId}&itemBrandId=${itemBrandId}`
+    );
+    return response?.data;
+  } catch (error) {
+    console.error("Error fetching Existing RCs:", error);
+    throw error;
+  }
+};
+
+export const getRefundBgDetailList = async (hospitalCode, tenderNo) => {
+  try {
+    const response = await fetchData(
+      `/jhk-services/api/v1/rate-contract-dtl/refund-details?hospCode=${hospitalCode}&tenderNo=${tenderNo}`
+    );
+    return response?.data;
   } catch (error) {
     console.error("Error fetching Existing RCs:", error);
     throw error;
@@ -182,8 +218,38 @@ export const getTenderNumber = async (hospitalCode, suppID) => {
 
 export const addTenderdetails = async (data) => {
   try {
+    const response = await fetchPostFormData(
+      `http://10.226.27.173:8094/api/v1/rate-contract-dtl/save-tender-dtls`,
+      data
+    );
+    return response?.data;
+  } catch (error) {
+    console.error("Error adding branch:", error);
+    throw error;
+  }
+};
+
+export const addContractdetails = async (data) => {
+  try {
+    // const response = await fetchPostFormData(
+    //   `/jhk-services/api/v1/rate-contract-dtl/save-rate-contract`,
+    //   data
+    // );
+    const response = await fetchPostFormData(
+      `http://10.226.27.173:8094/api/v1/rate-contract-dtl/save-rate-contract`,
+      data
+    );
+    return response?.data;
+  } catch (error) {
+    console.error("Error adding branch:", error);
+    throw error;
+  }
+};
+
+export const uploadFileTenderdetails = async (data) => {
+  try {
     const response = await fetchPostData(
-      `/jhk-services/api/v1/rate-contract-dtl/save-tender-dtls`,
+      `/jhk-services/api/v1/rate-contract-dtl/upload-file`,
       data
     );
     return response;
@@ -192,13 +258,52 @@ export const addTenderdetails = async (data) => {
     throw error;
   }
 };
-export const uploadFileTenderdetails = async (data) => {
+
+export const addNewBgDetails = async (data) => {
   try {
-    const response = await fetchPostData(
-      `/jhk-services/api/v1/rate-contract-dtl/upload-file`,
+    const response = await fetchUpdateData(
+      `/jhk-services/api/v1/rate-contract-dtl/edit-bg-action-new-save`,
       data
     );
+    return response?.data;
+  } catch (error) {
+    console.error("Error adding branch:", error);
+    throw error;
+  }
+};
+
+export const addRefundBgDetails = async (data) => {
+  try {
+    const response = await fetchUpdateData(
+      `/jhk-services/api/v1/rate-contract-dtl/edit-bg-action-refund-save`,
+      data
+    );
+    return response?.data;
+  } catch (error) {
+    console.error("Error adding branch:", error);
+    throw error;
+  }
+};
+
+export const deleteSupplierDetails = async (hospCode, suppId, tenderno, seatId) => {
+  try {
+    const response = await fetchDeleteData(
+      `/jhk-services/api/v1/rate-contract-dtl/delete-record?hospCode=${hospCode}&supplierId=${suppId}&tenderNo=${tenderno}&seatId=${seatId}`
+    );
     return response;
+  } catch (error) {
+    console.error("Error adding branch:", error);
+    throw error;
+  }
+};
+
+export const cancelRateContract = async (data) => {
+  try {
+    const response = await fetchPostData(
+      `/jhk-services/api/v1/rate-contract-dtl/cancel-rate-contract`,
+      data
+    );
+    return response?.data;
   } catch (error) {
     console.error("Error adding branch:", error);
     throw error;

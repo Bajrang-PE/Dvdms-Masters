@@ -8,6 +8,7 @@ import {
   RadioButton,
 } from "../../../../commons/FormElements";
 import {
+  addContractdetails,
   getBgDetailList,
   getContractDetails,
   getExistingRC,
@@ -17,6 +18,7 @@ import {
   getUnitCombo,
 } from "../../../../../api/Jharkhand/api/rateContractAPI";
 import DataTable from "../../../../commons/Datatable";
+import SelectBox from "../../../../commons/SelectBox";
 
 const existingRcTableCols = [
   { header: "Supplier Name", field: "suppName" },
@@ -27,13 +29,12 @@ const existingRcTableCols = [
   { header: "Tender Number", field: "tenderNo" },
   { header: "BG Details", field: "bgAmt" },
 ];
-
 const bgdetailsTableCols = [
-  { header: "BG Amount (₹)", field: "suppName" },
-  { header: "BG From Date", field: "levelType" },
-  { header: "BG To Date", field: "rate" },
-  { header: "BG No.", field: "hstnumRcNo" },
-  { header: "Refund Amount", field: "bgValidity" },
+  { header: "BG Amount (₹)", field: "bg_amt" },
+  { header: "BG From Date", field: "bg_frm_date" },
+  { header: "BG To Date", field: "bg_to_date" },
+  { header: "BG No.", field: "hstnum_bg_no" },
+  { header: "Refund Amount", field: "hstnum_refund_amount" },
 ];
 
 export default function RateContractAddForm() {
@@ -51,10 +52,16 @@ export default function RateContractAddForm() {
   );
 
   const [whetherImported, setWhetherImported] = useState("No");
-  const [drugName, setDrugName] = useState("");
+  const [drugName, setDrugName] = useState(0);
+  const [itemID, setItemID] = useState(0);
   const [suppliers, setSuppliers] = useState([]);
 
   const taxTypes = [{ label: "GST", value: "3" }];
+  const batchSizeOptions = Array.from({ length: 50 }, (_, i) => ({
+    value: i + 1,
+    label: String(i + 1),
+  }));
+
 
   // Controlled state for inputs
   const initialState = {
@@ -71,6 +78,7 @@ export default function RateContractAddForm() {
     bankName: "",
     branchName: "",
     bankIfscCode: "",
+    bankID: "",
 
     //tender detail
     contractedQty: "",
@@ -86,6 +94,7 @@ export default function RateContractAddForm() {
     deliveryDay: "",
     discount: "",
     remarks: "",
+    tenderDate: ""
   };
 
   function addFormReducer(state, action) {
@@ -101,19 +110,31 @@ export default function RateContractAddForm() {
     }
   }
 
+  const [errors, seterrors] = useState({
+    drugNameErr: "", supplierNameErr: "", tenderNoErr: "", shelfLifeErr: "", noOfBatchesErr: "", whetherImportedErr: "", levelErr: "", taxTypeErr: "", cgstErr: "", sgstErr: "", rateUnitErr: "", deliveryDayErr: "",
+  })
+
   const [formState, dispatcher] = useReducer(addFormReducer, initialState);
 
   const dispatch = useDispatch();
 
   const dataTableRef = useRef();
   const [existingRCs, setExistingRCs] = useState([]);
-  // const [bgList, setBgList] = useState([]);
+  const [bgList, setBgList] = useState([]);
   const [levelType, setLevelType] = useState([]);
   const [unitDrpDt, setUnitDrpDt] = useState([]);
+  const [selectedFile, setSelectedFile] = useState(null);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    const errName = name + "Err";
     dispatcher({ type: "SET_FIELD", field: name, value });
+    if (name === 'rate' || name === 'unit') {
+      seterrors({ ...errors, 'rateUnitErr': "" });
+    } else {
+      seterrors({ ...errors, [errName]: "" });
+    }
   };
 
   function handleClose() {
@@ -125,7 +146,7 @@ export default function RateContractAddForm() {
   }
 
   const getContractDetailsWithTender = () => {
-    const { supplierName } = formState;
+    const { supplierName, tenderNo } = formState;
     getTenderNumber(998, supplierName).then((res) => {
       console.log("res", res);
       if (res?.status === 1) {
@@ -137,15 +158,17 @@ export default function RateContractAddForm() {
               type: "SET_FIELDS",
               payload: {
                 tenderNo: tendNo,
-                contractFrom: data[0]?.contract_frm_date,
-                contractTo: data[0]?.contratct_to_date,
-                rcFinalDate: data[0]?.contract_frm_date,
-                quotationNo: data[0]?.contract_frm_date,
-                acceptanceDate: data[0]?.contract_frm_date,
-                financeCommitteDate: data[0]?.contract_frm_date,
-                bankName: data[0]?.contract_frm_date,
-                branchName: data[0]?.contract_frm_date,
-                bankIfscCode: data[0]?.contract_frm_date,
+                contractFrom: data?.data[0]?.contract_frm_date,
+                contractTo: data?.data[0]?.contratct_to_date,
+                rcFinalDate: data?.data[0]?.tender_date,
+                quotationNo: data?.data[0]?.quot_ref_no,
+                acceptanceDate: data?.data[0]?.acceptance_date,
+                financeCommitteDate: data?.data[0]?.fin_comm_date,
+                bankName: data?.data[0]?.bank_name,
+                branchName: data?.data[0]?.hststr_branch_name,
+                bankIfscCode: data?.data[0]?.hststr_ifsc_code,
+                bankID: data?.data[0]?.hstnum_bank_id,
+                tenderDate: data?.data[0]?.tender_date,
               },
             });
           }
@@ -189,22 +212,52 @@ export default function RateContractAddForm() {
   useEffect(() => {
     async function fetchExistingRCs() {
       const response = await getExistingRC(998, storeID, drugName, contractID);
-      setExistingRCs(response);
+      if (response?.status === 1) {
+        setExistingRCs(response?.data);
+      } else {
+        setExistingRCs([]);
+      }
     }
     fetchExistingRCs();
   }, [storeID, drugName, contractID]);
 
   const fetchBGListDt = () => {
+    const { supplierName, tenderNo } = formState;
 
-    getBgDetailList(998, 1410025, 1410025, 20180126)?.then((res) => {
-      console.log("res", res);
+    getBgDetailList(998, supplierName, contractID, tenderNo)?.then((res) => {
+      if (res?.status === 1) {
+        setBgList(res?.data);
+      } else {
+        setBgList([]);
+      }
     });
   };
 
   useEffect(() => {
-    if (formState?.supplierName) {
+    if (formState?.supplierName && formState?.tenderNo) {
       fetchBGListDt();
+    }
+  }, [formState?.supplierName, formState?.tenderNo]);
+
+  useEffect(() => {
+    if (formState?.supplierName) {
       getContractDetailsWithTender();
+    } else {
+      dispatcher({
+        type: "SET_FIELDS",
+        payload: {
+          tenderNo: '',
+          contractFrom: '',
+          contractTo: '',
+          rcFinalDate: '',
+          quotationNo: '',
+          acceptanceDate: '',
+          financeCommitteDate: '',
+          bankName: '',
+          branchName: '',
+          bankIfscCode: '',
+        },
+      });
     }
   }, [formState?.supplierName]);
 
@@ -223,6 +276,134 @@ export default function RateContractAddForm() {
       });
     }
   }, [contractID]);
+
+  const handleSave = () => {
+    let isValid = true;
+
+    if (!drugName?.trim()) {
+      seterrors((prev => ({ ...prev, 'drugNameErr': "Drug Name is Required!" })));
+      isValid = false;
+    }
+    if (!formState?.supplierName?.trim()) {
+      seterrors((prev => ({ ...prev, 'supplierNameErr': "Supplier Name is Required!" })));
+      isValid = false;
+    }
+    if (!formState?.tenderNo) {
+      seterrors((prev => ({ ...prev, 'tenderNoErr': "Tendor number is Required!" })));
+      isValid = false;
+    }
+    if (!formState?.shelfLife?.trim()) {
+      seterrors((prev => ({ ...prev, 'shelfLifeErr': "Shelf life is Required!" })));
+      isValid = false;
+    }
+    if (!formState?.noOfBatches) {
+      seterrors((prev => ({ ...prev, 'noOfBatchesErr': "No. of batches is Required!" })));
+      isValid = false;
+    }
+    if (!formState?.level) {
+      seterrors((prev => ({ ...prev, 'levelErr': "Please select a level!" })));
+      isValid = false;
+    }
+    if (!formState?.taxType?.trim()) {
+      seterrors((prev => ({ ...prev, 'taxTypeErr': "Please select tax type!" })));
+      isValid = false;
+    }
+    if (!formState?.cgst?.trim()) {
+      seterrors((prev => ({ ...prev, 'cgstErr': "CGST is required!" })));
+      isValid = false;
+    }
+    if (!formState?.sgst?.trim()) {
+      seterrors((prev => ({ ...prev, 'sgstErr': "SGST is required!" })));
+      isValid = false;
+    }
+    if (!formState?.rate?.trim() || !formState?.unit?.trim()) {
+      seterrors((prev => ({ ...prev, 'rateUnitErr': "Rate and Unit are required!" })));
+      isValid = false;
+    }
+    if (!formState?.deliveryDay?.trim()) {
+      seterrors((prev => ({ ...prev, 'deliveryDayErr': "Delivery days is required!" })));
+      isValid = false;
+    }
+
+    if (isValid) {
+      saveContractdetails();
+    }
+
+  }
+
+  const saveContractdetails = () => {
+
+    const val = {
+      "gnumHospitalCode": 998,
+      "gnumCancelSeatid": "",
+      "hstnumContractTypeId": contractID,
+      "hstnumBankId": formState?.bankID,
+      "hstnumBranchId": formState?.branchName,
+      "hststrIfscCode": formState?.bankIfscCode,
+      "hstnumBgAmt": parseInt(bgList[0]?.bg_amt || '0'),
+      "hstnumBgNo": bgList[0]?.hstnum_bg_no || '',
+      "strTenderDateDtls": formState?.tenderDate,
+      "hstnumSupplierId": parseInt(formState?.supplierName),
+      "hstnumStoreId": storeID,
+      "hstnumItembrandId": parseInt(drugName),
+      "gnumSeatid": 10001,
+      "gnumIsvalid": 1,
+      "hstnumItemId": parseInt(itemID || 0),
+
+      "hststrTenderNo": formState?.tenderNo?.toString(),//s
+      "hstnumContractQty": parseInt(formState?.contractedQty),
+      "hstnumShelfLife": parseInt(formState?.shelfLife),
+      "hstnumBatchSize": parseInt(formState?.noOfBatches),
+      "hstnumImportedFlag": whetherImported === "Yes" ? 1 : 0,
+      "sstnumLevelTypeId": parseInt(formState?.level),
+      "hstnumAllocationOrderQty": parseInt(formState?.allocationQty),
+      "hstnumTaxType": parseInt(formState?.taxType),
+      "hstnumRateUnitId": parseInt(formState?.unit),
+      "hstnumRate": parseInt(formState?.rate),
+      "hstnumDeliveryDays": parseInt(formState?.deliveryDay),
+      "hstnumCgst": parseInt(formState?.cgst),
+      "hstnumSgst": parseInt(formState?.sgst),
+      "hstnumDiscount": parseInt(formState?.discount),
+      "gstrRemarks": formState?.remarks,
+      "hstdtContractFrmdate": formState?.contractFrom,
+      "hstdtContractTodate": formState?.contractTo,
+      "hstnumDccRequireFlag": formState?.isDccMandatory ? 1 : 0
+    }
+
+    const formData = new FormData();
+
+    formData.append("rateContractDto", JSON.stringify(val));
+
+    if (selectedFile) {
+      formData.append("file", selectedFile, selectedFile?.name);
+    }
+
+    // for (let pair of formData.entries()) {
+    //   console.log(pair[0] + ': ', pair[1]);
+    // }
+    addContractdetails(formData)?.then((data) => {
+      if (data?.status === 1) {
+        alert('Rate Contract Added Successfully');
+        handleReset();
+        dispatch(hidePopup());
+      } else {
+        alert(data?.message);
+      }
+      console.log('data', data)
+    })
+
+  }
+
+  const onFileChange = (event) => {
+    setSelectedFile(event.target.files[0]);
+  };
+
+  function handleFileUpload(selectedFile) {
+    const formData = new FormData();
+    formData.append("file", selectedFile, selectedFile?.name);
+    return formData;
+  }
+
 
   return (
     <section className="rateContractAddJHK">
@@ -251,12 +432,19 @@ export default function RateContractAddForm() {
               options={drugList}
               onChange={(e) => {
                 setDrugName(e?.target?.value);
+                setItemID(drugList?.find(dt => dt?.value == e?.target?.value)?.itemId || null)
               }}
               name={"drugName"}
               value={drugName}
             />
+            {errors?.drugNameErr &&
+              <span className="text-sm text-[#9b0000] mt-1 ms-1">
+                {errors?.drugNameErr}
+              </span>
+            }
           </div>
         </div>
+
       </div>
       <h4 className="bg-[#097080] text-white p-2 rounded">
         Existing Rate Contract
@@ -282,11 +470,14 @@ export default function RateContractAddForm() {
           >
             Supplier Name:
           </label>
-          <ComboDropDown
+          <SelectBox
+            id="supplierName"
             options={suppliers}
             onChange={handleChange}
             name={"supplierName"}
             value={formState?.supplierName}
+            className="Wrapper__select p-4"
+            error={errors?.supplierNameErr}
           />
         </div>
 
@@ -297,11 +488,16 @@ export default function RateContractAddForm() {
           >
             Tender No.:
           </label>
-          <ComboDropDown
+          <SelectBox
+            id="tenderNo"
             options={[]}
             onChange={handleChange}
             name={"tenderNo"}
             value={formState?.tenderNo}
+            placeholder={`${formState?.tenderNo ? formState?.tenderNo : 'select value'}`}
+            className="Wrapper__select p-4"
+            disabled={formState?.tenderNo}
+            error={formState?.tenderNo ? "" : errors?.tenderNoErr}
           />
         </div>
 
@@ -323,37 +519,37 @@ export default function RateContractAddForm() {
         <div>
           <label htmlFor="" className="rateContractAddJHK__label mb-0">
             Contract From :{" "}
-            <span className="fs-3 fw-normal">{formState?.contractFrom}</span>{" "}
+            <span className="fs-6 fw-normal">{formState?.contractFrom}</span>{" "}
           </label>
         </div>
         <div>
           <label htmlFor="" className="rateContractAddJHK__label mb-0">
             Contract To :{" "}
-            <span className="fs-3 fw-normal">{formState?.contractTo}</span>{" "}
+            <span className="fs-6 fw-normal">{formState?.contractTo}</span>{" "}
           </label>
         </div>
         <div>
           <label htmlFor="" className="rateContractAddJHK__label mb-0">
             RC Finalization Date :{" "}
-            <span className="fs-3 fw-normal">{formState?.rcFinalDate}</span>{" "}
+            <span className="fs-6 fw-normal">{formState?.rcFinalDate}</span>{" "}
           </label>
         </div>
         <div>
           <label htmlFor="" className="rateContractAddJHK__label mb-0">
             Quotation No. :{" "}
-            <span className="fs-3 fw-normal">{formState?.quotationNo}</span>{" "}
+            <span className="fs-6 fw-normal">{formState?.quotationNo}</span>{" "}
           </label>
         </div>
         <div>
           <label htmlFor="" className="rateContractAddJHK__label mb-0">
             Acceptance Date :{" "}
-            <span className="fs-3 fw-normal">{formState?.acceptanceDate}</span>{" "}
+            <span className="fs-6 fw-normal">{formState?.acceptanceDate}</span>{" "}
           </label>
         </div>
         <div>
           <label htmlFor="" className="rateContractAddJHK__label mb-0">
             Financial Committee Date :{" "}
-            <span className="fs-3 fw-normal">
+            <span className="fs-6 fw-normal">
               {formState?.financeCommitteDate}
             </span>{" "}
           </label>
@@ -361,19 +557,19 @@ export default function RateContractAddForm() {
         <div>
           <label htmlFor="" className="rateContractAddJHK__label mb-0">
             Bank Name :{" "}
-            <span className="fs-3 fw-normal">{formState?.bankName}</span>{" "}
+            <span className="fs-6 fw-normal">{formState?.bankName}</span>{" "}
           </label>
         </div>
         <div>
           <label htmlFor="" className="rateContractAddJHK__label mb-0">
             Branch Name :{" "}
-            <span className="fs-3 fw-normal">{formState?.branchName}</span>{" "}
+            <span className="fs-6 fw-normal">{formState?.branchName}</span>{" "}
           </label>
         </div>
         <div>
           <label htmlFor="" className="rateContractAddJHK__label mb-0">
             Bank IFSC Code :{" "}
-            <span className="fs-3 fw-normal">{formState?.bankIfscCode}</span>{" "}
+            <span className="fs-6 fw-normal">{formState?.bankIfscCode}</span>{" "}
           </label>
         </div>
       </div>
@@ -414,6 +610,11 @@ export default function RateContractAddForm() {
             value={formState?.shelfLife}
             onChange={handleChange}
           />
+          {errors?.shelfLifeErr &&
+            <span className="text-sm text-[#9b0000] mt-1 ms-1">
+              {errors?.shelfLifeErr}
+            </span>
+          }
         </div>
 
         <div>
@@ -424,11 +625,16 @@ export default function RateContractAddForm() {
             No of Batches:
           </label>
           <ComboDropDown
-            options={[]}
+            options={batchSizeOptions}
             onChange={handleChange}
             name={"noOfBatches"}
             value={formState?.noOfBatches}
           />
+          {errors?.noOfBatchesErr &&
+            <span className="text-sm text-[#9b0000] mt-1 ms-1">
+              {errors?.noOfBatchesErr}
+            </span>
+          }
         </div>
 
         <div className="bankmaster__container">
@@ -465,6 +671,11 @@ export default function RateContractAddForm() {
             name={"level"}
             value={formState?.level}
           />
+          {errors?.levelErr &&
+            <span className="text-sm text-[#9b0000] mt-1 ms-1">
+              {errors?.levelErr}
+            </span>
+          }
         </div>
 
         <div>
@@ -495,6 +706,11 @@ export default function RateContractAddForm() {
             name={"taxType"}
             value={formState?.taxType}
           />
+          {errors?.taxTypeErr &&
+            <span className="text-sm text-[#9b0000] mt-1 ms-1">
+              {errors?.taxTypeErr}
+            </span>
+          }
         </div>
 
         <div>
@@ -513,6 +729,11 @@ export default function RateContractAddForm() {
             value={formState?.cgst}
             onChange={handleChange}
           />
+          {errors?.cgstErr &&
+            <span className="text-sm text-[#9b0000] mt-1 ms-1">
+              {errors?.cgstErr}
+            </span>
+          }
         </div>
 
         <div>
@@ -531,6 +752,11 @@ export default function RateContractAddForm() {
             value={formState?.sgst}
             onChange={handleChange}
           />
+          {errors?.sgstErr &&
+            <span className="text-sm text-[#9b0000] mt-1 ms-1">
+              {errors?.sgstErr}
+            </span>
+          }
         </div>
         <div>
           <label
@@ -559,6 +785,11 @@ export default function RateContractAddForm() {
               addOnClass="col-8"
             />
           </div>
+          {errors?.rateUnitErr &&
+            <span className="text-sm text-[#9b0000] mt-1 ms-1">
+              {errors?.rateUnitErr}
+            </span>
+          }
         </div>
 
         <div>
@@ -577,6 +808,12 @@ export default function RateContractAddForm() {
             value={formState?.deliveryDay}
             onChange={handleChange}
           />
+          {errors?.deliveryDayErr &&
+            <span className="text-sm text-[#9b0000] mt-1 ms-1">
+              {errors?.deliveryDayErr
+              }
+            </span>
+          }
         </div>
         <div>
           <label htmlFor="discount" className="employeeMaster__label">
@@ -600,14 +837,14 @@ export default function RateContractAddForm() {
         </h4>
 
         <div>
-          <label htmlFor="ifscCode" className="employeeMaster__label">
+          <label htmlFor="file" className="employeeMaster__label">
             Specification (pdf) :
           </label>
           <input
             className="rateContractAddJHK__fileUpload"
             type="file"
-            // placeholder='Choose file...'
-            // onChange={onFileChange}
+            placeholder='Choose file...'
+            onChange={onFileChange}
           />
           {/* <button
             className="bankmaster__container-controls-btn"
@@ -639,15 +876,15 @@ export default function RateContractAddForm() {
         <div style={{ marginBottom: "3rem" }}>
           <DataTable
             masterName={"Existing Rate Contract"}
-            ref={dataTableRef}
+            ref={null}
             columns={bgdetailsTableCols}
-            data={existingRCs}
+            data={bgList}
           />
         </div>
       </div>
 
       <div className="bankmaster__container-controls">
-        <button className="bankmaster__container-controls-btn">Save</button>
+        <button className="bankmaster__container-controls-btn" onClick={handleSave}>Save</button>
         <button
           className="bankmaster__container-controls-btn"
           onClick={handleReset}

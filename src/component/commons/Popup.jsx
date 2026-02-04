@@ -37,7 +37,7 @@ export default function Popup({ isVisible, children, largeDataset = false }) {
               borderRadius: '7px',
               boxShadow: '0 0 10px rgba(0,0,0,0.3)',
               ...(largeDataset
-                ? { height: '70rem', overflowY: 'scroll' }
+                ? { height: '95vh', overflowY: 'scroll' }
                 : { height: 'auto' }),
             }}
           >

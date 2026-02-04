@@ -1,4 +1,4 @@
-import { faFilter, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faFilter, faPlus, faRotateRight, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 //eslint-disable-next-line
 import { motion } from "framer-motion";
@@ -47,11 +47,10 @@ export default function ServiceNavbar({
                 className="masters__navbar--btn-container-button"
                 onClick={data.onClick}
                 key={index}
+                style={{ background: data?.color && data?.color }}
               >
-                <FontAwesomeIcon
-                  icon={faPlus}
-                  style={{ marginRight: "0.5rem" }}
-                />
+                {data?.icon ? data?.icon :  <FontAwesomeIcon icon={faPlus} className="mr-1" />}
+               
                 {data.label}
               </button>
             ))}

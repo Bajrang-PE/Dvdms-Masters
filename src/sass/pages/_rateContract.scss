@@ -25,7 +25,7 @@
     }
     &--chart {
       // padding-top: 1.3rem;
-      flex: 0 1 30%;
+      flex: 0 1 35%;
     }
   }
 
@@ -34,8 +34,9 @@
     display: block;
     align-items: center;
     display: flex;
+    flex-wrap: wrap;
     margin-bottom: rem10(5);
-    gap: rem10(5);
+    gap: rem10(2);
 
     &--container {
       display: flex;
@@ -95,10 +96,10 @@
   &__container {
     display: flex;
     width: 100%;
-    gap: rem10(3);
+    gap: rem10(1.5);
     flex-wrap: wrap;
     align-items: center;
-    margin-bottom: rem10(5);
+    margin-bottom: rem10(2);
     &--dropdown {
       flex: 0 1 rem10(25);
     }
@@ -148,5 +149,5 @@
 }
 
 .highcharts-container {
-  height: rem10(30) !important;
+  height: rem10(25) !important;
 }

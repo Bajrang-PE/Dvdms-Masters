@@ -1,22 +1,23 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { Route, Routes, useParams } from "react-router-dom";
-import NotFoundPage from "../pages/NotFoundPage";
-import RateContract from "../component/masters/assam/services/RateContract";
-import AssamPrivateRoute from "./AssamPrivateRoute";
-import JharkhandPrivateRoute from "./JharkhandPrivateRoute";
-import RateContractJH from "../component/masters/jharkhand/services/RateContract";
-// import RateContractAddForm from '../component/masters/jharkhand/services/RateContract/RateContractAdd'
-import MenuTopBar from "../component/headers/MenuTopBar";
-import BankMasterJH from "../component/masters/jharkhand/admin/lists/BankMasterJH";
-import BankBranchMasterJH from "../component/masters/jharkhand/admin/lists/BankBranchMasterJH";
-// import CommitteeTypeList from "../component/masters/assam/admin/lists/CommiteeTypeMasterList";
-import RateContractAddAssam from "../component/masters/assam/services/RateContract/RateContractAdd";
-import BankMasterList from "../component/masters/assam/admin/lists/BankMasterList";
-import CentralPurchaseOrder from "../component/masters/assam/services/PurchaseOrder/CentralPurchaseOrder";
+const LoadingSpinner = lazy(() => import("../component/commons/LoadingSpinner"));
+const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
+const RateContract = lazy(() => import("../component/masters/assam/services/RateContract"));
+const AssamPrivateRoute = lazy(() => import("./AssamPrivateRoute"));
+const JharkhandPrivateRoute = lazy(() => import("./JharkhandPrivateRoute"));
+const RateContractJH = lazy(() => import("../component/masters/jharkhand/services/RateContract"));
+const MenuTopBar = lazy(() => import("../component/headers/MenuTopBar"));
+const BankMasterJH = lazy(() => import("../component/masters/jharkhand/admin/lists/BankMasterJH"));
+const BankBranchMasterJH = lazy(() => import("../component/masters/jharkhand/admin/lists/BankBranchMasterJH"));
+const RateContractAddAssam = lazy(() => import("../component/masters/assam/services/RateContract/RateContractAdd"));
+const BankMasterList = lazy(() => import("../component/masters/assam/admin/lists/BankMasterList"));
+const MenuTabBar = lazy(() => import("../component/headers/MenuTabBar"));
+const MenuPage = lazy(() => import("../pages/MenuPage"));
+const SingleProgPoDeskJH = lazy(() => import("../component/masters/jharkhand/services/SingleProgPoDeskJH"));
+const SupplierInterfaceDeskJH = lazy(() => import("../component/masters/jharkhand/services/SupplierInterfaceDeskJH"));
 
 const MasterRoute = () => {
   const { stateCode } = useParams();
-  console.log("Page loaded ", stateCode);
   return (
     <>
       {stateCode && stateCode === "AS" && (
@@ -41,43 +42,41 @@ const MasterRoute = () => {
           bg={"#00000073"}
         />
       )}
-      <Routes>
-        {/* ASSAM */}
-        {stateCode === "AS" && (
-          <Route element={<AssamPrivateRoute />}>
-            {/*Services*/}
-            <Route path="/rate-contract" element={<RateContract />} />
-             <Route path="/central-purchase-order" element={<CentralPurchaseOrder />} />
-            <Route path="/bank-master" element={<BankMasterList />} />
-            <Route
-              path="/rate-contract/add"
-              element={<RateContractAddAssam />}
-            />
-          </Route>
-        )}
+      <Suspense fallback={<LoadingSpinner />}>
+        <MenuTabBar />
+        <Routes>
+          <Route path="/" element={<MenuPage />} />
 
-        {/* JHARKHAND */}
-        {stateCode === "JH" && (
-          <Route element={<JharkhandPrivateRoute />}>
-            {/* SERVICES */}
-            <Route path="/rate-contract" element={<RateContractJH />} />
-            {/* <Route path="/rate-contract/add" element={<RateContractAddForm />} />  */}
+          {/* ASSAM */}
+          {stateCode === "AS" && (
+            <Route element={<AssamPrivateRoute />}>
+              {/*Services*/}
+              <Route path="/rate-contract" element={<RateContract />} />
+              <Route path="/bank-master" element={<BankMasterList />} />
+              <Route
+                path="/rate-contract/add"
+                element={<RateContractAddAssam />}
+              />
+            </Route>
+          )}
 
-            {/* ADMIN */}
-            <Route path="/bank-master" element={<BankMasterJH />} />
-            <Route
-              path="/bank-branch-master"
-              element={<BankBranchMasterJH />}
-            />
-            {/* <Route
-              path="/committee-type-master"
-              element={<CommitteeTypeList />}
-            />  */}
-          </Route>
-        )}
+          {/* JHARKHAND */}
+          {stateCode === "JH" && (
+            <Route element={<JharkhandPrivateRoute />}>
+              {/* SERVICES */}
+              <Route path="/rate-contract" element={<RateContractJH />} />
+              <Route path="/single-prog-po-desk" element={<SingleProgPoDeskJH />} />
+              <Route path="/supplier-interface-desk" element={<SupplierInterfaceDeskJH />} />
 
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
+              {/* ADMIN */}
+              <Route path="/bank-master" element={<BankMasterJH />} />
+              <Route path="/bank-branch-master" element={<BankBranchMasterJH />} />
+            </Route>
+          )}
+
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </Suspense>
     </>
   );
 };

@@ -23,7 +23,7 @@ const SelectBox = ({
         required={required}
         onChange={onChange}
         onBlur={onBlur}
-        className={`w-full px-4 py-1 border ${
+        className={`w-full px-4 py-2 border ${
           error ? "ring-1 ring-red-500" : "border-gray-300"
         } rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 ${className}`}
       >

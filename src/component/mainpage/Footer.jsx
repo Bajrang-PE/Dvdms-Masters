@@ -7,7 +7,7 @@ const Footer = () => {
             <div className="container-fluid text-center text-md-start">
                 <div className="row">
                     <div className="col-md-6 px-4 col-sm-12 pt-5 pl-5" style={{ color: "white" }}>
-                        <h3>Centralized DVDMS</h3>
+                        <h3>Unified DVDMS</h3>
                         <p className='fs-13'>Ministry of Health &amp; Family Welfare (Govt. of India)</p>
                     </div>
                     <hr className="clearfix w-100 d-md-none pb-3" />

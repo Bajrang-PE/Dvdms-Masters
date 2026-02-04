@@ -7,6 +7,7 @@ const initialState = {
   bankNameDrpDt: [],
   bankBranchMstDt: [],
   error: null,
+  supplierID: {},
 };
 
 const jhMasters = createSlice({
@@ -15,7 +16,10 @@ const jhMasters = createSlice({
   reducers: {
     clearError: (state) => {
       state.error = null;
-    }
+    },
+    setSupplier(state, action) {
+      state.supplierID = action.payload;
+    },
   },
   extraReducers: createAsyncReducers([
     { thunk: fetchBankList, stateKey: 'bankMstDt' },
@@ -24,6 +28,6 @@ const jhMasters = createSlice({
   ])
 });
 
-export const { clearError } = jhMasters.actions;
+export const { clearError, setSupplier } = jhMasters.actions;
 export { fetchBankList, fetchBankNameDrpDt, fetchBankBranchList };
 export default jhMasters.reducer;

@@ -1,86 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { FaBars, FaChartLine } from "react-icons/fa";
 import { RiAdminLine } from "react-icons/ri";
 import { BsChevronDown } from "react-icons/bs";
 import "../css/MenuPage.css";
-import MenuTopBar from "../component/headers/MenuTopBar";
 import { Link, useParams } from "react-router-dom";
 import { getMenuList } from "../api/Assam/services/rateContractAPI";
-
-const services = [
-  { title: "Rate Contract", link: "rate-contract" },
-  {
-    title: "Purchase Order Management",
-    sub: [
-      { title: "Local Purchase Order Generation", link: "" },
-      { title: "Central Purchase Order Generation", link: "" },
-    ],
-  },
-  {
-    title: "Issue Management",
-    sub: [
-      { title: "Issue To Non Web Connected Store", link: "" },
-      { title: "Issue to Web-Connected Store", link: "" },
-      { title: "Ehospital issue desk", link: "" },
-    ],
-  },
-  {
-    title: "Receive",
-    sub: [
-      { title: "Issue To Non Web Connected Store", link: "" },
-      { title: "Issue to Web-Connected Store", link: "" },
-    ],
-  },
-];
-
-const admin = [
-  { title: "Bank Master", link: "bank-master" },
-  { title: "Bank Branch Master", link: "bank-branch-master" },
-  { title: "Committee Type Master", link: "committee-type-master" }, //as
-];
-
-const reports = [
-  { title: "Inventory Management" },
-  { title: "MIS Report" },
-  {
-    title: "Financial Management",
-    sub: [
-      { title: "Issue To Non Web Connected Store", link: "" },
-      { title: "Issue to Web-Connected Store", link: "" },
-    ],
-  },
-  { title: "Purchase Order Management" },
-];
-
-const serviceReplacements = [
-  {
-    targetLink: "Rate Contract Management",
-    targetSublink: "Rate Contract",
-    newUrl: "rate-contract",
-  },
-
-    {
-    targetLink: "Purchase Order Management",
-    targetSublink: "Central Purchase Order Generation",
-    newUrl: "central-purchase-order",
-  },
-];
-
-const mastersReplacements = [
-  {
-    targetLink: "Bank Management",
-    targetSublink: "Bank Master",
-    newUrl: "bank-master",
-  },
-  {
-    targetLink: "Bank Management",
-    targetSublink: "Bank Branch Master",
-    newUrl: "bank-master",
-  },
-];
+import { UnifiedContext } from "../context/UnifiedContext";
 
 const MenuCard = ({ icon, title, menu, borderClr }) => {
   const [activeIndex, setActiveIndex] = useState(null);
+  const { openTab } = useContext(UnifiedContext);
+  const { stateCode } = useParams();
 
   const toggle = (i) => {
     setActiveIndex(activeIndex === i ? null : i);
@@ -121,6 +51,14 @@ const MenuCard = ({ icon, title, menu, borderClr }) => {
                 <Link
                   className="acrmenu w-100"
                   to={item?.link ? item?.link : ""}
+                  onClick={() =>
+                    openTab({
+                      id: item.link,
+                      title: item.title,
+                      path: `${item.link}`,
+                      closable: true
+                    }, stateCode)
+                  }
                 >
                   {" "}
                   {item.title}
@@ -135,6 +73,14 @@ const MenuCard = ({ icon, title, menu, borderClr }) => {
                     <Link
                       className="acrmenu w-100 d-block"
                       to={s?.link ? s?.link : ""}
+                      onClick={() =>
+                        openTab({
+                          id: s.link,
+                          title: s.title,
+                          path: `${s.link}`,
+                          closable: true
+                        }, stateCode)
+                      }
                     >
                       {s?.title}
                     </Link>
@@ -151,31 +97,60 @@ const MenuCard = ({ icon, title, menu, borderClr }) => {
 
 const MenuPage = () => {
   const { stateCode } = useParams();
-  const [serviceList, setServiceList] = useState([]);
-  const [adminList, setAdminList] = useState([]);
-  const [reportsList, setReportsList] = useState([]);
 
   useEffect(() => {
     async function getMenus() {
       const response = await getMenuList();
-      const servicesList = response.Services["E Aushadhi"];
-      const adminsList = response.Admin["E Aushadhi"];
-      const reports = response.Reports["E Aushadhi"];
-      console.log("Services : ",servicesList);
-      const mappedServices = buildMenus(servicesList);
-      const mappedMasters = buildMenus(adminsList);
-      const reportsList = buildMenus(reports);
-
-      setServiceList(urlReplacer(mappedServices, serviceReplacements));
-      setAdminList(urlReplacer(mappedMasters, mastersReplacements));
-      setReportsList(reportsList);
+      console.log(response);
     }
+    console.log("State code in menu page", stateCode);
     getMenus();
-  }, [stateCode]);
+  }, []);
+
+  const services = [
+    { title: "Rate Contract", link: "rate-contract" },
+    { title: "Single Program Po Desk", link: "single-prog-po-desk" },
+    { title: "Supplier Interface Desk", link: "supplier-interface-desk" },
+    { title: "Pm darpan service",link: "pm-darpan-service" },
+    {
+      title: "Issue Management",
+      sub: [
+        { title: "Issue To Non Web Connected Store", link: "issue-to-non-web-connected-store" },
+        { title: "Issue to Web-Connected Store", link: "issue-to-web-connected-store" },
+        { title: "Ehospital issue desk", link: "" },
+      ],
+    },
+    {
+      title: "Receive",
+      sub: [
+        { title: "Issue To Non Web Connected Store", link: "" },
+        { title: "Issue to Web-Connected Store", link: "" },
+      ],
+    },
+  ];
+
+  const admin = [
+    { title: "Bank Master", link: "bank-master" },
+    { title: "Bank Branch Master", link: "bank-branch-master" },
+    { title: "Committee Type Master", link: "committee-type-master" }, //as
+  ];
+
+  const reports = [
+    { title: "Inventory Management", link: "inventory-management" },
+    { title: "MIS Report" ,link:"mis-report"},
+    {
+      title: "Financial Management",
+      sub: [
+        { title: "Issue To Non Web Connected Store", link: "" },
+        { title: "Issue to Web-Connected Store", link: "" },
+      ],
+    },
+    { title: "Purchase Order Management",link:"purchase-order-management" },
+  ];
 
   return (
     <>
-      {stateCode && stateCode === "AS" && (
+      {/* {stateCode && stateCode === "AS" && (
         <MenuTopBar
           title={"AMSCL, Govt. of Assam"}
           subtitle={"DVDMS (e-Aushadhi)"}
@@ -196,7 +171,7 @@ const MenuPage = () => {
           isLocation={true}
           bg={"#00000073"}
         />
-      )}
+      )} */}
 
       <div className="main-menu-body">
         <div className="container py-5">
@@ -205,7 +180,7 @@ const MenuPage = () => {
               <MenuCard
                 icon={<FaBars />}
                 title="Services"
-                menu={serviceList}
+                menu={services}
                 borderClr={"#2c71f0"}
               />
             </div>
@@ -214,7 +189,7 @@ const MenuPage = () => {
               <MenuCard
                 icon={<RiAdminLine />}
                 title="Admin"
-                menu={adminList}
+                menu={admin}
                 borderClr={"#e56c1a"}
               />
             </div>
@@ -223,7 +198,7 @@ const MenuPage = () => {
               <MenuCard
                 icon={<FaChartLine />}
                 title="Reports"
-                menu={reportsList}
+                menu={reports}
                 borderClr={"#a548f0"}
               />
             </div>
@@ -231,69 +206,11 @@ const MenuPage = () => {
         </div>
       </div>
       <div className="text-center bg-black text-gray-200 border-t border-gray-700 p-2">
-        <span>&copy; 2025 CDAC Noida. All rights reserved CDAC</span>
+        <span>© 2025 CDAC Noida. All rights reserved CDAC</span>
         <br />
       </div>
     </>
   );
 };
-
-//recursive call
-function buildMenus(object, result = [], prevKey = "") {
-  Object.keys(object).forEach((key) => {
-    if (object[key] && typeof object[key] === "object") {
-      prevKey = key;
-      // console.log("Reassigning key", key);
-      return buildMenus(object[key], result, prevKey);
-    }
-
-    const submenu = { title: key, link: object[key] || "" };
-    const menu = { title: prevKey, sub: [submenu] };
-    const keyAlreadyExists = result.some(
-      (service) => service.title === prevKey
-    );
-    if (keyAlreadyExists && prevKey !== "") {
-      const existingMenu = result.find((service) => service.title === prevKey);
-      existingMenu.sub = [...existingMenu.sub, submenu];
-      result.pop(existingMenu);
-      result.push(existingMenu);
-      return;
-    }
-    prevKey === "" ? result.push(submenu) : result.push(menu);
-    return;
-  });
-
-  return result;
-}
-
-//temporary function to replace url mapping for testing
-function urlReplacer(searchData, replacements) {
-  const ruleMap = new Map();
-
-  for (const r of replacements) {
-    const key = `${r.targetLink}::${r.targetSublink || "__PARENT__"}`;
-    ruleMap.set(key, r.newUrl);
-  }
-
-  return searchData.map((item) => {
-    const parentKey = `${item.title}::__PARENT__`;
-    const parentUrl = ruleMap.get(parentKey);
-
-    let updated = parentUrl ? { ...item, link: parentUrl } : item;
-
-    if (!item.sub) return updated;
-
-    const subUpdated = item.sub.map((subItem) => {
-      const subKey = `${item.title}::${subItem.title}`;
-      const newUrl = ruleMap.get(subKey);
-
-      return newUrl ? { ...subItem, link: newUrl } : subItem;
-    });
-
-    return updated === item
-      ? { ...item, sub: subUpdated }
-      : { ...updated, sub: subUpdated };
-  });
-}
 
 export default MenuPage;

@@ -157,6 +157,7 @@ const BankBranchMasterFormJH = ({ data, openPage, optionsParams }) => {
                         onChange={handleInputChange}
                         error={errors?.branchNameErr}
                     />
+                   
                 </div>
                 <div className="branchmaster__grid--container-item">
                     <label htmlFor="IfscCode" className="branchmaster__label required-label">

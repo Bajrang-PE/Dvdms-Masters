@@ -9,13 +9,14 @@
       top: 50%;
       left: 50%;
       z-index: 1200;
-      width: rem10(95);
+      // width: rem10(95);
+      width: 80%;
       padding: rem10(2) rem10(4);
       background-color: $pure-white;
       transform: translate(-50%, -50%);
       border-radius: 7px;
       box-shadow: $box-shadow-text-fields;
-      height: 80% !important;
+      height: 95% !important;
     }
   }
 }

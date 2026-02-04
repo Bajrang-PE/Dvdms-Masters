@@ -16,7 +16,7 @@ import {
 import { InputField } from './FormElements';
 import jsPDF from 'jspdf';
 
-const DataTable = forwardRef(({ masterName, columns, data }, ref) => {
+const DataTable = forwardRef(({ masterName, columns, data, isSearchReq = true, isPagination = true, isReport = true, handleRowSelect }, ref) => {
   const [sortedData, setSortedData] = useState(data);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -42,6 +42,13 @@ const DataTable = forwardRef(({ masterName, columns, data }, ref) => {
       return selectedRows.map(globalIndex => sortedData[globalIndex]);
     },
   }));
+
+  useEffect(() => {
+    if (handleRowSelect) {
+      const selectedData = selectedRows.map(i => sortedData[i]);
+      handleRowSelect(selectedData);
+    }
+  }, [selectedRows, sortedData]);
 
   // Handle Search
   const handleSearch = event => {
@@ -245,7 +252,7 @@ const DataTable = forwardRef(({ masterName, columns, data }, ref) => {
   // Pagination Logic
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-  const currentRows = sortedData?.slice(indexOfFirstRow, indexOfLastRow);
+  const currentRows = isPagination ? sortedData?.slice(indexOfFirstRow, indexOfLastRow) : sortedData;
 
   const handleRowsPerPageChange = event => {
     setRowsPerPage(parseInt(event.target.value, 10));
@@ -261,36 +268,44 @@ const DataTable = forwardRef(({ masterName, columns, data }, ref) => {
 
   return (
     <div className="datatable__container">
-      <div className="datatable-actions">
-        <div className="datatable-actions-search">
-          <InputField
-            type={'text'}
-            value={searchQuery}
-            onChange={handleSearch}
-            placeholder={'Search..'}
-            className={'datatable-actions-search--input'}
-            id={'DatatableSearch'}
-          />
+
+      {(isSearchReq || isReport) &&
+        <div className="datatable-actions">
+          {isSearchReq &&
+            <div className="datatable-actions-search">
+              <InputField
+                type={'text'}
+                value={searchQuery}
+                onChange={handleSearch}
+                placeholder={'Search..'}
+                className={'datatable-actions-search--input'}
+                id={'DatatableSearch'}
+              />
+            </div>
+          }
+          {isReport &&
+            <>
+              <span className="datatable-actions-toggler" onClick={handleToggler}>
+                <FontAwesomeIcon icon={faSave} />
+              </span>
+
+              {toggleToolbar && (
+                <div className="datatable-actions-buttons">
+                  <button className="datatable-actions--btn" onClick={downloadExcel}>
+                    Download Excel
+                  </button>
+                  <button className="datatable-actions--btn" onClick={downloadPDF}>
+                    Download PDF
+                  </button>
+                  <button className="datatable-actions--btn" onClick={downloadHTML}>
+                    Download HTML
+                  </button>
+                </div>
+              )}
+            </>
+          }
         </div>
-
-        <span className="datatable-actions-toggler" onClick={handleToggler}>
-          <FontAwesomeIcon icon={faSave} />
-        </span>
-
-        {toggleToolbar && (
-          <div className="datatable-actions-buttons">
-            <button className="datatable-actions--btn" onClick={downloadExcel}>
-              Download Excel
-            </button>
-            <button className="datatable-actions--btn" onClick={downloadPDF}>
-              Download PDF
-            </button>
-            <button className="datatable-actions--btn" onClick={downloadHTML}>
-              Download HTML
-            </button>
-          </div>
-        )}
-      </div>
+      }
 
       <div className="datatable__container--forTable">
         <table className="datatable">
@@ -371,7 +386,7 @@ const DataTable = forwardRef(({ masterName, columns, data }, ref) => {
       </div>
 
       {/* Rows per page selector */}
-      {sortedData && (
+      {(sortedData && isPagination) && (
         <div className="datatable__paginationContainer">
           <label className="datatable__paginationContainer-text">
             Showing {indexOfFirstRow + 1}-
@@ -431,9 +446,8 @@ const DataTable = forwardRef(({ masterName, columns, data }, ref) => {
                     <button
                       key={page}
                       onClick={() => handlePageChange(page)}
-                      className={`datatable__paginationContainer-buttons--btn datatable__paginationContainer-buttons--btn-pages ${
-                        page === currentPage ? 'active' : ''
-                      }`}
+                      className={`datatable__paginationContainer-buttons--btn datatable__paginationContainer-buttons--btn-pages ${page === currentPage ? 'active' : ''
+                        }`}
                     >
                       {page}
                     </button>

@@ -1,8 +1,8 @@
+import { lazy } from "react";
 import { Navigate, Outlet, useParams } from "react-router-dom";
-import NotFoundPage from "../pages/NotFoundPage";
+const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
 
 export default function JharkhandPrivateRoute() {
-    // const token = localStorage.getItem("userToken");
     const user = localStorage.getItem("data");
     const userDt = JSON.parse(user);
     const { stateCode } = useParams();
@@ -10,8 +10,6 @@ export default function JharkhandPrivateRoute() {
     const hasStateAccess = (stateCode) => {
         return userDt?.state === "JH" && stateCode === "JH";
     };
-
-    // if (!token) return <Navigate to="/" replace />;
 
     if (!hasStateAccess(stateCode)) return <NotFoundPage />;
 

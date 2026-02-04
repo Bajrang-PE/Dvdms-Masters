@@ -2,7 +2,7 @@ import React from "react";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 
-const PieChart = ({ title = "", data }) => {
+const PieChart = ({ title = "", data, setStatus }) => {
   // Convert CSS gradient string to Highcharts SVG gradient object
   const parseGradient = (cssGradient) => {
     const colorMatches = cssGradient.match(/#(?:[0-9a-fA-F]{3}){1,2}/g);
@@ -19,15 +19,19 @@ const PieChart = ({ title = "", data }) => {
     };
   };
 
-  const processedData = data.map(({ name, y, datapointColor }) => ({
+  const processedData = data.map(({ name, y, datapointColor, status }) => ({
     name,
     y,
     color: parseGradient(datapointColor),
+    status
   }));
 
   const options = {
     chart: {
       type: "pie",
+    },
+    credits: {
+      enabled: false
     },
     title: {
       text: title,
@@ -39,7 +43,7 @@ const PieChart = ({ title = "", data }) => {
     legend: {
       enabled: true,
       align: "right",
-      verticalAlign: "top",
+      verticalAlign: "middle",
       layout: "vertical",
       itemMarginTop: 8,
       itemMarginBottom: 8,
@@ -67,7 +71,7 @@ const PieChart = ({ title = "", data }) => {
 
     plotOptions: {
       pie: {
-        innerSize: "30%",
+        innerSize: "70%",
         allowPointSelect: true,
         cursor: "pointer",
         showInLegend: true,
@@ -81,6 +85,15 @@ const PieChart = ({ title = "", data }) => {
             fontWeight: "500",
           },
         },
+        point: {
+          events: {
+            click: function () {
+              if (setStatus) {
+                setStatus(this?.status || '0')
+              }
+            }
+          }
+        }
       },
     },
     series: [

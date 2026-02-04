@@ -1,8 +1,9 @@
-import { Navigate, Outlet, useParams } from "react-router-dom";
-import NotFoundPage from "../pages/NotFoundPage";
+import { lazy } from "react";
+import { Outlet, useParams } from "react-router-dom";
+const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
 
 export default function PrivateRoute() {
-  // const token = localStorage.getItem("userToken");
+  
   const user = localStorage.getItem("data");
   const userDt = JSON.parse(user);
   const { stateCode } = useParams();
@@ -10,9 +11,13 @@ export default function PrivateRoute() {
     return userDt?.state === stateCode && userDt?.isLogin === "true";
   };
 
-  // if (!token) return <Navigate to="/" replace />;
 
   if (!hasStateAccess(stateCode)) return <NotFoundPage />;
 
-  return <Outlet />;
+  return (
+    <>
+      <Outlet />
+    </>
+
+  )
 }

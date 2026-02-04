@@ -117,6 +117,7 @@ const BankMasterFormJH = ({ data, openPage }) => {
           onChange={handleInputChange}
           error={bankNameErr}
         />
+         {bankNameErr && <span className="text-sm text-[#9b0000] mt-1 ms-1">{bankNameErr}</span>}
       </div>
       <div className="bankmaster__container">
         <label htmlFor="BankShortName" className="bankmaster__label">
