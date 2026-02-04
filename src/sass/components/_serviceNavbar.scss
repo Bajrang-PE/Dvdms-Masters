@@ -1,0 +1,21 @@
+@use "../utilities/remConvertor" as *;
+
+.service__navbar--btn-container {
+  flex: 0 1 50%;
+  display: flex;
+  gap: rem10(1.5);
+  justify-content: flex-end;
+}
+
+.service__navbar--filter {
+  border-bottom: 1px solid #dddddd;
+}
+
+.Wrapper--disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.Wrapper--disabled .Wrapper__select {
+  cursor: not-allowed;
+}

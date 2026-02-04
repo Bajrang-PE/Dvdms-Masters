@@ -1,0 +1,124 @@
+@use "../abstracts/variables" as *;
+@use "../utilities/remConvertor" as *;
+@use "sass:color";
+
+.Navbar {
+  &__header {
+    background-image: $primary-navbar-gradient;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.45);
+  }
+
+  &__stateInfo {
+    margin-left: rem10(1);
+    overflow: hidden;
+
+    & > h3 {
+      font-family: $primary-font;
+      font-size: rem10(1.8);
+      font-weight: 400;
+      color: white;
+    }
+
+    & > p {
+      font-family: $primary-font;
+      font-size: rem10(1.4);
+      font-weight: 500;
+      color: rgba($color: white, $alpha: 0.8);
+      margin-bottom: 0 !important;
+    }
+  }
+}
+
+.masters {
+  &__navbar {
+    width: 100%;
+    padding: rem10(1) rem10(2);
+
+    &--text {
+      font-family: $primary-font;
+      font-weight: 500;
+      font-size: rem10(2);
+      margin: 0;
+      color: $Teal-Primary;
+    }
+
+    &--control-panel {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding-bottom: rem10(1);
+      border-bottom: 1px solid $underline-color;
+    }
+
+    &--btn-container {
+      flex: 0 1 30%;
+      display: flex;
+      gap: rem10(1.5);
+      justify-content: flex-end;
+
+      &-button {
+        padding: rem10(1) rem10(2);
+        font-family: $secondary-font;
+        font-size: rem10(1.4);
+        font-weight: 500;
+        background-color: $Teal-Primary;
+        color: white;
+        border-radius: 5px;
+        box-shadow: $box-shadow-minimal;
+        transition: all 0.3s ease;
+
+        &:hover {
+          background-color: color.adjust($Teal-Primary, $lightness: -10%);
+        }
+
+        &-filter {
+          background-color: $Teal-secondary;
+          &:hover {
+            background-color: color.adjust($Teal-secondary, $lightness: -10%);
+          }
+        }
+
+        &-modify {
+          background-color: $Teal-secondary;
+          &:hover {
+            background-color: color.adjust($Teal-secondary, $lightness: -10%);
+          }
+        }
+
+        &-delete {
+          background-color: $error-red;
+          &:hover {
+            background-color: color.adjust($error-red, $lightness: -10%);
+          }
+        }
+
+        &-view {
+          background-color: $warning-yellow;
+          &:hover {
+            background-color: color.adjust($warning-yellow, $lightness: -10%);
+          }
+        }
+
+        &:active {
+          transform: scale(0.95);
+        }
+      }
+    }
+
+    &--filters {
+      border-bottom: 1px solid $underline-color;
+      display: flex;
+      gap: rem10(3);
+      align-items: center;
+      flex-wrap: wrap;
+
+      &-summary {
+        font-family: $secondary-font;
+        font-size: rem10(1.5);
+        font-weight: 500;
+      }
+    }
+  }
+}

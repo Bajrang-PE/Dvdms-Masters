@@ -1,0 +1,63 @@
+@use "../abstracts/variables" as *;
+@use "../abstracts/mixins" as *;
+@use "../utilities/remConvertor" as *;
+
+.dndContainer {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: rem10(3);
+  padding: 1rem;
+
+  &__search {
+    @include primaryFormInput;
+    margin-bottom: 5px;
+  }
+
+  &__controls {
+    padding: rem10(1) rem10(1.2);
+    border: 1px solid #ddd;
+    font-size: rem10(1.4);
+    font-family: $primary-font;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: $primary-color;
+      color: white;
+    }
+  }
+
+  &__left,
+  &__right {
+    background-color: whitesmoke;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 7px;
+    padding: rem10(2);
+    height: rem10(30);
+    overflow-y: auto;
+    flex: 0 1 32%;
+
+    &--item {
+      font-family: $secondary-font;
+      font-size: rem10(1.4);
+      padding: rem10(1);
+      cursor: pointer;
+      user-select: none;
+      margin: 8px auto;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: $primary-color !important;
+        color: white !important;
+        font-weight: 500;
+        border: none;
+      }
+    }
+  }
+}

@@ -1,0 +1,75 @@
+@use "../../abstracts/variables" as *;
+@use "../../abstracts/mixins" as *;
+@use "../../utilities/remConvertor" as *;
+
+.rateContractAddJHK {
+  padding: rem10(1) rem10(2);
+  &__heading {
+    font-family: $primary-font;
+    font-size: rem10(2.5);
+    color: $Teal-Primary;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: rem10(3);
+  }
+
+  &__fileUpload {
+    border: 1px solid rgba(slategray, 0.34);
+    font-family: $secondary-font;
+    font-size: rem10(1.2);
+    padding: rem10(1);
+    border-radius: 5px;
+    max-width: rem10(14);
+    margin-right: rem10(1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    &:hover {
+      background-color: rgba(slategray, 0.34);
+    }
+
+    &:active {
+      border: none;
+      background-color: rgba(slategray, 0.5);
+    }
+  }
+
+  &__label {
+    font-family: $Teal-secondary;
+    font-size: rem10(1.8);
+    font-weight: 500;
+    display: block;
+    margin-bottom: rem10(1);
+  }
+
+  &__input {
+    @include primaryFormInput;
+  }
+
+  &__container {
+    position: relative;
+    display: grid;
+    grid-template-rows: auto;
+    grid-template-columns: 1fr 1fr;
+    gap: rem10(1.5);
+    margin-bottom: rem10(3);
+    border-radius: 6px;
+    border: 1px solid rgba($color: #ddd, $alpha: 0.95);
+    padding: rem10(4) rem10(1);
+
+    &-heading {
+      position: absolute;
+      top: -2%;
+      left: 0;
+      background-color: $Teal-Primary;
+      font-family: $primary-font;
+      font-size: rem10(1.5);
+      font-weight: 400;
+      color: $pure-white;
+      padding: rem10(1);
+      border-radius: 6px;
+      letter-spacing: 2px;
+      user-select: none;
+    }
+  }
+}

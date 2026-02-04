@@ -1,0 +1,52 @@
+/* Global CSS Reset with 1rem = 10px */
+html {
+  font-size: 100%; /* 1rem = 10px */
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+// body {
+//   overflow-x: hidden;
+// }
+
+// a {
+//   text-decoration: none;
+//   color: inherit;
+// }
+
+// ul,
+// ol {
+//   list-style: none;
+// }
+
+// img {
+//   max-width: 100%;
+//   height: auto;
+// }
+
+// input,
+// button,
+// textarea {
+//   border: none;
+//   background: none;
+//   outline: none;
+//   font-family: inherit;
+//   font-size: inherit;
+// }
+
+// button {
+//   cursor: pointer;
+// }
+
+// table {
+//   border-collapse: collapse;
+//   width: 100%;
+// }
+
+// hr {
+//   border: 0;
+//   border-top: 0.1rem solid #ccc;
+// }

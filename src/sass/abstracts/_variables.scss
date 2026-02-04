@@ -1,0 +1,91 @@
+//colors
+$primary-color: #1277b5;
+$secondary-color: #5bc0de;
+$underline-color: #dddddd;
+$dim-white: whitesmoke;
+$pure-white: white;
+$dim-black: #1e1e1e;
+$warning-yellow: #f0ad4e;
+$error-red: #d9534f;
+$bg: #0f1115;
+$surface: #151922;
+$text: #e6e8eb;
+$muted: #9aa0aa;
+$border: rgba(255, 255, 255, 0.08);
+$accent: #6ae3ff;
+$danger: #ff6b6b;
+$Teal-Primary: #097080;
+$Teal-secondary: #0097a1;
+//https://colorhunt.co/palette/00546101879000b7b5f4f4f4
+
+//Gradients
+$primary-navbar-gradient: linear-gradient(
+  110deg,
+  hsl(184deg 100% 36%) 0%,
+  hsl(184deg 100% 35%) 2%,
+  hsl(184deg 100% 34%) 4%,
+  hsl(184deg 99% 33%) 7%,
+  hsl(184deg 99% 32%) 10%,
+  hsl(184deg 99% 31%) 15%,
+  hsl(184deg 99% 29%) 21%,
+  hsl(184deg 99% 28%) 27%,
+  hsl(184deg 99% 28%) 34%,
+  hsl(184deg 99% 28%) 42%,
+  hsl(184deg 99% 28%) 50%,
+  hsl(184deg 99% 28%) 59%,
+  hsl(184deg 99% 28%) 66%,
+  hsl(184deg 99% 28%) 73%,
+  hsl(184deg 99% 28%) 80%,
+  hsl(184deg 100% 27%) 85%,
+  hsl(185deg 100% 26%) 90%,
+  hsl(186deg 100% 24%) 93%,
+  hsl(186deg 100% 23%) 96%,
+  hsl(187deg 100% 22%) 98%,
+  hsl(187deg 100% 20%) 99%,
+  hsl(188deg 100% 19%) 100%
+);
+
+$menu-gradient: linear-gradient(
+  110deg,
+  hsl(0deg 0% 96%) 0%,
+  hsl(179deg 7% 96%) 0%,
+  hsl(180deg 14% 95%) 1%,
+  hsl(180deg 21% 95%) 2%,
+  hsl(180deg 27% 95%) 4%,
+  hsl(180deg 33% 95%) 7%,
+  hsl(180deg 39% 95%) 12%,
+  hsl(180deg 44% 95%) 17%,
+  hsl(180deg 50% 95%) 25%,
+  hsl(180deg 55% 95%) 34%,
+  hsl(180deg 59% 94%) 44%,
+  hsl(180deg 64% 94%) 55%,
+  hsl(180deg 68% 94%) 65%,
+  hsl(180deg 73% 94%) 74%,
+  hsl(180deg 77% 94%) 82%,
+  hsl(180deg 80% 94%) 87%,
+  hsl(180deg 84% 94%) 92%,
+  hsl(180deg 88% 94%) 95%,
+  hsl(180deg 91% 93%) 98%,
+  hsl(180deg 94% 93%) 99%,
+  hsl(180deg 97% 93%) 100%,
+  hsl(180deg 100% 93%) 100%
+);
+//Shadows
+$box-spherical-shadow: rgba(0, 0, 0, 0.17) 0px -23px 25px 0px inset,
+  rgba(0, 0, 0, 0.15) 0px -36px 30px 0px inset,
+  rgba(0, 0, 0, 0.1) 0px -79px 40px 0px inset, rgba(0, 0, 0, 0.06) 0px 2px 1px,
+  rgba(0, 0, 0, 0.09) 0px 4px 2px, rgba(0, 0, 0, 0.09) 0px 8px 4px,
+  rgba(0, 0, 0, 0.09) 0px 16px 8px, rgba(0, 0, 0, 0.09) 0px 32px 16px;
+
+$box-spherical-light-shadow: rgba(0, 0, 0, 0.15) 0px -23px 25px 0px inset,
+  rgba(0, 0, 0, 0.11) 0px -36px 30px 0px inset, rgba(0, 0, 0, 0.06) 0px 2px 1px,
+  rgba(0, 0, 0, 0.09) 0px 4px 2px, rgba(0, 0, 0, 0.09) 0px 8px 4px,
+  rgba(0, 0, 0, 0.09) 0px 16px 8px, rgba(0, 0, 0, 0.09) 0px 32px 16px;
+
+$box-shadow-text-fields: rgba(0, 0, 0, 0.09) 0px 3px 12px;
+
+$box-shadow-minimal: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+
+//fonts
+$primary-font: "Roboto", sans-serif;
+$secondary-font: "Poppins", sans-serif;

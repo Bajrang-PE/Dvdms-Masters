@@ -1,0 +1,64 @@
+@use "../abstracts/variables" as *;
+@use "../utilities/remConvertor" as *;
+
+.mini-table-wrapper {
+  max-width: 100%;
+  background: $pure-white;
+  border: 1px solid $underline-color;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  font-family: $primary-font;
+  color: $Teal-Primary;
+  padding: rem10(1);
+
+  &.no-data {
+    color: gray;
+    font-style: italic;
+    text-align: center;
+    padding: rem10(2);
+  }
+}
+
+.vertical-table {
+  display: flex;
+  flex-direction: column;
+  gap: rem10(2);
+  align-items: center;
+}
+
+.vertical-table-row {
+  background-color: $dim-white;
+  border-radius: 6px;
+  padding: rem10(1);
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.05);
+
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: rem10(1) rem10(3);
+  align-items: center;
+
+  // border bottom for each key-value pair except last one
+  .vertical-table-cell {
+    padding: rem10(0.25) 0;
+    border-bottom: 1px solid #ddd;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    display: contents; // to allow the two spans to use grid properly
+  }
+
+  .label {
+    font-weight: 700;
+    font-size: rem10(2);
+    color: $Teal-Primary;
+  }
+
+  .value {
+    letter-spacing: 1px;
+    font-family: $secondary-font;
+    font-size: rem10(1.5);
+    color: $dim-black;
+  }
+}

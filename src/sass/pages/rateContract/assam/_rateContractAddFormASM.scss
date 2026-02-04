@@ -1,0 +1,132 @@
+@use "../../../abstracts/variables" as *;
+@use "../../../abstracts/mixins" as *;
+@use "../../../utilities/remConvertor" as *;
+
+.rateContractAddASM {
+  padding: rem10(3);
+  &__heading {
+    font-family: $primary-font;
+    font-size: rem10(2.4);
+    color: $Teal-Primary;
+    font-weight: 600;
+    margin-bottom: rem10(2);
+  }
+
+  &__remarks {
+    width: 30%;
+    margin-top: rem10(3);
+  }
+
+  &__radio-container {
+    display: flex;
+    align-items: center;
+    gap: rem10(4);
+    flex-wrap: wrap;
+    // margin: 0 auto;
+    width: 90%;
+    margin-top: rem10(5);
+  }
+
+  &__buttons-container {
+    display: flex;
+    align-items: center;
+    gap: rem10(2);
+    flex-wrap: wrap;
+    width: 90%;
+    margin-top: rem10(3);
+  }
+
+  &__menus {
+    &-menu {
+      position: relative;
+      height: 100%;
+      border-radius: rem10(1);
+      border: 1px solid rgba($Teal-Primary, 0.4);
+      box-shadow: 0 4px 8px rgba($muted, 0.5),
+        inset 0 2px 4px rgba($Teal-Primary, 0.2);
+      margin-top: rem10(5);
+      padding: rem10(2);
+      background: whitesmoke;
+
+      &-heading {
+        position: absolute;
+        top: -6%;
+        left: 0;
+        text-align: center;
+        font-family: $secondary-font;
+        font-size: rem10(1.5);
+        background-color: $Teal-Primary;
+        padding: rem10(1);
+        user-select: none;
+        color: white;
+        max-width: max-content;
+        border-radius: 5px;
+        z-index: 10;
+      }
+
+      &-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: rem10(1) rem10(5);
+      }
+
+      &-item {
+        position: relative;
+        margin-top: rem10(2);
+        flex: 0 1 16%;
+
+        & > label {
+          font-family: $primary-font;
+          font-size: rem10(1.8);
+          font-weight: 500;
+          letter-spacing: 1px;
+        }
+      }
+    }
+  }
+
+  &__label {
+    font-family: $Teal-secondary;
+    font-size: rem10(1.8);
+    font-weight: 500;
+    display: block;
+    margin-bottom: rem10(1);
+  }
+
+  &__input {
+    @include primaryFormInput;
+  }
+
+  &__container {
+    position: relative;
+    display: grid;
+    grid-template-rows: auto;
+    grid-template-columns: 1fr 1fr;
+    gap: rem10(1.5);
+    margin-bottom: rem10(3);
+    border-radius: 6px;
+    border: 1px solid rgba($color: #ddd, $alpha: 0.95);
+    padding: rem10(1);
+
+    &-heading {
+      position: absolute;
+      top: -2%;
+      left: 0;
+      background-color: $Teal-Primary;
+      font-family: $primary-font;
+      font-size: rem10(1.5);
+      font-weight: 400;
+      color: $pure-white;
+      padding: rem10(1);
+      border-radius: 6px;
+      letter-spacing: 2px;
+      user-select: none;
+    }
+  }
+}
+
+.react-datepicker__portal {
+  position: absolute !important;
+}
