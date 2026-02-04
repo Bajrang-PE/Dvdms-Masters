@@ -75,9 +75,9 @@ const MenuCard = ({ icon, title, menu, borderClr }) => {
                       to={s?.link ? s?.link : ""}
                       onClick={() =>
                         openTab({
-                          id: item.link,
-                          title: item.title,
-                          path: `${item.link}`,
+                          id: s.link,
+                          title: s.title,
+                          path: `${s.link}`,
                           closable: true
                         }, stateCode)
                       }
@@ -109,12 +109,14 @@ const MenuPage = () => {
 
   const services = [
     { title: "Rate Contract", link: "rate-contract" },
-    { title: "Pm darpan service" },
+    { title: "Single Program Po Desk", link: "single-prog-po-desk" },
+    { title: "Supplier Interface Desk", link: "supplier-interface-desk" },
+    { title: "Pm darpan service",link: "pm-darpan-service" },
     {
       title: "Issue Management",
       sub: [
-        { title: "Issue To Non Web Connected Store", link: "" },
-        { title: "Issue to Web-Connected Store", link: "" },
+        { title: "Issue To Non Web Connected Store", link: "issue-to-non-web-connected-store" },
+        { title: "Issue to Web-Connected Store", link: "issue-to-web-connected-store" },
         { title: "Ehospital issue desk", link: "" },
       ],
     },
@@ -134,8 +136,8 @@ const MenuPage = () => {
   ];
 
   const reports = [
-    { title: "Inventory Management" },
-    { title: "MIS Report" },
+    { title: "Inventory Management", link: "inventory-management" },
+    { title: "MIS Report" ,link:"mis-report"},
     {
       title: "Financial Management",
       sub: [
@@ -143,7 +145,7 @@ const MenuPage = () => {
         { title: "Issue to Web-Connected Store", link: "" },
       ],
     },
-    { title: "Purchase Order Management" },
+    { title: "Purchase Order Management",link:"purchase-order-management" },
   ];
 
   return (

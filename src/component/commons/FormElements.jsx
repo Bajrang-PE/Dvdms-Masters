@@ -10,6 +10,7 @@ export function ComboDropDown({
   name,
   addOnClass = "",
   isDisabled = false,
+  isRequired = false,
 }) {
   const DROPDOWN_HEIGHT = 180;
 
@@ -69,7 +70,7 @@ export function ComboDropDown({
         }`}
       ref={wrapperRef}
     >
-      {label && <label className="Wrapper__label">{label}</label>}
+      {label && <label className={`Wrapper__label ${isRequired ? 'required-label' : ""}`}>{label}</label>}
 
       <div
         className="Wrapper__select"
@@ -79,7 +80,7 @@ export function ComboDropDown({
         {selectedOption ? selectedOption.label : "Please Select"}
       </div>
 
-      {filteredOptions.length > 0 && isOpen && !isDisabled && (
+      {isOpen && !isDisabled && (
         <div className="Wrapper__select--menu">
           <input
             type="text"
@@ -89,20 +90,31 @@ export function ComboDropDown({
             className="Wrapper__search"
             disabled={isDisabled}
           />
-
-          <Virtuoso
-            style={{ height: DROPDOWN_HEIGHT }}
-            totalCount={filteredOptions.length}
-            itemContent={(index) => (
-              <div
-                key={filteredOptions[index].value}
-                className="Wrapper__select--option"
-                onClick={() => handleSelect(filteredOptions[index])}
-              >
-                {filteredOptions[index].label}
-              </div>
-            )}
-          />
+          {filteredOptions.length > 0 ?
+            <Virtuoso
+              style={{ height: DROPDOWN_HEIGHT }}
+              totalCount={filteredOptions.length}
+              itemContent={(index) => (
+                <div
+                  key={filteredOptions[index].value}
+                  className="Wrapper__select--option"
+                  onClick={() => handleSelect(filteredOptions[index])}
+                  value={filteredOptions[index].value}
+                >
+                  {filteredOptions[index].label}
+                </div>
+              )}
+            />
+            :
+            <div
+              key={""}
+              className="Wrapper__select--option"
+              // onClick={() => handleSelect(filteredOptions[index])}
+              value={''}
+            >
+              {"No Records!"}
+            </div>
+          }
         </div>
       )}
     </div>

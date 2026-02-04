@@ -11,7 +11,7 @@ import {
   getStoreName,
   getSuppliers,
 } from "../../../../api/Jharkhand/api/rateContractAPI";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { showPopup } from "../../../../features/commons/popupSlice";
 import RateContractAddForm from "./RateContract/RateContractAdd";
 import RateContractTenderForm from "./RateContract/RateContractTenderForm";
@@ -290,11 +290,9 @@ export default function RateContractJH() {
       } else {
         setPieChartData([]);
       }
-      console.log('data', data);
     })
   }
 
-  console.log('pieChartData', pieChartData)
 
   return (
     <>
@@ -391,7 +389,7 @@ export default function RateContractJH() {
           </div>
           {pieChartData.length > 0 && (
             <div className="rateContract__filterSection--chart">
-              <PieChart data={pieChartData?.filter(dt => dt?.name !== "All" || dt?.status !== "0")} />
+              <PieChart data={pieChartData?.filter(dt => dt?.name !== "All" || dt?.status !== "0")} setStatus={setActiveStatus} />
             </div>
           )}
         </div>

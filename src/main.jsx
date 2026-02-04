@@ -8,7 +8,7 @@ import UnifiedContextApi from './context/UnifiedContext.jsx'
 import { BrowserRouter } from 'react-router-dom'
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
+  // <StrictMode>
     <BrowserRouter>
       <UnifiedContextApi>
         <Provider store={store}>
@@ -16,5 +16,5 @@ createRoot(document.getElementById('root')).render(
         </Provider>
       </UnifiedContextApi>
     </BrowserRouter>
-  </StrictMode>,
+  // </StrictMode>,
 )
