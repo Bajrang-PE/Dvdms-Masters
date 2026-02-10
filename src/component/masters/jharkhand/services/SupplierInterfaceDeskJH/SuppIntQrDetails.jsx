@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getSuppIntDeskDeliveryDetails, getSuppIntDeskQRBatchDetails } from '../../../../../api/Jharkhand/services/SupplierInterfaceDeskAPI_JH';
 import { hidePopup } from '../../../../../features/commons/popupSlice';
 import ReactDataTable from '../../../../commons/ReactDataTable';
+import BottomButtons from '../../../../commons/BottomButtons';
 
 const SuppIntQrDetails = (props) => {
     const { selectedData, actionType } = props;
@@ -297,26 +298,7 @@ const SuppIntQrDetails = (props) => {
                 />
             </div>
 
-            <div className="bankmaster__container-controls">
-                <button
-                    className="bankmaster__container-controls-btn"
-                // onClick={handleChange}
-                >
-                    Save
-                </button>
-                <button
-                    className="bankmaster__container-controls-btn"
-                // onClick={handleChange}
-                >
-                    Reset
-                </button>
-                <button
-                    className="bankmaster__container-controls-btn"
-                    onClick={handleClose}
-                >
-                    Close
-                </button>
-            </div>
+            <BottomButtons isSave={true} isReset={true} isClose={true} onSave={null} onReset={null} onClose={handleClose} />
         </>
     )
 }

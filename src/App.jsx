@@ -21,11 +21,10 @@ function App() {
       <Routes>
         <Route path="/" element={<MainPage2 />} />
         <Route path="/home" element={<MainPage2 />} />
-        <Route path="/home/:stateCode" element={<HomeWrapper />} />
 
         {/* Example protected route */}
         <Route element={<PrivateRoute />}>
-          {/* <Route path="/home/:stateCode/menus" element={<MenuPage />} /> */}
+          <Route path="/home/:stateCode" element={<HomeWrapper />} />
           <Route path="/home/:stateCode/menus/*" element={<MasterRoute />} />
         </Route>
 

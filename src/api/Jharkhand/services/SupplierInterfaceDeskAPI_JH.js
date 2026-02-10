@@ -108,10 +108,22 @@ export const getSuppIntDeskDrugCmbData = async (hospitalCode, poNo, storeId, sch
     }
 };
 
-export const getSuppIntDeskDccReqBatchDetails = async (hospitalCode, suppId, poNo, storeId) => {
+export const getSuppIntDeskInvoiceQrPopup = async (poNo, deliveryNo, scheduleNo, poStoreId) => {
     try {
         const response = await fetchData(
-            `/api/v1/supplier-interface-desk/dcc-req-dtl?hospCode=${hospitalCode}&suppId=${suppId}&poNo=${poNo}&poStoreId=${storeId}`
+            `/api/v1/supplier-interface-desk/pop-on-supp-challan-no?deliveryNo=${deliveryNo}&poStoreId=${poStoreId}&scheduleNo=${scheduleNo}&poNo=${poNo}`
+        );
+        return response.data;
+    } catch (err) {
+        console.error("Error fetching store name : ", err);
+        throw err;
+    }
+};
+
+export const getSuppIntDeskDccReqBatchDetails = async (hospitalCode, suppId, poNo, storeId, itemBrandId) => {
+    try {
+        const response = await fetchData(
+            `/api/v1/supplier-interface-desk/dcc-req-dtl?hospCode=${hospitalCode}&suppId=${suppId}&poNo=${poNo}&poStoreId=${storeId}&itemBrandId=${itemBrandId}`
         );
         return response.data;
     } catch (err) {
@@ -181,10 +193,11 @@ export const fetchSuppIntDeskItemDetails = async (data) => {
     }
 };
 
-export const getSuppIntDeskPopUpSuppInvDetails = async (deliveryNo, poStoreId) => {
+
+export const getSuppIntDeskBankDetails = async (hospCode, suppId) => {
     try {
         const response = await fetchData(
-            `/api/v1/supplier-interface-desk/pop-on-supp-challan-no?deliveryNo=${deliveryNo}&poStoreId=${poStoreId}&scheduleNo=1&poNo=10282000004`
+            `/api/v1/supplier-interface-desk/bank-dtl?hospCode=${hospCode}&suppId=${suppId}`
         );
         return response.data;
     } catch (err) {
@@ -193,10 +206,10 @@ export const getSuppIntDeskPopUpSuppInvDetails = async (deliveryNo, poStoreId) =
     }
 };
 
-export const getSuppIntDeskBankDetails = async (hospCode, suppId) => {
+export const addSuppIntDeskDccReqDetail = async (data) => {
     try {
-        const response = await fetchData(
-            `/api/v1/supplier-interface-desk/bank-dtl?hospCode=${hospCode}&suppId=${suppId}`
+        const response = await fetchPostData(
+            `/api/v1/supplier-interface-desk/save-dcc-req-dtl`, data
         );
         return response.data;
     } catch (err) {
@@ -234,6 +247,32 @@ export const addNewBatchDetails = async (data) => {
     try {
         const response = await fetchPostFormData(
             `/api/v1/supplier-interface-desk/save-batch-details`,
+            data
+        );
+        return response?.data;
+    } catch (error) {
+        console.error("Error adding branch:", error);
+        throw error;
+    }
+};
+
+export const addSuppIntDeskBillDetails = async (data) => {
+    try {
+        const response = await fetchPostFormData(
+            `/api/v1/supplier-interface-desk/save-bill-dtl`,
+            data
+        );
+        return response?.data;
+    } catch (error) {
+        console.error("Error adding branch:", error);
+        throw error;
+    }
+};
+
+export const addSuppIntDeskDeliveryDetails = async (data) => {
+    try {
+        const response = await fetchPostFormData(
+            `/api/v1/supplier-interface-desk/save-delivery-dtl`,
             data
         );
         return response?.data;

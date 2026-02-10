@@ -1,5 +1,4 @@
 export function parseDate(value) {
-  console.log("Trying to parse", value);
 
   const date = value instanceof Date ? value : new Date(value);
 

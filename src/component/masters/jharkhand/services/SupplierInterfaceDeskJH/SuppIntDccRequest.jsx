@@ -1,136 +1,307 @@
-import React, { useEffect, useState } from 'react'
-import ReactDataTable from '../../../../commons/ReactDataTable'
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import ReactDataTable from '../../../../commons/ReactDataTable';
 import { useDispatch, useSelector } from 'react-redux';
 import InputBox from '../../../../commons/InputBox';
 import { hidePopup } from '../../../../../features/commons/popupSlice';
-import { getSuppIntDeskDccReqBatchDetails, getSuppIntDeskDeliveryDetails } from '../../../../../api/Jharkhand/services/SupplierInterfaceDeskAPI_JH';
+import { addSuppIntDeskDccReqDetail, getSuppIntDeskDccReqBatchDetails } from '../../../../../api/Jharkhand/services/SupplierInterfaceDeskAPI_JH';
+import BottomButtons from '../../../../commons/BottomButtons';
 
-const SuppIntDccRequest = (props) => {
-    const { selectedData, actionType } = props;
 
+const QuantityCell = React.memo(
+    ({ row, index, isSelected, value, onChange, handleSupplyQtyBlur }) => {
+        const defaultQty =
+            row?.supp_qty === "" ||
+                row?.supp_qty === "NA" ||
+                row?.supp_qty == 0
+                ? 0
+                : row?.supp_qty;
+
+        console.log("index", value)
+
+        return (
+            <InputBox
+                type="text"
+                defaultValue={isSelected ? value === "NA" ? 0 : value ?? defaultQty : defaultQty}
+                disabled={!isSelected}
+                // onChange={(e) => onChange(index, e.target.value)}
+                onBlur={(e) => handleSupplyQtyBlur(index, e.target.value)}
+
+            />
+        );
+    }
+);
+
+const DccBatchTable = React.memo(({
+    data, selectedData, setPoDccQtyFlag, setSelectedRowData
+}) => {
+
+    const [selectedRows, setSelectedRows] = useState([]);
+
+    const handleQuantityChange = useCallback((targetIndex, value) => {
+        setSelectedRows(prev =>
+            prev.map(item =>
+                item.index === targetIndex
+                    ? { ...item, supp_qty: value }
+                    : item
+            )
+        );
+    }, []);
+
+    console.log('selectedRows', selectedRows)
+    const handleRowSelect = (index, row, e) => {
+        setSelectedRows(prev => {
+            const exists = prev.find(item => item.index == index);
+
+            if (exists) {
+                return prev.filter(item => item.index !== index);
+            }
+
+            return [...prev, { ...row, index }];
+        });
+    };
+
+
+    const handleSupplyQtyBlur = (index, value,) => {
+        const totalPoQty = Number(selectedData[0]?.order_quantty || 0);
+        const currentDccQty = Number(selectedData[0]?.totalpodccqty || 0);
+        let isValid = true;
+
+        const updatedList = selectedRows.map(item =>
+            item.index === index
+                ? { ...item, supp_qty: Number(value) || 0 }
+                : item
+        );
+
+        const totalSuppliedQty = updatedList.reduce(
+            (sum, item) => sum + Number(item.supp_qty || 0),
+            0
+        );
+
+        const availableQty = totalPoQty - currentDccQty;
+
+        // DCC validation
+        if (totalSuppliedQty > availableQty) {
+            alert(
+                `Total Quantity Can't be Greater than Current DCC [ ${availableQty} ] Quantity!!!`
+            );
+            isValid = false;
+            setSelectedRows(prev =>
+                prev.map(item =>
+                    item.index === index
+                        ? { ...item, supp_qty: 0 }
+                        : item
+                )
+            );
+            const arr = selectedRows?.map(item => item.index === index ? { ...item, supp_qty: isValid ? value : 0 } : item);
+            setSelectedRowData(arr);
+            return;
+        }
+
+        // PO validation
+        if (totalSuppliedQty > totalPoQty) {
+            alert(
+                `Total Quantity Can't be Greater than PO Order [ ${totalPoQty} ] Quantity!!!`
+            );
+            isValid = false;
+            setSelectedRows(prev =>
+                prev.map(item =>
+                    item.index === index
+                        ? { ...item, supp_qty: 0 }
+                        : item
+                )
+            );
+            const arr = selectedRows?.map(item => item.index === index ? { ...item, supp_qty: 0 } : item);
+            setSelectedRowData(arr);
+            return;
+        }
+
+        console.log('object')
+        setSelectedRows(prev =>
+            prev.map(item =>
+                item.index === index
+                    ? { ...item, supp_qty: isValid ? value : 0 }
+                    : item
+            )
+        );
+        const arr = selectedRows?.map(item => item.index === index ? { ...item, supp_qty: value } : item);
+        setSelectedRowData(arr);
+
+        // Flag update
+        setPoDccQtyFlag(
+            totalSuppliedQty === totalPoQty ? 1 : 0
+        );
+    };
+
+
+    const columns = useMemo(() => [
+        {
+            name: <input type="checkbox" disabled className="form-check-input" />,
+            width: "5%",
+            cell: (row, index) => (
+                <input
+                    type="checkbox"
+                    checked={selectedRows.some(dt => dt?.index === index)}
+                    onChange={(e) => handleRowSelect(index, row, e)}
+                />
+            )
+        },
+        {
+            name: "Authority Name",
+            selector: row => row?.store_name,
+            sortable: true,
+            wrap: true
+        },
+        {
+            name: "Batch Name",
+            selector: row => row?.hststr_batch_no,
+            sortable: true,
+            wrap: true
+        },
+        {
+            name: "MFG Date",
+            selector: row => row?.manuf_date,
+            sortable: true,
+            wrap: true
+        },
+        {
+            name: "Expiry Date",
+            selector: row => row?.expiry_date,
+            sortable: true,
+            wrap: true
+        },
+        {
+            name: "Shelf Life",
+            selector: row => row?.shelf_life,
+            sortable: true,
+            wrap: true
+        },
+        {
+            name: "In-House Test Report",
+            selector: row => row?.file_name,
+            width: "20%",
+            cell: (row) => (
+                <span
+                    style={{ color: 'blue', cursor: 'pointer' }}
+                    onClick={() => alert('pending')}
+                >
+                    {row?.file_name}
+                </span>
+            )
+        },
+        {
+            name: "Quantity",
+            sortable: false,
+            cell: (row, index) => (
+                <QuantityCell
+                    row={row}
+                    index={index}
+                    isSelected={selectedRows.some(dt => dt?.index === index)}
+                    value={selectedRows?.find(dt => dt?.index === index)?.supp_qty}
+                    onChange={handleQuantityChange}
+                    handleSupplyQtyBlur={handleSupplyQtyBlur}
+                />
+            )
+        }
+    ], [selectedRows]);
+
+    return (
+        <ReactDataTable
+            title=""
+            column={columns}
+            data={data}
+            isSearchReq={false}
+            isPagination={false}
+        />
+    );
+});
+
+
+const RemarksBox = React.memo(({ value, onChange }) => (
+    <div className="pt-4 px-8">
+        <label className="employeeMaster__label">Remarks :</label>
+        <textarea
+            className="rateContractAddJHK__input"
+            placeholder="Enter here..."
+            defaultValue={value}
+            onBlur={onChange}
+        />
+    </div>
+));
+
+
+const SuppIntDccRequest = ({ selectedData }) => {
+
+    const dispatch = useDispatch();
     const { value: supplierID, label: supplierName } = useSelector(
-        (state) => state.jhMst.supplierID
+        state => state.jhMst.supplierID
     );
 
-    const SEAT_ID = 14462;
-    const dispatch = useDispatch();
     const [poDetailsList, setPoDetailsList] = useState([]);
-    const [poDetails, setPoDetails] = useState([]);
-    const [values, setValues] = useState({ suppName: "", poType: "", poGenPer: "", poDate: "", PoNumber: "", storeId: "", itemName: "", poOrderQty: "", remarks: "" });
+    const [poDetails, setPoDetails] = useState({});
+    const [remarks, setRemarks] = useState("");
+    const [poDccQtyFlag, setPoDccQtyFlag] = useState(0);
+
+    const [selectedRowData, setSelectedRowData] = useState([]);
 
     useEffect(() => {
-        if (selectedData?.length > 0) {
-            setValues({
-                ...values,
-                suppName: supplierName,
-                poType: selectedData[0]?.sstnum_potype_id,
-                poDate: selectedData[0]?.po_date,
-                poGenPer: selectedData[0]?.sstnum_potype_id,
-                PoNumber: selectedData[0]?.hstnum_po_no,
-                storeId: selectedData[0]?.hstnum_store_id,
-                poOrderQty: selectedData[0]?.order_quantty,
-            })
-        }
-        getDccReqDetails(supplierID, selectedData[0]?.hstnum_po_no, selectedData[0]?.hstnum_store_id);
-    }, [selectedData])
+        if (!selectedData?.length) return;
 
-    const getDccReqDetails = (supp, poNum, poStId) => {
-        getSuppIntDeskDccReqBatchDetails(998, supp, poNum, poStId)?.then((res) => {
+        const row = selectedData[0];
+
+        getSuppIntDeskDccReqBatchDetails(
+            998,
+            supplierID,
+            row?.hstnum_po_no,
+            row?.hstnum_store_id,
+            row?.hstnum_itembrand_id
+        ).then(res => {
             if (res?.status === 1) {
-                console.log('res', res)
-                setPoDetails(res?.data?.poDetails);
-                setPoDetailsList(res?.data?.batchList);
-            }else{
-                setPoDetailsList([]);
+                setPoDetails(res?.data?.poDetails || {});
+                setPoDetailsList(res?.data?.batchList || []);
+            } else {
                 setPoDetails({});
+                setPoDetailsList([]);
             }
+        });
+
+    }, [selectedData, supplierID]);
+
+    const handleRemarksChange = useCallback((e) => {
+        setRemarks(e.target.value);
+    }, []);
+
+    const handleClose = () => dispatch(hidePopup());
+
+    const handleSaveDccRequest = () => {
+        const val = {
+            gnumHospitalCode: 998,
+            hstnumPoNo: selectedData[0]?.hstnum_po_no,
+            poDccQtyFlag: poDccQtyFlag,
+            dccSiDTO: selectedRowData?.map((dt) => ({
+                batchNo: dt?.hststr_batch_no,
+                supplierId: dt?.hstnum_supplier_id,
+                itemBrandId: dt?.hstnum_itembrand_id,
+                poNo: dt?.hstnum_po_no || selectedData[0]?.hstnum_po_no,
+                supplyOrderQty: parseInt(dt?.supp_qty),
+                manufDate: new Date(dt?.manuf_date),
+                expiryDate: new Date(dt?.expiry_date),
+                shelfLife: dt?.shelf_life,
+                fileName: dt?.file_name
+            }))
+        }
+
+        addSuppIntDeskDccReqDetail(val)?.then((res) => {
+            console.log('res', res)
         })
     }
 
-    const poDetailsCols = [
-        {
-            name: <input
-                type="checkbox"
-                disabled={true}
-                className="form-check-input log-select text-start"
-            />,
-            cell: (row, index) =>
-                <div style={{ position: 'absolute', top: 4, left: 10 }}>
-                    <span className="btn btn-sm text-white px-1 py-0 mr-1" >
-                        <input
-                            type="checkbox"
-                        // checked={selectedRowId?.index === index}
-                        // onChange={(e) => { handleRowSelect(row, index) }}
-                        />
-                    </span>
-                </div>,
-            width: "5%"
-        },
-        {
-            name: (<span>Authority Name</span>),
-            selector: row => row[0],
-            sortable: true,
-            wrap: true,
-            // width: "20%"
-        },
-        {
-            name: (<span>Batch Name</span>),
-            selector: row => row[9],
-            sortable: true,
-            wrap: true,
-        },
-        {
-            name: (<span>MFG Date</span>),
-            selector: row => row[1]?.split('#')[0],
-            sortable: true,
-            wrap: true,
-        },
-        {
-            name: (<span>Expiry Date</span>),
-            selector: row => row[1]?.split('#')[1],
-            sortable: true,
-            wrap: true,
-        },
-        {
-            name: (<span>Shelf Life</span>),
-            selector: row => row[1]?.split('#')[4],
-            sortable: true,
-            wrap: true,
-        },
-        {
-            name: (<span>In-House Test Report</span>),
-            selector: row => row[1]?.split('#')[0] - row[1]?.split('#')[1],
-            sortable: true,
-            wrap: true,
-        },
-        {
-            name: (<span>Quantity</span>),
-            cell: (row, index) =>
-                <div style={{ position: 'absolute', top: 3, left: 0 }}>
-                    <InputBox
-                        id="orderQuantiy"
-                        className=""
-                        type="text"
-                        name={"orderQuantiy"}
-                        placeholder=""
-                    // value={orderQuantity[index] || ""}
-                    // disabled={selectedRowId?.index !== index}
-                    // onChange={(e) => { handleQuantityChange(index, e?.target?.value); }}
-                    // onBlur={handleTotalQuantity}
-                    />
-
-                </div>,
-            sortable: false,
-        },
-    ]
-
-    function handleClose() {
-        dispatch(hidePopup());
-    }
+    console.log('selectedData', selectedData)
+    console.log('selectedRowData', selectedRowData)
 
     return (
         <>
             <h3 className="employeeMaster__heading">Dcc Request</h3>
+
             <div className="rateContractAddJHK__container mb-2">
                 <h4 className="rateContractAddJHK__container-heading">
                     Supplier Details
@@ -157,7 +328,7 @@ const SuppIntDccRequest = (props) => {
                 <div>
                     <label htmlFor="" className="rateContractAddJHK__label mb-0">
                         Purchase Order Date :{" "}
-                        <span className="fs-6 fw-normal">{values?.poDate}</span>{" "}
+                        <span className="fs-6 fw-normal">{selectedData[0]?.po_date}</span>{" "}
                     </label>
                 </div>
                 <div>
@@ -170,58 +341,35 @@ const SuppIntDccRequest = (props) => {
                     <label htmlFor="" className="rateContractAddJHK__label mb-0">
                         PO Order Quantity :{" "}
                         <span className="fs-6 fw-normal">
-                            {values?.poOrderQty}
+                            {selectedData[0]?.order_quantty}
                         </span>{" "}
                     </label>
                 </div>
             </div>
-            <div className="">
-                <ReactDataTable
-                    title={''}
-                    column={poDetailsCols}
+            <div style={{ border: "1px solid #cc9966" }}>
+                <DccBatchTable
                     data={poDetailsList}
-                    isSearchReq={false}
-                    isPagination={false}
+                    selectedData={selectedData}
+                    setPoDccQtyFlag={setPoDccQtyFlag}
+                    setSelectedRowData={setSelectedRowData}
+                // selectedRows={selectedRows}
+                // onRowSelect={handleRowSelect}
+                // onQuantityChange={handleQuantityChange}
+                // handleSupplyQtyBlur={handleSupplyQtyBlur}
                 />
             </div>
 
-            <div className='py-2 px-10'>
-                <label htmlFor="remarks" className="employeeMaster__label">
-                    Remarks :
-                </label>
-                <textarea
-                    id="remarks"
-                    className="rateContractAddJHK__input"
-                    type="text"
-                    name={"remarks"}
-                    placeholder="Enter here..."
-                // value={values?.remarks}
-                // onChange={(e) => { dispatcher({ type: "SET_VALUE", name: "remarks", value: e?.target?.value }); }}
-                />
-            </div>
+            <RemarksBox value={remarks} onChange={handleRemarksChange} />
 
-            <div className="bankmaster__container-controls">
-                <button
-                    className="bankmaster__container-controls-btn"
-                // onClick={handleChange}
-                >
-                    Save
-                </button>
-                <button
-                    className="bankmaster__container-controls-btn"
-                // onClick={handleChange}
-                >
-                    Reset
-                </button>
-                <button
-                    className="bankmaster__container-controls-btn"
-                    onClick={handleClose}
-                >
-                    Close
-                </button>
-            </div>
+            <BottomButtons
+                isSave
+                isReset
+                isClose
+                onClose={handleClose}
+                onSave={handleSaveDccRequest}
+            />
         </>
-    )
-}
+    );
+};
 
-export default SuppIntDccRequest
+export default SuppIntDccRequest;

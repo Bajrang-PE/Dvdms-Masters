@@ -7,6 +7,7 @@ import SelectBox from '../../../../commons/SelectBox';
 import { addNewBatchDetails, deleteSuppIntDeskBatchDetail, getSuppIntDeskBatchDtlItemCmb, getSuppIntDeskPrevBatchDtls, modifyPrevBatchDetails } from '../../../../../api/Jharkhand/services/SupplierInterfaceDeskAPI_JH';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+import BottomButtons from '../../../../commons/BottomButtons';
 
 const SuppIntBatchDetails = (props) => {
 
@@ -167,18 +168,19 @@ const SuppIntBatchDetails = (props) => {
         const val = {
             strFileName: "",
             strReportNo: values?.inHouseCdlNo,
-            strReportDate: new Date(values?.reportDate),
+            hstdtReportDate: new Date(values?.reportDate),
             gnumHospitalCode: 998,
             strBatchNo: values?.batchNo,
             hstnumItembrandId: values?.itemName?.split("^")[0],
             hstnumSupplierId: supplierID,
 
-            strExpiryDate: new Date(values?.expiryDate),
-            strManufactureDate: values?.mfgDate,
+            hstdtExpiryDate: new Date(values?.expiryDate),
+            hstdtManufDate: new Date(values?.mfgDate),
             strItemManufacturerId: values?.manufacName,
-            strShortShelfLife: values?.itemName?.split("^")[3],  
+            strShortShelfLife: values?.itemName?.split("^")[3],
             isMdApprove: values?.mdApproveSpeCaseCheck,
-            strMdApprovalDate: values?.mdApprovalDate
+            strMdApprovalDate: new Date(values?.mdApprovalDate)
+
 
         }
         console.log('val', val)
@@ -199,7 +201,7 @@ const SuppIntBatchDetails = (props) => {
 
         addNewBatchDetails(formData)?.then((data) => {
             if (data?.status === 1) {
-                alert('Rate Contract Added Successfully');
+                alert('Added Successfully');
                 getPrevBatchDetails(supplierID, values?.itemName);
                 // dispatch(hidePopup());
             } else {
@@ -367,7 +369,7 @@ const SuppIntBatchDetails = (props) => {
     }
 
     console.log('values', values)
-    console.log('selectedRow', selectedRow)
+    console.log('selectedRow', prevBatchDetailsListData?.find(dt => dt?.hststr_batch_no == "TEST201BG"))
 
     return (
         <>
@@ -642,26 +644,8 @@ const SuppIntBatchDetails = (props) => {
 
                 </div>
             }
-            <div className="bankmaster__container-controls">
-                <button
-                    className="bankmaster__container-controls-btn"
-                    onClick={handleSave}
-                >
-                    Save
-                </button>
-                <button
-                    className="bankmaster__container-controls-btn"
-                // onClick={handleChange}
-                >
-                    Reset
-                </button>
-                <button
-                    className="bankmaster__container-controls-btn"
-                    onClick={handleClose}
-                >
-                    Close
-                </button>
-            </div>
+
+            <BottomButtons isSave={true} isReset={true} isClose={true} onSave={handleSave} onReset={null} onClose={handleClose} />
         </>
     )
 }

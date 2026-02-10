@@ -3,7 +3,7 @@ import { FaCalendarDays } from 'react-icons/fa6';
 import { Link } from 'react-router-dom';
 import GlobalModal from '../../commons/GlobalModal';
 
-const GalleryJH = () => {
+const GalleryJH = ({ title }) => {
 
     const [showModal, setShowModal] = useState(false);
     const [item, setItem] = useState({});
@@ -46,7 +46,7 @@ const GalleryJH = () => {
         <>
             <div className="bg-white rounded-lg shadow-md p-6" id='galleryjh'>
                 <div className="text-left mb-8">
-                    <h2 className="text-3xl font-bold text-blue-900 mb-2">Gallery</h2>
+                    <h2 className="text-3xl font-bold text-blue-900 mb-2">{title}</h2>
                     <div className="w-24 h-1.5 bg-gradient-to-r from-blue-400 to-indigo-600 rounded-full"></div>
                 </div>
 

@@ -30,17 +30,23 @@ const JharkhandHomePage = () => {
         { to: '', icon: <FaUserInjured />, label: 'Patient Complaint', id: 'pateintcompjh' },
     ];
 
+    const aboutData = {
+        title: "Supply of Quality Medicine Transparent Drug Procurement Procedure Upto Date Medicine Inventory.",
+        des: "DVDMS (Drugs and Vaccine Distribution Management System) is a software platform to automate various activities of Directorate General Medical Health, Govt. Of Jharkhand. It comprises of Drug and Vaccine Supply Chain Management that deals with Purchase Order, Inventory Management & Distribution of various drugs etc. Also it helps for managing receipt, Issue, Quality Control, vaccines and other health sector goods that are supplied to States under various disease control programmes.",
+        image: "/jh_about.png"
+    }
+
 
 
     return (
         <section className="page home-page">
             <TopBar title={"JMHIDPCL i-MCS"} subtitle={"Jharkhand Medical & Health Infrastructure Development & Procurement Corporation Ltd."} logoUrl={"/JH_Logo.png"} isEmail={false} isLocation={false} bg={'#00000073'} isHelpDesk={true} />
             <NavBar logoUrl={"/JH_Logo.png"} menuItems={menuItems} />
-            <TopMasterJH />
-            <AboutSection />
+            <TopMasterJH image={"/banner_map_jh.jpg"}/>
+            <AboutSection title={aboutData?.title} description={aboutData?.des} image={aboutData?.image} />
             <FeaturesSectionJH />
             <UsefulLinksJH />
-            <GalleryJH />
+            <GalleryJH title={"Gallery"}/>
             <PatientComplaintFormJH />
             <FooterJH />
         </section>
