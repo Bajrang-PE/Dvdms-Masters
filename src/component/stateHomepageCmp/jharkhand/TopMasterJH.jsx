@@ -1,38 +1,55 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
-const TopMasterJH = () => {
+const TopMasterJH = ({ image }) => {
+  const [animate, setAnimate] = useState(false);
 
-    const [animateAMSCL, setAnimateAMSCL] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setAnimate(true), 300);
+    return () => clearTimeout(timer);
+  }, []);
 
-    useEffect(() => {
-        const timer2 = setTimeout(() => setAnimateAMSCL(true), 400);
+  return (
+    <section className="relative w-full h-[80vh] overflow-hidden">
+      
+      {/* Background Image */}
+      <div
+        className="absolute inset-0 bg-center bg-cover scale-105 animate-[zoom-out_10s_ease-in-out_infinite]"
+        style={{ backgroundImage: `url(${image})` }}
+      />
 
-        return () => {
-            clearTimeout(timer2);
-        };
-    }, []);
+      {/* Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/40 to-black/60" />
 
-    return (
-        <div className="relative w-full h-[80vh] overflow-hidden justify-items-center content-center">
-            <div
-                className={`absolute inset-0 transition-opacity duration-1000 ease-in-out`}
-                style={{
-                    backgroundImage: `url(${'/banner_map_jh.jpg'})`,
-                    backgroundPosition: 'center center',
-                    backgroundSize: 'cover',
-                    backgroundRepeat: 'no-repeat',
-                    animation: 'zoom-out 8s ease-in-out infinite'
-                }}
-            />
+      {/* Content */}
+      <div className="relative z-10 flex items-center justify-center h-full px-4">
+        <div
+          className={`h-75 max-w-lg w-full rounded-2xl backdrop-blur-xl bg-white/15 border border-white/20 text-white p-4 shadow-2xl transition-all duration-1000 ease-out
+            ${animate ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}
+          `}
+        >
+          <h2 className="text-3xl font-semibold tracking-wide text-center mb-4">
+            Circulars
+          </h2>
 
-            <div
-                className={`h-75 w-50 bg-[#33384ad6] text-white p-4 z-[10] transition-all duration-1000 ease-out translate-y-0 ${animateAMSCL ? 'translate-y-0 opacity-100' : '-translate-y-10 opacity-0'}`}
-            >
-                <h2 className="text-2xl font-bold mb-3 text-center">CIRCULARS</h2>
-                <small className="px-2 py-1 rounded">No Circulars</small>
+          <div className="flex flex-col items-center gap-3">
+
+            <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full text-sm">
+              <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
+              No circulars available
             </div>
+
+            {/* Optional button (future ready) */}
+            {/* <button
+              disabled
+              className="mt-4 px-6 py-2 rounded-lg bg-white/20 text-white/70 cursor-not-allowed text-sm"
+            >
+              View Archive
+            </button> */}
+          </div>
         </div>
-    );
+      </div>
+    </section>
+  );
 };
 
 export default TopMasterJH;

@@ -12,6 +12,8 @@ const InputBox = ({
   error = "",
   className = "",
   inputClass = "",
+  ref,
+  defaultValue
 }) => {
   return (
     <div className={`mb-2 ${inputClass}`}>
@@ -25,6 +27,8 @@ const InputBox = ({
         required={required}
         onChange={onChange}
         onBlur={onBlur}
+        ref={ref}
+        defaultValue={defaultValue}
         className={`w-full px-4 py-1 border ${error ? "ring-1 ring-red-500" : "ring-gray-500"
           } rounded-lg focus:outline-none focus:border-blue-500 transition-all duration-200 ${className}`}
       />

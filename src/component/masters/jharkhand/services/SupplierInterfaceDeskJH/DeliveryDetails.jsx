@@ -1,15 +1,14 @@
-import React, { useEffect, useReducer, useState } from 'react'
+import React, { useEffect, useMemo, useReducer, useState } from 'react'
 import { ComboDropDown, DatePickerComponent, InputField } from '../../../../commons/FormElements';
 import ReactDataTable from '../../../../commons/ReactDataTable';
 import { useDispatch, useSelector } from 'react-redux';
 import { hidePopup } from '../../../../../features/commons/popupSlice';
-import { deleteSuppIntDeskDelDetail, fetchSuppIntDeskItemDetails, getSuppIntDeskConsigneeWrhsCmb, getSuppIntDeskDeliveryDetails, getSuppIntDeskDrugCmbData, getSuppIntDeskPrevBatchDtls, getSuppIntDeskScheduleNoCmb, getSuppIntDeskVeiwDeldetail } from '../../../../../api/Jharkhand/services/SupplierInterfaceDeskAPI_JH';
+import { addSuppIntDeskDeliveryDetails, deleteSuppIntDeskDelDetail, fetchSuppIntDeskItemDetails, getSuppIntDeskConsigneeWrhsCmb, getSuppIntDeskDeliveryDetails, getSuppIntDeskDrugCmbData, getSuppIntDeskInvoiceQrPopup, getSuppIntDeskScheduleNoCmb, getSuppIntDeskVeiwDeldetail } from '../../../../../api/Jharkhand/services/SupplierInterfaceDeskAPI_JH';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAdd, faEye, faMinus, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { Modal } from 'react-bootstrap';
-import { MasterViewModal } from '../../MasterViewModal';
-import MiniTable from '../../../../commons/Minitable';
 import { isISODateString, parseDate } from '../../../../commons/utilFunctions';
+import BottomButtons from '../../../../commons/BottomButtons';
 
 const DeliveryDetails = (props) => {
 
@@ -41,9 +40,12 @@ const DeliveryDetails = (props) => {
         transMobileNo: "",
 
         drugName: "",
-
         storeId: "",
-        remarks: ""
+        remarks: "",
+
+        invoiceCopy: "",
+        ewayBill: "",
+        lrCopy: ""
     }
 
     const reducerActions = (state, action) => {
@@ -72,11 +74,13 @@ const DeliveryDetails = (props) => {
     const [unitDrpData, setUnitDrpData] = useState([]);
     const [drugNameDrpData, setDrugNameDrpData] = useState([]);
     const [viewModal, setViewModal] = useState(false);
+    const [viewQrModal, setViewQrModal] = useState(false);
     const [viewDetails, setViewDetails] = useState([]);
     const [viewStatus, setViewStatus] = useState('view');
     const [selectedRows, setSelectedRows] = useState([]);
     const [clickedRow, setClickedrow] = useState();
     const [isViewBalQtyModal, setIsViewBalQtyModal] = useState(false);
+    const [qrPopupData, setQrPopupData] = useState([]);
 
 
     const [rows, setRows] = useState([
@@ -203,11 +207,25 @@ const DeliveryDetails = (props) => {
                 const drpData = res?.data?.map((dt) => ({
                     value: dt?.hstnum_item_id,
                     label: dt?.item_name,
-                    itemBrandId: dt?.hstnum_itembrand_id
+                    itemBrandId: dt?.hstnum_itembrand_id,
+                    reqId: dt?.batch_req
                 }))
                 setDrugNameDrpData(drpData);
             } else {
                 setDrugNameDrpData([]);
+            }
+        })
+    }
+
+    const getQrPopupDetails = (row) => {
+        getSuppIntDeskInvoiceQrPopup(row?.hstnumPoNo, row?.hstnumDeliveryNo, row?.hstnumScheduleNo, row?.hstnumStoreId)?.then((res) => {
+            if (res?.status === 1) {
+                console.log('res', res)
+                setQrPopupData(res?.data);
+                setViewQrModal(true);
+            } else {
+                setQrPopupData([]);
+                setViewQrModal(false);
             }
         })
     }
@@ -247,7 +265,7 @@ const DeliveryDetails = (props) => {
         dispatch(hidePopup());
     }
 
-    const columns = [
+    const columns = useMemo(() => [
         {
             name: (<span className='text-center'>Schedule No.</span>),
             selector: row => row?.hstnumScheduleNo,
@@ -275,7 +293,7 @@ const DeliveryDetails = (props) => {
             cell: (row, index) =>
                 <span
                     style={{ color: 'blue', cursor: 'pointer' }}
-                    onClick={() => alert('bbb')}
+                    onClick={() => getQrPopupDetails(row)}
                 >
                     {row?.hststrSuppReceiptNo}
                 </span>
@@ -329,7 +347,7 @@ const DeliveryDetails = (props) => {
             width: "8%"
         },
 
-    ]
+    ], []);
 
     const drugColumns = [
         {
@@ -401,7 +419,7 @@ const DeliveryDetails = (props) => {
     const handleAddRow = () => {
 
         const newRow = {
-            batchNo: "", menuFacName: "", mfgDate: "", expDate: "", unit: "", suppQtyLimit: "", NPCDCS: "", totalQty: ''
+            batchNo: "", menuFacName: "", mfgDate: "", expDate: "", unit: "", suppQtyLimit: "", NPCDCS: "", totalQty: '', prgId: ""
         };
         setRows([...rows, newRow]);
     };
@@ -449,7 +467,9 @@ const DeliveryDetails = (props) => {
                 supplierId,
                 requestId,
                 balanceQty: itemDetails?.balance_qty,
-                drugName: drugNameDrpData?.find(dt => dt?.value == values?.drugName)?.label
+                drugName: drugNameDrpData?.find(dt => dt?.value == values?.drugName)?.label,
+                itemId: `${values?.drugName}^${drugNameDrpData?.find(dt => dt?.value == values?.drugName)?.itemBrandId}^${supplierName}^${drugNameDrpData?.find(dt => dt?.value == values?.drugName)?.reqId}`,
+                prgId: itemDetails?.hstnum_programme_id
             };
 
             setRows(updatedRows);
@@ -459,7 +479,6 @@ const DeliveryDetails = (props) => {
             setRows(updatedRows);
         }
     };
-
 
     const viewRecord = (row, mode) => {
         setClickedrow(row);
@@ -499,7 +518,9 @@ const DeliveryDetails = (props) => {
 
     const onCloseModal = () => {
         setViewModal(false);
+        setViewQrModal(false);
         setIsViewBalQtyModal(false);
+
     }
 
     const handleRowSelect = (rowId) => {
@@ -510,6 +531,66 @@ const DeliveryDetails = (props) => {
             return [...prev, rowId];
         });
     };
+
+    const saveDeliveryDetails = () => {
+        const val = {
+            strPrgDtl: addedRows?.map((rw, index) => `${rw?.prgId}@${rw?.NPCDCS}`),
+            strHiddenValue: addedRows?.map((rw, index) => `${rw?.itemId}^${rw?.batchNoName}^${rw?.mfgDate}^${rw?.expDate}^${rw?.unit}^${rw?.balanceQty}^${rw?.NPCDCS}^${rw?.supplierId}^0^${rw?.requestId}`),
+            gnumHospitalCode: 998,
+            hstnumDeliveryNo: "",
+            hstnumScheduleNo: values?.scheduleNo?.split("^")[0],
+            hstnumPoNo: poDetails?.hstnum_po_no,
+            deliveryStoreId: values?.consigneeWarehouse,
+            hstnumStoreId: values?.storeId,
+            poStoreId: values?.storeId,
+            strSupplierReceiptNo: values?.challanInvoiceNo,
+            hstdtSupplierReceiptDate: new Date(values?.challanInvoiceDate),
+            hstnumDeliveryModeId: values?.deliveryMode,
+            strTransporterName: values?.transName,
+            strLorryNo: values?.vehicleNumber,
+            strRemarks: "",
+            gnumSeatId: SEAT_ID,
+            transporterMobNo: values?.transMobileNo,
+            hstnumShortShelfLife: poDetails?.hstnum_shelf_life,
+            hstnumItembrandId: drugNameDrpData?.find(dt => dt?.value == values?.drugName)?.itemBrandId,
+            hstnumProgrammeId: poDetails?.hstnum_programme_id,
+            hstnumExpectedDeliveryDays: values?.expDelDays,
+        }
+
+        console.log('val', val);
+
+        const formData = new FormData();
+
+        formData.append("rawJson", JSON.stringify(val));
+
+        const fileKeys = ["lrCopyFile", "ewayBillFile", "invoiceCopyFile"];
+
+        fileKeys.forEach((key) => {
+            const file = values?.[key];
+            if (file) {
+                formData.append("files", file, file.name);
+            } else {
+                formData.append("files", new Blob([]), "");
+            }
+        });
+
+        for (const [key, value] of formData.entries()) {
+            if (value instanceof File) {
+                console.log(key, {
+                    name: value.name,
+                    size: value.size,
+                    type: value.type
+                });
+            } else {
+                console.log(key, value);
+            }
+        }
+
+
+        addSuppIntDeskDeliveryDetails(formData)?.then((res) => {
+            console.log('res', res)
+        })
+    }
 
     const balQtyModalColumns = [
         { label: 'Ordered Qty. [A] :', key: 'hstnum_order_qty' },
@@ -523,7 +604,13 @@ const DeliveryDetails = (props) => {
         { label: 'Balanced Qty. [(A-B)-(C-D-E-H)] :', key: 'balance_qty' },
     ]
 
-    console.log('itemSetails', itemDetails)
+    const onFileChange = (e) => {
+        const { name, files } = e?.target;
+        dispatcher({ type: "SET_VALUE", name: name, value: files[0] });
+    };
+
+    console.log('values', values)
+    console.log('addedRows', addedRows)
 
     return (
         <>
@@ -710,8 +797,9 @@ const DeliveryDetails = (props) => {
                     <input
                         className="rateContractAddJHK__fileUpload"
                         type="file"
+                        name='lrCopy'
                         placeholder='Choose file...'
-                    // onChange={onFileChange}
+                        onChange={onFileChange}
                     />
                 </div>
                 <div>
@@ -721,8 +809,9 @@ const DeliveryDetails = (props) => {
                     <input
                         className="rateContractAddJHK__fileUpload"
                         type="file"
+                        name='ewayBill'
                         placeholder='Choose file...'
-                    // onChange={onFileChange}
+                        onChange={onFileChange}
                     />
                 </div>
                 <div>
@@ -732,8 +821,9 @@ const DeliveryDetails = (props) => {
                     <input
                         className="rateContractAddJHK__fileUpload"
                         type="file"
+                        name='invoiceCopy'
                         placeholder='Choose file...'
-                    // onChange={onFileChange}
+                        onChange={onFileChange}
                     />
                 </div>
 
@@ -907,27 +997,7 @@ const DeliveryDetails = (props) => {
                 <ReactDataTable title={'drugDetails'} column={drugColumns} data={addedRows} isSearchReq={false} isPagination={false} />
             </div>
 
-
-            <div className="bankmaster__container-controls">
-                <button
-                    className="bankmaster__container-controls-btn"
-                    onClick={handleChange}
-                >
-                    Save
-                </button>
-                <button
-                    className="bankmaster__container-controls-btn"
-                    onClick={handleChange}
-                >
-                    Reset
-                </button>
-                <button
-                    className="bankmaster__container-controls-btn"
-                    onClick={handleClose}
-                >
-                    Close
-                </button>
-            </div>
+            <BottomButtons isSave={true} isReset={true} isClose={true} onSave={saveDeliveryDetails} onReset={null} onClose={handleClose} />
 
             {viewModal &&
                 <Modal show={true} onHide={onCloseModal} size={'xl'} dialogClassName="dialog-min" style={{ zIndex: "1201" }}>
@@ -1007,7 +1077,46 @@ const DeliveryDetails = (props) => {
                         </div>
                     </Modal.Body>
                 </Modal>
+            }
 
+            {viewQrModal &&
+                <Modal show={true} onHide={onCloseModal} size={'lg'} dialogClassName="dialog-min" style={{ zIndex: "1201" }}>
+                    <Modal.Header closeButton className='py-1 px-2 cms-login'>
+                    </Modal.Header>
+                    <Modal.Body className='px-2 py-1'>
+                        <table className="table text-center mb-0 table-bordered" style={{ borderColor: "#23646e" }}>
+                            <thead className="text-white">
+                                <tr className='m-0' style={{ fontSize: "13px", verticalAlign: "middle" }}>
+                                    <th className='p-2'>{'Batch No.'}</th>
+                                    <th className='p-2'>{'Mfg. Date'}</th>
+                                    <th className='p-2'>{'Exp. Date'}</th>
+                                    <th className='p-2'>{'Supplied Qty.'}</th>
+                                    <th className='p-2'>{'QR Code'}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {qrPopupData?.length > 0 && qrPopupData?.map((dt, index) => (
+                                    <tr className='' style={{ fontSize: "12px" }} key={index}>
+                                        <td className='p-2 '>{dt?.hststr_batch_no}</td>
+                                        <td className='p-2'>{dt?.hstdt_manuf_date}</td>
+                                        <td className='p-2'>{dt?.hstdt_expiry_date}</td>
+                                        <td className='p-2'>{dt?.supp_qty}</td>
+                                        <td className='p-2 fw-bolder text-info-emphasis text-center'>
+                                            "Pending qr"
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+
+                        <hr className='my-2' />
+                        <div className='text-center'>
+                            <button className='btn cms-login-btn m-1 btn-sm' onClick={onCloseModal}>
+                                <i className="fa fa-broom me-1"></i> Close
+                            </button>
+                        </div>
+                    </Modal.Body>
+                </Modal>
             }
 
             {isViewBalQtyModal &&

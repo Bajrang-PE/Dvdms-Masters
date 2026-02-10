@@ -1,20 +1,15 @@
 import React, { lazy, Suspense } from "react";
 import { Route, Routes, useParams } from "react-router-dom";
+import { JharkhandFileRoute } from "./Jharkhand/JharkhandFileRoute";
+import { AssamFileRoute } from "./Assam/AssamFileRoute";
+
 const LoadingSpinner = lazy(() => import("../component/commons/LoadingSpinner"));
 const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
-const RateContract = lazy(() => import("../component/masters/assam/services/RateContract"));
-const AssamPrivateRoute = lazy(() => import("./AssamPrivateRoute"));
-const JharkhandPrivateRoute = lazy(() => import("./JharkhandPrivateRoute"));
-const RateContractJH = lazy(() => import("../component/masters/jharkhand/services/RateContract"));
+const AssamPrivateRoute = lazy(() => import("./Assam/AssamPrivateRoute"));
+const JharkhandPrivateRoute = lazy(() => import("./Jharkhand/JharkhandPrivateRoute"));
 const MenuTopBar = lazy(() => import("../component/headers/MenuTopBar"));
-const BankMasterJH = lazy(() => import("../component/masters/jharkhand/admin/lists/BankMasterJH"));
-const BankBranchMasterJH = lazy(() => import("../component/masters/jharkhand/admin/lists/BankBranchMasterJH"));
-const RateContractAddAssam = lazy(() => import("../component/masters/assam/services/RateContract/RateContractAdd"));
-const BankMasterList = lazy(() => import("../component/masters/assam/admin/lists/BankMasterList"));
 const MenuTabBar = lazy(() => import("../component/headers/MenuTabBar"));
 const MenuPage = lazy(() => import("../pages/MenuPage"));
-const SingleProgPoDeskJH = lazy(() => import("../component/masters/jharkhand/services/SingleProgPoDeskJH"));
-const SupplierInterfaceDeskJH = lazy(() => import("../component/masters/jharkhand/services/SupplierInterfaceDeskJH"));
 
 const MasterRoute = () => {
   const { stateCode } = useParams();
@@ -45,32 +40,20 @@ const MasterRoute = () => {
       <Suspense fallback={<LoadingSpinner />}>
         <MenuTabBar />
         <Routes>
-          <Route path="/" element={<MenuPage />} />
+          <Route index element={<MenuPage />} />
 
           {/* ASSAM */}
           {stateCode === "AS" && (
             <Route element={<AssamPrivateRoute />}>
               {/*Services*/}
-              <Route path="/rate-contract" element={<RateContract />} />
-              <Route path="/bank-master" element={<BankMasterList />} />
-              <Route
-                path="/rate-contract/add"
-                element={<RateContractAddAssam />}
-              />
+              {AssamFileRoute}
             </Route>
           )}
 
           {/* JHARKHAND */}
           {stateCode === "JH" && (
             <Route element={<JharkhandPrivateRoute />}>
-              {/* SERVICES */}
-              <Route path="/rate-contract" element={<RateContractJH />} />
-              <Route path="/single-prog-po-desk" element={<SingleProgPoDeskJH />} />
-              <Route path="/supplier-interface-desk" element={<SupplierInterfaceDeskJH />} />
-
-              {/* ADMIN */}
-              <Route path="/bank-master" element={<BankMasterJH />} />
-              <Route path="/bank-branch-master" element={<BankBranchMasterJH />} />
+              {JharkhandFileRoute}
             </Route>
           )}
 
