@@ -144,7 +144,8 @@ const SupplierInterfaceDeskJH = () => {
             { header: "Penalty Amt", field: "hstnum_penelty_amt" },
             { header: "Recovery Amt", field: "hstnum_recovery_amt" },
             { header: "Paid Amount", field: "supplyFlag" },
-        ] : [])
+        ] : []),
+      
     ];
 
     const bankColumns = [
@@ -154,6 +155,7 @@ const SupplierInterfaceDeskJH = () => {
         { label: 'Account Number :', key: 'account_no' },
         { label: 'Bank Address :', key: 'bank_address' },
     ]
+
 
     return (
         <>

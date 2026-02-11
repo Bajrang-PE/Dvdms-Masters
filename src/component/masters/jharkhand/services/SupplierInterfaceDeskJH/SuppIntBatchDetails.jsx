@@ -8,6 +8,7 @@ import { addNewBatchDetails, deleteSuppIntDeskBatchDetail, getSuppIntDeskBatchDt
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 import BottomButtons from '../../../../commons/BottomButtons';
+import { ToastAlert } from '../../../../../utils/Toast';
 
 const SuppIntBatchDetails = (props) => {
 
@@ -119,10 +120,10 @@ const SuppIntBatchDetails = (props) => {
         if (isConfirmed) {
             deleteSuppIntDeskBatchDetail(998, supplierID, values?.itemName?.split("^")[0], row?.hststr_batch_no)?.then((res) => {
                 if (res?.status === 1) {
-                    alert("Batch deleted successfully");
+                    ToastAlert("Batch deleted successfully", 'error');
                     getPrevBatchDetails(supplierID, values?.itemName);
                 } else {
-                    alert(data?.message);
+                    ToastAlert(data?.message, 'error');
                 }
             })
         }
@@ -152,14 +153,13 @@ const SuppIntBatchDetails = (props) => {
 
         modifyPrevBatchDetails(formData)?.then((data) => {
             if (data?.status === 1) {
-                alert('Rate Contract Added Successfully');
+                ToastAlert('Rate Contract Added Successfully', 'success');
                 getPrevBatchDetails(supplierID, values?.itemName);
                 // dispatch(hidePopup());
                 setIsEditMode(false);
             } else {
-                alert(data?.message);
+                ToastAlert(data?.message, 'error');
             }
-            console.log('data', data)
         })
     }
 
@@ -201,11 +201,11 @@ const SuppIntBatchDetails = (props) => {
 
         addNewBatchDetails(formData)?.then((data) => {
             if (data?.status === 1) {
-                alert('Added Successfully');
+                ToastAlert('Added Successfully', 'success');
                 getPrevBatchDetails(supplierID, values?.itemName);
                 // dispatch(hidePopup());
             } else {
-                alert(data?.message);
+                ToastAlert(data?.message, 'error');
             }
             console.log('data', data)
         })

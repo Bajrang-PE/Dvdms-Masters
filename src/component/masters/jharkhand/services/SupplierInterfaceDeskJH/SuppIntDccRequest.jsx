@@ -5,6 +5,7 @@ import InputBox from '../../../../commons/InputBox';
 import { hidePopup } from '../../../../../features/commons/popupSlice';
 import { addSuppIntDeskDccReqDetail, getSuppIntDeskDccReqBatchDetails } from '../../../../../api/Jharkhand/services/SupplierInterfaceDeskAPI_JH';
 import BottomButtons from '../../../../commons/BottomButtons';
+import { ToastAlert } from '../../../../../utils/Toast';
 
 
 const QuantityCell = React.memo(
@@ -81,8 +82,8 @@ const DccBatchTable = React.memo(({
 
         // DCC validation
         if (totalSuppliedQty > availableQty) {
-            alert(
-                `Total Quantity Can't be Greater than Current DCC [ ${availableQty} ] Quantity!!!`
+            ToastAlert(
+                `Total Quantity Can't be Greater than Current DCC [ ${availableQty} ] Quantity!!!`, 'error'
             );
             isValid = false;
             setSelectedRows(prev =>
@@ -99,8 +100,8 @@ const DccBatchTable = React.memo(({
 
         // PO validation
         if (totalSuppliedQty > totalPoQty) {
-            alert(
-                `Total Quantity Can't be Greater than PO Order [ ${totalPoQty} ] Quantity!!!`
+            ToastAlert(
+                `Total Quantity Can't be Greater than PO Order [ ${totalPoQty} ] Quantity!!!`, 'error'
             );
             isValid = false;
             setSelectedRows(prev =>
