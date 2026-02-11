@@ -9,12 +9,12 @@ import { faAdd, faEye, faMinus, faPlus, faTrash } from '@fortawesome/free-solid-
 import { Modal } from 'react-bootstrap';
 import { isISODateString, parseDate } from '../../../../commons/utilFunctions';
 import BottomButtons from '../../../../commons/BottomButtons';
+import { ToastAlert } from '../../../../../utils/Toast';
 
 const DeliveryDetails = (props) => {
 
     const { selectedData, actionType } = props;
 
-    console.log('selectedData', selectedData)
 
     const { value: supplierID, label: supplierName } = useSelector(
         (state) => state.jhMst.supplierID
@@ -47,6 +47,20 @@ const DeliveryDetails = (props) => {
         ewayBill: "",
         lrCopy: ""
     }
+
+    const [errors, setErrors] = useState({
+        expDelDaysErr: "",
+        challanInvoiceNoErr: "",
+        challanInvoiceDateErr: "",
+        deliveryModeErr: "",
+        vehicleNumberErr: "",
+        transNameErr: "",
+        invoiceCopyErr: "",
+        ewayBillErr: "",
+        lrCopyErr: "",
+        drugNameErr: "",
+        addedRowsErr: ""
+    })
 
     const reducerActions = (state, action) => {
         switch (action.type) {
@@ -81,6 +95,7 @@ const DeliveryDetails = (props) => {
     const [clickedRow, setClickedrow] = useState();
     const [isViewBalQtyModal, setIsViewBalQtyModal] = useState(false);
     const [qrPopupData, setQrPopupData] = useState([]);
+    const [deleteBatchErr, setDeleteBatchErr] = useState("");
 
 
     const [rows, setRows] = useState([
@@ -91,7 +106,7 @@ const DeliveryDetails = (props) => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        // const errname = name + "Err";
+        const errName = name + "Err";
         if (name === 'tAndcAccept') {
             dispatcher({ type: "SET_VALUE", name: name, value: e.target.checked });
         } else if (name === "scheduleNo") {
@@ -99,11 +114,11 @@ const DeliveryDetails = (props) => {
         } else {
             dispatcher({ type: "SET_VALUE", name: name, value });
         }
-        // setErrors({ ...errors, [errname]: "" });
+        setErrors({ ...errors, [errName]: "" })
     };
 
     const handleDateChange = (value, fieldName) => {
-        const errname = fieldName + "Err";
+        const errName = fieldName + "Err";
         const formattedDate = value
             .toLocaleDateString("en-GB", {
                 day: "2-digit",
@@ -117,6 +132,7 @@ const DeliveryDetails = (props) => {
             name: fieldName,
             value: formattedDate,
         });
+        setErrors({ ...errors, [errName]: "" })
     };
 
     useEffect(() => {
@@ -188,7 +204,7 @@ const DeliveryDetails = (props) => {
     }
 
     const getConsigneeWrhsDrpData = (poNum, poStId) => {
-        getSuppIntDeskConsigneeWrhsCmb(998, poStId, 10281800001)?.then((res) => {
+        getSuppIntDeskConsigneeWrhsCmb(998, poStId, poNum)?.then((res) => {
             if (res?.status === 1) {
                 const drpData = res?.data?.map((dt) => ({
                     value: dt?.consignee_id,
@@ -220,7 +236,6 @@ const DeliveryDetails = (props) => {
     const getQrPopupDetails = (row) => {
         getSuppIntDeskInvoiceQrPopup(row?.hstnumPoNo, row?.hstnumDeliveryNo, row?.hstnumScheduleNo, row?.hstnumStoreId)?.then((res) => {
             if (res?.status === 1) {
-                console.log('res', res)
                 setQrPopupData(res?.data);
                 setViewQrModal(true);
             } else {
@@ -257,7 +272,6 @@ const DeliveryDetails = (props) => {
                 setUnitDrpData({});
                 setItemDetails([]);
             }
-            console.log('fetchSuppIntDeskItemDetails', res)
         })
     }
 
@@ -432,7 +446,7 @@ const DeliveryDetails = (props) => {
                     .map((r, i) => ({ ...r, columnNo: i + 1 }));
                 setAddedRows(updatedRows);
             } else {
-                alert("No rows available");
+                ToastAlert("No rows available",'error');
             }
         } else {
             if (rows.length > 0) {
@@ -441,7 +455,7 @@ const DeliveryDetails = (props) => {
                     .map((r, i) => ({ ...r, columnNo: i + 1 }));
                 setRows(updatedRows);
             } else {
-                alert("No rows available");
+                ToastAlert("No rows available",'error');
             }
         }
 
@@ -488,6 +502,7 @@ const DeliveryDetails = (props) => {
                 setViewDetails(res?.data)
                 setViewModal(true);
             } else {
+                ToastAlert(res?.message, "error")
                 setViewDetails([])
                 setViewModal(false);
                 setViewStatus('view');
@@ -506,21 +521,77 @@ const DeliveryDetails = (props) => {
             strSeatId: SEAT_ID,
             strMultiRowBatchNo: selectedRows,
             strDccRequestNo: clickedRow?.strDccRequestNo?.toString() || null,
+            strPOStoreId: clickedRow?.hstnumPoStoreId
         }
-        deleteSuppIntDeskDelDetail(val)?.then((res) => {
-            console.log('res', res)
-        })
+
+        if (selectedRows?.length > 0) {
+            deleteSuppIntDeskDelDetail(val)?.then((res) => {
+                if (res?.status === 1) {
+                    ToastAlert(res?.message, "success")
+                    getDeliveryDetails(selectedData[0]?.hstnum_po_no, selectedData[0]?.hstnum_store_id);
+                    onCloseModal();
+                } else {
+                    ToastAlert(res?.message, "error")
+                }
+            })
+        } else {
+            setDeleteBatchErr('Please select atleast one batch')
+
+        }
     }
 
     const addToCart = () => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            const rowNo = i + 1;
+
+            if (!row?.batchNoName) {
+                ToastAlert(`Row ${rowNo}: Please select Batch No`,'error');
+                return;
+            }
+
+            if (!row?.mfgDate) {
+                ToastAlert(`Row ${rowNo}: Manufacturing Date should not empty`,'error');
+                return;
+            }
+
+            if (!row?.expDate) {
+                ToastAlert(`Row ${rowNo}:  Expiry Date should not empty`,'error');
+                return;
+            }
+
+            const expDate = new Date(row.expDate);
+            expDate.setHours(0, 0, 0, 0);
+
+            if (expDate <= today) {
+                ToastAlert(`Row ${rowNo}: Expiry date must be greater than current date`,'error');
+                return;
+            }
+
+            if (!row?.unit) {
+                ToastAlert(`Row ${rowNo}: Please select Unit`,'error');
+                return;
+            }
+
+            if (!row?.NPCDCS) {
+                ToastAlert(`Row ${rowNo}: total quantity should not empty`,'error');
+                return;
+            }
+        }
+
         setAddedRows(rows);
-    }
+    };
+
 
     const onCloseModal = () => {
         setViewModal(false);
         setViewQrModal(false);
         setIsViewBalQtyModal(false);
-
+        setDeleteBatchErr('');
+        setSelectedRows([]);
     }
 
     const handleRowSelect = (rowId) => {
@@ -557,8 +628,6 @@ const DeliveryDetails = (props) => {
             hstnumExpectedDeliveryDays: values?.expDelDays,
         }
 
-        console.log('val', val);
-
         const formData = new FormData();
 
         formData.append("rawJson", JSON.stringify(val));
@@ -574,22 +643,71 @@ const DeliveryDetails = (props) => {
             }
         });
 
-        for (const [key, value] of formData.entries()) {
-            if (value instanceof File) {
-                console.log(key, {
-                    name: value.name,
-                    size: value.size,
-                    type: value.type
-                });
+        addSuppIntDeskDeliveryDetails(formData)?.then((res) => {
+
+            if (res?.status === 1) {
+                ToastAlert(res?.message,'success')
+                getDeliveryDetails(selectedData[0]?.hstnum_po_no, selectedData[0]?.hstnum_store_id);
             } else {
-                console.log(key, value);
+                ToastAlert(res?.message,'error')
             }
+        })
+    }
+
+    const handleSaveDeliveryDetails = () => {
+        let isValid = true
+
+        if (!values?.expDelDays?.trim()) {
+            setErrors(prev => ({ ...prev, "expDelDaysErr": "This Field is required!" }))
+            isValid = false;
+        }
+        if (!values?.challanInvoiceNo?.trim()) {
+            setErrors(prev => ({ ...prev, "challanInvoiceNoErr": "This Field is required!" }))
+            isValid = false;
+        }
+        if (!values?.challanInvoiceDate?.trim()) {
+            setErrors(prev => ({ ...prev, "challanInvoiceDateErr": "This Field is required!" }))
+            isValid = false;
+        }
+        if (!values?.deliveryMode?.trim()) {
+            setErrors(prev => ({ ...prev, "deliveryModeErr": "This Field is required!" }))
+            isValid = false;
+        }
+        if (!values?.vehicleNumber?.trim()) {
+            setErrors(prev => ({ ...prev, "vehicleNumberErr": "This Field is required!" }))
+            isValid = false;
+        }
+        if (!values?.transName?.trim()) {
+            setErrors(prev => ({ ...prev, "transNameErr": "This Field is required!" }))
+            isValid = false;
+        }
+        if (!values?.lrCopy?.trim()) {
+            setErrors(prev => ({ ...prev, "lrCopyErr": "Please select a file" }))
+            isValid = false;
+        }
+        if (!values?.ewayBill?.trim()) {
+            setErrors(prev => ({ ...prev, "ewayBillErr": "Please select a file" }))
+            isValid = false;
+        }
+        if (!values?.invoiceCopy?.trim()) {
+            setErrors(prev => ({ ...prev, "invoiceCopyErr": "Please select a file" }))
+            isValid = false;
+        }
+
+        if (!values?.drugName?.trim()) {
+            setErrors(prev => ({ ...prev, "drugNameErr": "This Field is required!" }))
+            isValid = false;
+        }
+
+        if (!addedRows?.length || addedRows?.length === 0) {
+            setErrors(prev => ({ ...prev, "addedRowsErr": "Can not save empty drug details" }))
+            isValid = false;
         }
 
 
-        addSuppIntDeskDeliveryDetails(formData)?.then((res) => {
-            console.log('res', res)
-        })
+        if (isValid) {
+            saveDeliveryDetails();
+        }
     }
 
     const balQtyModalColumns = [
@@ -606,11 +724,10 @@ const DeliveryDetails = (props) => {
 
     const onFileChange = (e) => {
         const { name, files } = e?.target;
+        const errName = name + "Err";
         dispatcher({ type: "SET_VALUE", name: name, value: files[0] });
+        setErrors({ ...errors, [errName]: "" })
     };
-
-    console.log('values', values)
-    console.log('addedRows', addedRows)
 
     return (
         <>
@@ -696,6 +813,11 @@ const DeliveryDetails = (props) => {
                         value={values?.expDelDays}
                         onChange={handleChange}
                     />
+                    {errors?.expDelDaysErr &&
+                        <span className="text-sm text-[#9b0000] mt-1 ms-1">
+                            {errors?.expDelDaysErr}
+                        </span>
+                    }
                 </div>
 
                 <DatePickerComponent
@@ -721,6 +843,11 @@ const DeliveryDetails = (props) => {
                         value={values?.challanInvoiceNo}
                         onChange={handleChange}
                     />
+                    {errors?.challanInvoiceNoErr &&
+                        <span className="text-sm text-[#9b0000] mt-1 ms-1">
+                            {errors?.challanInvoiceNoErr}
+                        </span>
+                    }
                 </div>
 
                 <div>
@@ -734,16 +861,27 @@ const DeliveryDetails = (props) => {
                         isRequired={true}
                     // disabled={formState.tender !== 1}
                     />
+                    {errors?.challanInvoiceDateErr &&
+                        <span className="text-sm text-[#9b0000] mt-1 ms-1">
+                            {errors?.challanInvoiceDateErr}
+                        </span>
+                    }
                 </div>
-
-                <ComboDropDown
-                    options={delModeDrpData}
-                    onChange={handleChange}
-                    name={"deliveryMode"}
-                    label={'Delivery Mode:'}
-                    isRequired={true}
-                    value={values?.deliveryMode}
-                />
+                <div>
+                    <ComboDropDown
+                        options={delModeDrpData}
+                        onChange={handleChange}
+                        name={"deliveryMode"}
+                        label={'Delivery Mode:'}
+                        isRequired={true}
+                        value={values?.deliveryMode}
+                    />
+                    {errors?.deliveryModeErr &&
+                        <span className="text-sm text-[#9b0000] mt-1 ms-1">
+                            {errors?.deliveryModeErr}
+                        </span>
+                    }
+                </div>
 
                 <div>
                     <label htmlFor="vehicleNumber" className="employeeMaster__label required-label">
@@ -758,6 +896,11 @@ const DeliveryDetails = (props) => {
                         value={values?.vehicleNumber}
                         onChange={handleChange}
                     />
+                    {errors?.vehicleNumberErr &&
+                        <span className="text-sm text-[#9b0000] mt-1 ms-1">
+                            {errors?.vehicleNumberErr}
+                        </span>
+                    }
                 </div>
 
                 <div>
@@ -773,6 +916,11 @@ const DeliveryDetails = (props) => {
                         value={values?.transName}
                         onChange={handleChange}
                     />
+                    {errors?.transNameErr &&
+                        <span className="text-sm text-[#9b0000] mt-1 ms-1">
+                            {errors?.transNameErr}
+                        </span>
+                    }
                 </div>
 
                 <div>
@@ -801,6 +949,11 @@ const DeliveryDetails = (props) => {
                         placeholder='Choose file...'
                         onChange={onFileChange}
                     />
+                    {errors?.lrCopyErr &&
+                        <span className="text-sm text-[#9b0000] mt-1 ms-1">
+                            {errors?.lrCopyErr}
+                        </span>
+                    }
                 </div>
                 <div>
                     <label htmlFor="file" className="employeeMaster__label required-label">
@@ -813,6 +966,11 @@ const DeliveryDetails = (props) => {
                         placeholder='Choose file...'
                         onChange={onFileChange}
                     />
+                    {errors?.ewayBillErr &&
+                        <span className="text-sm text-[#9b0000] mt-1 ms-1">
+                            {errors?.ewayBillErr}
+                        </span>
+                    }
                 </div>
                 <div>
                     <label htmlFor="file" className="employeeMaster__label required-label">
@@ -825,6 +983,12 @@ const DeliveryDetails = (props) => {
                         placeholder='Choose file...'
                         onChange={onFileChange}
                     />
+
+                    {errors?.invoiceCopyErr &&
+                        <span className="text-sm text-[#9b0000] mt-1 ms-1">
+                            {errors?.invoiceCopyErr}
+                        </span>
+                    }
                 </div>
 
             </div>
@@ -832,14 +996,21 @@ const DeliveryDetails = (props) => {
             <div className="employeeMaster__container d-block">
                 <h4 className="employeeMaster__container-heading">Delivery Drug Details</h4>
 
-                <ComboDropDown
-                    options={drugNameDrpData}
-                    onChange={handleChange}
-                    name={"drugName"}
-                    label={'Drug Name:'}
-                    isRequired
-                    value={values?.drugName}
-                />
+                <div>
+                    <ComboDropDown
+                        options={drugNameDrpData}
+                        onChange={handleChange}
+                        name={"drugName"}
+                        label={'Drug Name:'}
+                        isRequired
+                        value={values?.drugName}
+                    />
+                    {errors?.drugNameErr &&
+                        <span className="text-sm text-[#9b0000] mt-1 ms-1">
+                            {errors?.drugNameErr}
+                        </span>
+                    }
+                </div>
 
                 <div className="flex items-center mb-0 mt-4">
                     <div className="w-10 border-1 border-[#097080]"></div>
@@ -886,7 +1057,7 @@ const DeliveryDetails = (props) => {
                                         <select name="batchNo" className="form-select form-select-sm" value={row?.batchNo} onChange={(e) => handleInputChange(index, 'batchNo', e.target.value)}>
                                             <option value="">Select</option>
                                             {/* <option value="2">Two</option> */}
-                                            {prevBatchDetailsDrpData?.length > 0 && prevBatchDetailsDrpData?.map((drg, index) => (
+                                            {prevBatchDetailsDrpData?.length > 0 && prevBatchDetailsDrpData?.filter(dt => !rows?.map(dt => dt?.batchNo).includes(dt?.value))?.map((drg, index) => (
                                                 <option
                                                     value={drg?.value}
                                                     key={index}
@@ -974,13 +1145,14 @@ const DeliveryDetails = (props) => {
                         </tbody>
                     </table>
                     <div className='text-end pt-2'>
-                        <button
-                            className="btn btn-secondary btn-sm"
-                            onClick={addToCart}
-                        >
-                            <FontAwesomeIcon icon={faPlus} className="mr-1 fw-bold text-warning" size='lg' />
-                            Add To Cart
-                        </button>
+                        {rows?.length > 0 &&
+                            <button
+                                className="btn btn-secondary btn-sm"
+                                onClick={addToCart}
+                            >
+                                <FontAwesomeIcon icon={faPlus} className="mr-1 fw-bold text-warning" size='lg' />
+                                Add To Cart
+                            </button>}
                     </div>
                 </div>
             </div>
@@ -997,7 +1169,7 @@ const DeliveryDetails = (props) => {
                 <ReactDataTable title={'drugDetails'} column={drugColumns} data={addedRows} isSearchReq={false} isPagination={false} />
             </div>
 
-            <BottomButtons isSave={true} isReset={true} isClose={true} onSave={saveDeliveryDetails} onReset={null} onClose={handleClose} />
+            <BottomButtons isSave={true} isReset={true} isClose={true} onSave={handleSaveDeliveryDetails} onReset={null} onClose={handleClose} />
 
             {viewModal &&
                 <Modal show={true} onHide={onCloseModal} size={'xl'} dialogClassName="dialog-min" style={{ zIndex: "1201" }}>
@@ -1046,6 +1218,12 @@ const DeliveryDetails = (props) => {
                                 ))}
                             </tbody>
                         </table>
+                        {deleteBatchErr &&
+                            <span className="text-sm text-[#9b0000] mt-1 ms-1">
+                                {deleteBatchErr}
+                            </span>
+                        }
+
                         {viewStatus === "delete" &&
                             <div className='py-4 px-10'>
                                 <label htmlFor="remarks" className="">
@@ -1065,15 +1243,15 @@ const DeliveryDetails = (props) => {
 
                         <hr className='my-2' />
                         <div className='text-center'>
-                            {viewStatus === "delete" ?
+                            {viewStatus === "delete" &&
                                 <button className='btn cms-login-btn m-1 btn-sm' onClick={deleteRecord}>
                                     <i className="fa fa-trash me-1"></i> Delete
                                 </button>
-                                :
-                                <button className='btn cms-login-btn m-1 btn-sm' onClick={onCloseModal}>
-                                    <i className="fa fa-broom me-1"></i> Close
-                                </button>
+
                             }
+                            <button className='btn cms-login-btn m-1 btn-sm' onClick={onCloseModal}>
+                                <i className="fa fa-broom me-1"></i> Close
+                            </button>
                         </div>
                     </Modal.Body>
                 </Modal>

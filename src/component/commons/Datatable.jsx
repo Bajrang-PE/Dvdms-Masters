@@ -57,6 +57,7 @@ const DataTable = forwardRef(({ masterName, columns, data, isSearchReq = true, i
 
     const filtered = data.filter(row =>
       columns.some(col => {
+        if (col?.isJSX) return false;
         const cellValue = row[col.field];
         return cellValue && cellValue.toString().toLowerCase().includes(query);
       })
@@ -99,26 +100,34 @@ const DataTable = forwardRef(({ masterName, columns, data, isSearchReq = true, i
     setSelectAll(false);
     setSelectedRows([]); // Optional: reset selection on page change
   };
-
   // Handle Select Row by global index
   const handleSelectRow = localIndex => {
     const globalIndex = (currentPage - 1) * rowsPerPage + localIndex;
-    let updatedSelectedRows = [...selectedRows];
-    if (updatedSelectedRows.includes(globalIndex)) {
-      updatedSelectedRows = updatedSelectedRows.filter(i => i !== globalIndex);
+
+    if (selectedRows[0] === globalIndex) {
+      setSelectedRows([]);
     } else {
-      updatedSelectedRows.push(globalIndex);
+      setSelectedRows([globalIndex]);
     }
-    setSelectedRows(updatedSelectedRows);
+
+    // console.log('globalIndex', globalIndex)
+    // console.log('localIndex', localIndex)
+    // let updatedSelectedRows = [...selectedRows];
+    // if (updatedSelectedRows.includes(globalIndex)) {
+    //   updatedSelectedRows = updatedSelectedRows.filter(i => i !== globalIndex);
+    // } else {
+    //   updatedSelectedRows.push(globalIndex);
+    // }
+    // setSelectedRows(updatedSelectedRows);
 
     // Update selectAll checkbox if all visible rows are selected
-    const visibleGlobalIndexes = currentRows.map(
-      (_, idx) => (currentPage - 1) * rowsPerPage + idx
-    );
-    const allSelected = visibleGlobalIndexes.every(i =>
-      updatedSelectedRows.includes(i)
-    );
-    setSelectAll(allSelected);
+    // const visibleGlobalIndexes = currentRows.map(
+    //   (_, idx) => (currentPage - 1) * rowsPerPage + idx
+    // );
+    // const allSelected = visibleGlobalIndexes.every(i =>
+    //   updatedSelectedRows.includes(i)
+    // );
+    // setSelectAll(allSelected);
   };
 
   function getPaginationPages(currentPage, totalPages) {
@@ -188,10 +197,15 @@ const DataTable = forwardRef(({ masterName, columns, data, isSearchReq = true, i
   const downloadPDF = () => {
     const doc = new jsPDF();
 
+    const exportColumns = columns.filter(
+      (col) => !col.isJSX
+    );
+
     // Prepare columns and rows for autoTable
-    const tableColumn = columns.map(col => col.header);
+    const tableColumn = exportColumns.map(col => col.header);
+
     const tableRows = sortedData.map(row =>
-      columns.map(col => row[col.field] ?? '')
+      exportColumns.map(col => row[col.field] ?? '')
     );
 
     // call the autoTable function, passing doc as first argument
@@ -228,17 +242,21 @@ const DataTable = forwardRef(({ masterName, columns, data, isSearchReq = true, i
 
   // Handle Download as HTML
   const downloadHTML = () => {
+    const exportColumns = columns.filter(
+      (col) => !col?.isJSX
+    );
+
     const html = `
       <table border="1">
         <thead>
-          <tr>${columns.map(col => `<th>${col.header}</th>`).join('')}</tr>
+          <tr>${exportColumns?.map(col => `<th>${col.header}</th>`).join('')}</tr>
         </thead>
         <tbody>
           ${sortedData
             .map(
               row => `
               <tr>
-                ${columns.map(col => `<td>${row[col.field]}</td>`).join('')}
+                ${exportColumns?.map(col => `<td>${row[col.field]}</td>`).join('')}
               </tr>`
             )
             .join('')}
@@ -316,12 +334,13 @@ const DataTable = forwardRef(({ masterName, columns, data, isSearchReq = true, i
                   type="checkbox"
                   checked={selectAll}
                   onChange={handleSelectAll}
+                  disabled
                 />
               </th>
               {columns.map(col => (
                 <th key={col.field}>
                   <span
-                    onClick={() => handleSort(col)}
+                    onClick={() => { col?.isJSX || col?.ele ? null : handleSort(col) }}
                     style={{
                       cursor: 'pointer',
                       userSelect: 'none',
@@ -361,12 +380,15 @@ const DataTable = forwardRef(({ masterName, columns, data, isSearchReq = true, i
                     <td className="checkbox__col">
                       <input
                         type="checkbox"
-                        checked={selectedRows.includes(globalIndex)}
+                        // checked={selectedRows.includes(globalIndex)}
+                        checked={selectedRows[0] === globalIndex}
                         onChange={() => handleSelectRow(localIndex)}
                       />
                     </td>
                     {columns.map(col => (
-                      <td key={col.field}>{row[col.field]}</td>
+                      <>
+                        <td key={col.field}>{col.isJSX && col?.ele ? col?.ele(row) : row[col?.field]}</td>
+                      </>
                     ))}
                   </tr>
                 );

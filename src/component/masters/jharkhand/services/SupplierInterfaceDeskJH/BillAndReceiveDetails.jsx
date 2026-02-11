@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye } from '@fortawesome/free-solid-svg-icons';
 import { Modal } from 'react-bootstrap';
 import { parseDate } from '../../../../commons/utilFunctions';
+import { ToastAlert } from '../../../../../utils/Toast';
 
 const BillAndReceiveDetails = (props) => {
 
@@ -239,10 +240,10 @@ const BillAndReceiveDetails = (props) => {
 
         addSuppIntDeskBillDetails(formData)?.then((data) => {
             if (data?.status === 1) {
-                alert('Added Successfully');
+                ToastAlert('Added Successfully','success');
                 // dispatch(hidePopup());
             } else {
-                alert(data?.message);
+                ToastAlert(data?.message,'error');
             }
             console.log('data', data)
         })
