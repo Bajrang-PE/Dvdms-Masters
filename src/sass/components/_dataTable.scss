@@ -119,8 +119,8 @@
     color: $dim-black;
     font-size: rem10(1.6);
     font-family: $secondary-font;
-    border-right: 1px solid #ddd;
-    border-bottom: 1px solid #ddd;
+    border-right: 1px solid rgba(#ddd,0.5);
+    border-bottom: 1px solid rgba(#ddd,0.5);
     word-wrap: break-word;
   }
 
@@ -132,7 +132,7 @@
     }
 
     &:nth-child(even) {
-      background-color: rgba($underline-color, 0.8);
+      background-color: rgba($underline-color, 0.2);
 
       &:hover {
         background-color: rgba($Teal-secondary, 0.2);

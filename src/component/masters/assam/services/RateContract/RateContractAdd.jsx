@@ -7,7 +7,6 @@ import {
   getPackagingType,
   getStoreDetails,
   loadTenderList,
-  saveRateContract,
 } from "../../../../../api/Assam/services/rateContractAPI";
 import {
   ComboDropDown,
@@ -16,7 +15,7 @@ import {
   RadioButton,
 } from "../../../../commons/FormElements";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 
 let { userId } = JSON.parse(
   !localStorage.getItem("data") ? 102234 : localStorage.getItem("data")
@@ -71,9 +70,9 @@ export default function RateContractAddAssam() {
     deliveryDays: "60",
     rcPckgUnit: "",
     totalRate: "",
-    rcNumberFlag: 1,
-    whetherImpFlag: 0,
-    whetherPBGFlag: 0,
+    rcNumberFlag: "1",
+    whetherImpFlag: "0",
+    whetherPBGFlag: "0",
     gstrRemarks: "",
     rcNumber: "",
   };
@@ -95,6 +94,7 @@ export default function RateContractAddAssam() {
   };
 
   const handleChange = (e) => {
+    console.log("setting up target ", e.target.value, e.target.name);
     const { name, value } = e.target;
     dispatcher({ type: "SET_FIELD", field: name, value });
   };
@@ -115,8 +115,6 @@ export default function RateContractAddAssam() {
   }
 
   const [formState, dispatcher] = useReducer(addFormReducer, initialState);
-
-  const dispatch = useDispatch();
 
   //router states
   const navigate = useNavigate();
@@ -620,12 +618,12 @@ export default function RateContractAddAssam() {
               label={data.label}
               name="rcNumberFlag"
               value={data.value}
-              checked={formState.rcNumberFlag === data.value}
+              checked={formState.rcNumberFlag == data.value}
               onChange={handleChange}
               keyProp={index}
             />
           ))}
-          {formState.rcNumberFlag === "manual" && (
+          {formState.rcNumberFlag !== "1" && (
             <InputField
               id="rcNumber"
               className="rateContractAddJHK__input"
@@ -649,7 +647,7 @@ export default function RateContractAddAssam() {
               label={data.label}
               name="whetherImpFlag"
               value={data.value}
-              checked={formState.whetherImpFlag === data.value}
+              checked={formState.whetherImpFlag == data.value}
               onChange={handleChange}
               keyProp={index}
             />
@@ -667,7 +665,7 @@ export default function RateContractAddAssam() {
               label={data.label}
               name="whetherPBGFlag"
               value={data.value}
-              checked={formState.whetherPBGFlag === data.value}
+              checked={formState.whetherPBGFlag == data.value}
               onChange={handleChange}
               keyProp={index}
             />

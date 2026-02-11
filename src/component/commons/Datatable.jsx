@@ -253,13 +253,13 @@ const DataTable = forwardRef(({ masterName, columns, data, isSearchReq = true, i
         </thead>
         <tbody>
           ${sortedData
-        .map(
-          row => `
+            .map(
+              row => `
               <tr>
                 ${exportColumns?.map(col => `<td>${row[col.field]}</td>`).join('')}
               </tr>`
-        )
-        .join('')}
+            )
+            .join('')}
         </tbody>
       </table>
     `;
