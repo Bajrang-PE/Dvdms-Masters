@@ -6,6 +6,7 @@ import axios from "axios";
 
 const BaseUrl = "http://10.226.29.29:8080/"; //AD AS
 // const BaseUrl = "http://10.226.30.86:8091"; //Main Gateway
+// const BaseUrl = "http://10.226.30.45:9002"; //HP prd
 
 axios.defaults.baseURL = BaseUrl;
 

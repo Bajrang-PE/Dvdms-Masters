@@ -43,7 +43,7 @@ const SupplierInterfaceDeskJH = () => {
         { mappingKey: "bankDetail", componentName: (props) => (<MasterViewModal data={bankListData} columns={bankColumns} openPage={'bankDetail'} />) },
         { mappingKey: "delivery", componentName: (props) => (<DeliveryDetails selectedData={selectedRowRc} actionType={'delivery'} />) },
         { mappingKey: "View", componentName: (props) => (<MasterViewModal data={bankListData} columns={bankColumns} openPage={'bankDetail'} />) },
-        { mappingKey: "dccReq", componentName: (props) => (<SuppIntDccRequest selectedData={selectedRowRc} actionType={'dccReq'} />) },
+        { mappingKey: "dccReq", componentName: (props) => (<SuppIntDccRequest selectedData={selectedRowRc} actionType={'dccReq'} getListData={getListData}/>) },
         { mappingKey: "recDtl", componentName: (props) => (<BillAndReceiveDetails selectedData={selectedRowRc} actionType={'recDtl'} />) },
         { mappingKey: "billDtl", componentName: (props) => (<BillAndReceiveDetails selectedData={selectedRowRc} actionType={'billDtl'} />) },
         { mappingKey: "qrDtl", componentName: (props) => (<SuppIntQrDetails selectedData={selectedRowRc} actionType={'qrDtl'} />) },

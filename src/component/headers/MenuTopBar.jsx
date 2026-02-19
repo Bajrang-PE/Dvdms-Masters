@@ -47,7 +47,7 @@ const MenuTopBar = (props) => {
       <header className={`Navbar__header`}>
         <div className="mx-auto flex flex-col md:flex-row justify-between items-center px-3 py-2 space-y-3 md:space-y-0">
           {/* Logo and text */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2">
             <img
               src={logoUrl}
               alt="CGHS Logo"

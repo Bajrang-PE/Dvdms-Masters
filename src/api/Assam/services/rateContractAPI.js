@@ -1,5 +1,7 @@
 import { fetchData, fetchPostData, fetchPutData } from "../../../utils/ApiHook";
 
+// /assam-services
+
 export const getManufacturers = async (userID) => {
   try {
     const response = await fetchData(
@@ -179,6 +181,17 @@ export const getPackagingType = async (hospCode) => {
 export const saveRateContract = async (data) => {
   try {
     let url = `/api/assam/CreateRateContractMaster/saveRateContract`;
+    const response = await fetchPostData(url, data);
+    return response.data;
+  } catch (error) {
+    console.error("Error saving rate contract", error);
+    throw error;
+  }
+};
+
+export const getExistingRateContractData = async (data) => {
+  try {
+    let url = `/api/assam/CreateRateContractMaster/getExistingRateContractDetails`;
     const response = await fetchPostData(url, data);
     return response.data;
   } catch (error) {

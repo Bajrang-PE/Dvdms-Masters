@@ -102,33 +102,38 @@
 
   & th,
   & td {
-    padding: rem10(1) rem10(1.5);
+    padding: rem10(1) rem10(1);
     text-align: left;
   }
 
   & th {
     background-color: $Teal-Primary;
     color: $pure-white;
-    font-weight: 600;
+    font-weight: 500;
     font-family: $primary-font;
-    font-size: rem10(1.6);
+    font-size: rem10(1.4);
     border-bottom: 2px solid #ddd;
+    white-space: normal; 
+    word-break: break-word;
+    vertical-align: middle;
   }
 
   & td {
     color: $dim-black;
-    font-size: rem10(1.6);
+    font-size: rem10(1.4);
     font-family: $secondary-font;
-    border-right: 1px solid rgba(#ddd,0.5);
-    border-bottom: 1px solid rgba(#ddd,0.5);
+    border-right: 1px solid rgba(#ddd, 0.5);
+    border-bottom: 1px solid rgba(#ddd, 0.5);
     word-wrap: break-word;
+    vertical-align: top;
   }
 
   & tr {
     font-weight: 400;
+
     &:hover {
       background-color: rgba($Teal-secondary, 0.2);
-      font-weight: 600;
+      // font-weight: 600;
     }
 
     &:nth-child(even) {
@@ -140,7 +145,8 @@
     }
 
     &.selected {
-      background-color: #add8e6; /* Light blue background when row is selected */
+      background-color: #add8e6;
+      /* Light blue background when row is selected */
     }
   }
 
@@ -172,6 +178,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+
       &--btn {
         padding: rem10(1);
         font-family: $Teal-secondary;
@@ -192,6 +199,7 @@
           font-weight: 600;
           flex: 1;
           text-align: center;
+
           &:hover {
             background-color: color.adjust($Teal-Primary, $lightness: -10%);
           }

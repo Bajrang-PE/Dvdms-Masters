@@ -12,6 +12,7 @@ import {
   getManufacturers,
   getPieChartData,
   getRcTableData,
+  getStoreDetails,
 } from "../../../../api/Assam/services/rateContractAPI";
 import PieChart from "../../../commons/PieChart";
 import DataTable from "../../../commons/Datatable";
@@ -24,6 +25,9 @@ import {
   setContractList,
   setSelectedContract,
 } from "../../../../features/Ratecontract/rateContractASMSlice";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEdit, faEye, faTrash } from "@fortawesome/free-solid-svg-icons";
+import RateContractAddAssam from "./RateContract/RateContractAdd";
 // import '../../../../sass/pages/_rateContract.scss';
 
 const chartColors = {
@@ -53,8 +57,52 @@ const columns = [
   { header: "Contract To", field: "contract_to" },
   { header: "Tender Number/Source Name", field: "tender_source_name" },
   { header: "Level Type", field: "sstnum_level_type_id" },
-  { header: "Action", field: "" },
+  {
+    header: "Action",
+    field: "action",
+    isJSX: true,
+    ele: (row) => (
+      <div style={{
+        display: "flex",
+        gap: "4px",
+        flexWrap: "wrap"
+      }}>
+        <button className="btn btn-sm btn-primary" style={{ padding: "1px 3px" }} onClick={() => handleAction("view", row)} title="Extension"> <FontAwesomeIcon icon={faEdit} size='sm' /></button>
+
+        <button className="btn btn-sm btn-warning" style={{ padding: "1px 3px" }} onClick={() => handleAction("edit", row)} title="Modify"><FontAwesomeIcon icon={faEdit} size='sm' /></button>
+
+        <button className="btn btn-sm btn-danger" style={{ padding: "1px 3px" }} onClick={() => handleAction("approve", row)} title="Cancel"><FontAwesomeIcon icon={faTrash} size='sm' /></button>
+
+        <button className="btn btn-sm btn-success" style={{ padding: "1px 3px" }} onClick={() => handleAction("print", row)} title="View"><FontAwesomeIcon icon={faEye} size='sm' /></button>
+
+        <button className="btn btn-sm btn-secondary" style={{ padding: "1px 3px" }} onClick={() => handleAction("share", row)} title="Early Expiry"><FontAwesomeIcon icon={faEdit} size='sm' /></button>
+
+        <button className="btn btn-sm btn-info" style={{ padding: "1px 3px" }} onClick={() => handleAction("delete", row)} title="RC Amendment"><FontAwesomeIcon icon={faEdit} size='sm' /></button>
+      </div>
+    ),
+  }
 ];
+
+const handleAction = (type, row) => {
+  console.log(type, row);
+
+  switch (type) {
+    case "view":
+      break;
+    case "edit":
+      break;
+    case "approve":
+      break;
+    case "print":
+      break;
+    case "share":
+      break;
+    case "delete":
+      break;
+    default:
+      break;
+  }
+};
 
 const radioOptions = [
   { label: "All", value: "0" },
@@ -81,10 +129,6 @@ export default function RateContract() {
   const buttonDataset = [
     { label: "Tender", onClick: handleTenderAdd },
     { label: "Rate Contract", onClick: handleRateContractAdd },
-  ];
-
-  const componentsList = [
-    { mappingKey: "Tender", componentName: RateContractTenderForm },
   ];
 
   //redux states
@@ -117,8 +161,15 @@ export default function RateContract() {
   const { userId } = JSON.parse(localStorage.getItem("data"));
   const [userSelection, setUserSelection] = useState("");
 
+  const [isRateContractAddForm, setIsRateContractAddForm] = useState(false);
+  const [healthFacilities, setHealthFacilities] = useState([]);
+
   //refs
   const dataTableRef = useRef();
+
+  const componentsList = [
+    { mappingKey: "Tender", componentName: () => <RateContractTenderForm itemCategories={budgetClasses} /> },
+  ];
 
   function handleTenderAdd() {
     setUserSelection("Tender");
@@ -127,7 +178,8 @@ export default function RateContract() {
 
   function handleRateContractAdd() {
     console.log("Rate Contract");
-    navigate("add", { replace: true });
+    setIsRateContractAddForm(true);
+    // navigate("add", { replace: true });
   }
 
   // Handle Search
@@ -135,6 +187,19 @@ export default function RateContract() {
     const query = event.target.value.toLowerCase();
     setSearchQuery(query);
   };
+
+  async function getStores() {
+    const response = await getStoreDetails(998);
+    let healthFacilitiesData = [];
+
+    response.forEach((element) => {
+      const { hstnum_store_id: value, hststr_store_name: label } = element;
+      healthFacilitiesData.push({ label, value });
+    });
+
+    setHealthFacilities(healthFacilitiesData)
+
+  }
 
   async function handleRateContractDisplay() {
     setDisplayTable(true);
@@ -159,6 +224,7 @@ export default function RateContract() {
 
   //effects for combos
   useEffect(() => {
+
     const loadContractTypes = async () => {
       try {
         const data = await getContractTypes(998);
@@ -170,6 +236,7 @@ export default function RateContract() {
           };
           contractTypeOptions.push(obj);
         });
+        setContractType(contractTypeOptions[0]?.value || 0)
         setContractTypes(contractTypeOptions);
         dispatch(setContractList(contractTypeOptions));
       } catch (err) {
@@ -189,7 +256,7 @@ export default function RateContract() {
           manufacturerOptions.push(obj);
         });
 
-        setManufacturers(manufacturerOptions);
+        setManufacturers([{ label: "All", value: 0 }, ...manufacturerOptions]);
       } catch (err) {
         console.log("Failed to fetch data.", err);
       }
@@ -212,29 +279,35 @@ export default function RateContract() {
       }
     };
 
-    const loadDrugs = async () => {
-      try {
-        const data = await getDrugNames(998, 99800001, 10);
-        let drugNames = [];
-        data.forEach((element) => {
-          const obj = {
-            label: element.itemname,
-            value: element.hstnum_item_id,
-            data: element.hstnum_itembrand_id,
-          };
-          drugNames.push(obj);
-        });
-        setDrugList([{ label: "All", value: 0, data: 0 }, ...drugNames]);
-      } catch (err) {
-        console.log("Failed to fetch data.", err);
-      }
-    };
-
-    loadDrugs();
     loadManufacturers();
     loadBudgetClasses();
     loadContractTypes();
+    getStores()
   }, [userId]);
+
+  const loadDrugs = async (budgetClass) => {
+    try {
+      const data = await getDrugNames(998, healthFacilities.at(0).value, budgetClass);
+      let drugNames = [];
+      data.forEach((element) => {
+        const obj = {
+          label: element.itemname,
+          value: element.hstnum_item_id,
+          data: element.hstnum_itembrand_id,
+        };
+        drugNames.push(obj);
+      });
+      setDrugList([{ label: "All", value: 0, data: 0 }, ...drugNames]);
+    } catch (err) {
+      console.log("Failed to fetch data.", err);
+    }
+  };
+
+  useEffect(() => {
+    if (budgetClass && healthFacilities?.length > 0) {
+      loadDrugs(budgetClass);
+    }
+  }, [budgetClass, healthFacilities])
 
   //effects for pie chart
   useEffect(() => {
@@ -242,10 +315,10 @@ export default function RateContract() {
       try {
         const data = await getPieChartData(
           998,
-          contractType || 1,
+          contractType,
           Number(manufName),
           Number(itemName),
-          10
+          budgetClass
         );
         console.log("Pie chart data : ", data);
         let statusData = [];
@@ -268,176 +341,188 @@ export default function RateContract() {
       }
     }
 
-    loadPieChart();
-  }, [contractType, manufName, itemName]);
+    if (contractType && budgetClass) {
+      loadPieChart();
+    }
+
+  }, [contractType, manufName, itemName, budgetClass]);
+
+  console.log('tableData', tableData)
 
   return (
     <>
-      <ServiceNavbar
-        buttons={buttonDataset}
-        heading={"Rate Contract"}
-        userSelection={userSelection}
-        componentsList={componentsList}
-        isLargeDataset={true}
-        filtersVisibleOnLoad={true}
-      >
-        <div className="rateContract__filterSection">
-          <div className="rateContract__filterSection--filters">
-            <div className="rateContract__container">
-              <ComboDropDown
-                options={contractTypes}
-                onChange={(e) => {
-                  setContractType(e.target.value);
-                  dispatch(setSelectedContract(e.target.value));
-                }}
-                value={contractType}
-                label={"Contract Type"}
-                addOnClass="rateContract__container--dropdown"
-              />
-              <ComboDropDown
-                options={budgetClasses}
-                onChange={(e) => setSelectedBudgetClass(e.target.value)}
-                value={budgetClass}
-                label={"Budget Class"}
-                addOnClass="rateContract__container--dropdown"
-              />
-              <ComboDropDown
-                options={manufacturers}
-                onChange={(e) => setManufName(e.target.value)}
-                value={manufName}
-                label={"Manufacturer Name"}
-                addOnClass="rateContract__container--dropdown"
-              />
-              <ComboDropDown
-                options={drugList}
-                onChange={(e) => setItemName(e.target.value)}
-                value={itemName}
-                label={"Item Name"}
-                addOnClass="rateContract__container--dropdown"
-              />
-            </div>
-            {pieChartData.length > 0 && (
-              <div className="rateContract__status">
-                {pieChartData.map((data, index) => {
-                  return (
-                    <div
-                      key={index}
-                      className="rateContract__status--container"
-                      style={{ backgroundImage: data.datapointColor }}
-                      onClick={() => {
-                        setShowRadio(true);
-                        setGnumIsValid(data.status);
-                      }}
-                    >
-                      <h2
-                        className="rateContract__heading"
-                        style={{ userSelect: "none" }}
-                      >
-                        {data.name}
-                      </h2>
-                      <h4
-                        className="rateContract__heading--count"
-                        style={{ userSelect: "none" }}
-                      >
-                        {data.y}
-                      </h4>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-            <AnimatePresence>
-              {showRadio && (
-                <motion.div
-                  variants={fadeSlideVariant}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                  className="rateContract__radioWrapper" // You can wrap both sections in one animated div
-                >
-                  <div className="rateContract__radioOptions">
-                    <h2
-                      className="rateContract__heading"
-                      style={{ margin: "0" }}
-                    >
-                      Search By:
-                    </h2>
-                    <div>
-                      {radioOptions.map((data, index) => (
-                        <RadioButton
-                          label={data.label}
-                          name="status"
-                          value={data.value}
-                          checked={radioOption === data.value}
-                          onChange={(e) => setRadioOption(e.target.value)}
-                          keyProp={index}
-                        />
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="rateContract__radioOptions--controls">
-                    <AnimatePresence mode="wait">
-                      {radioOption === "1" && (
-                        <motion.div
-                          key="text-input"
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{
-                            opacity: 1,
-                            y: 0,
-                            transition: { duration: 0.2 },
-                          }}
-                          exit={{
-                            opacity: 0,
-                            y: -10,
-                            transition: { duration: 0.2 },
+      {isRateContractAddForm ?
+        <RateContractAddAssam setIsRateContractAddForm={setIsRateContractAddForm} budgetCategory={budgetClasses} manufacturers={manufacturers} drugList={drugList} loadDrugs={loadDrugs} healthFacilities={healthFacilities} getStores={getStores}/>
+        :
+        (<>
+          <ServiceNavbar
+            buttons={buttonDataset}
+            heading={"Rate Contract"}
+            userSelection={userSelection}
+            componentsList={componentsList}
+            isLargeDataset={true}
+            filtersVisibleOnLoad={true}
+          >
+            <div className="rateContract__filterSection">
+              <div className="rateContract__filterSection--filters">
+                <div className="rateContract__container">
+                  <ComboDropDown
+                    options={contractTypes}
+                    onChange={(e) => {
+                      setContractType(e.target.value);
+                      dispatch(setSelectedContract(e.target.value));
+                    }}
+                    value={contractType}
+                    label={"Contract Type"}
+                    addOnClass="rateContract__container--dropdown"
+                  />
+                  <ComboDropDown
+                    options={budgetClasses}
+                    onChange={(e) => setSelectedBudgetClass(e.target.value)}
+                    value={budgetClass}
+                    label={"Budget Class"}
+                    addOnClass="rateContract__container--dropdown"
+                  />
+                  <ComboDropDown
+                    options={manufacturers}
+                    onChange={(e) => setManufName(e.target.value)}
+                    value={manufName}
+                    label={"Manufacturer Name"}
+                    addOnClass="rateContract__container--dropdown"
+                  />
+                  <ComboDropDown
+                    options={drugList}
+                    onChange={(e) => setItemName(e.target.value)}
+                    value={itemName}
+                    label={"Item Name"}
+                    addOnClass="rateContract__container--dropdown"
+                  />
+                </div>
+                {pieChartData.length > 0 && (
+                  <div className="rateContract__status">
+                    {pieChartData.map((data, index) => {
+                      return (
+                        <div
+                          key={index}
+                          className="rateContract__status--container"
+                          style={{ backgroundImage: data.datapointColor }}
+                          onClick={() => {
+                            setShowRadio(true);
+                            setGnumIsValid(data.status);
                           }}
                         >
-                          <InputField
-                            type="text"
-                            value={searchQuery}
-                            onChange={handleSearch}
-                            placeholder="Search.."
-                            className="rateContract__radioOptions--controls-input"
-                            id="DatatableSearch"
-                          />
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                    <button
-                      className="rateContract__radioOptions--controls-btn"
-                      onClick={handleRateContractDisplay}
-                    >
-                      Submit
-                    </button>
+                          <h2
+                            className="rateContract__heading"
+                            style={{ userSelect: "none" }}
+                          >
+                            {data.name}
+                          </h2>
+                          <h4
+                            className="rateContract__heading--count"
+                            style={{ userSelect: "none" }}
+                          >
+                            {data.y}
+                          </h4>
+                        </div>
+                      );
+                    })}
                   </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-          {pieChartData.length > 0 && (
-            <div className="rateContract__filterSection--chart">
-              {/* <h2
+                )}
+                <AnimatePresence>
+                  {showRadio && (
+                    <motion.div
+                      variants={fadeSlideVariant}
+                      initial="hidden"
+                      animate="visible"
+                      exit="exit"
+                      className="rateContract__radioWrapper" // You can wrap both sections in one animated div
+                    >
+                      <div className="rateContract__radioOptions">
+                        <h2
+                          className="rateContract__heading"
+                          style={{ margin: "0" }}
+                        >
+                          Search By:
+                        </h2>
+                        <div>
+                          {radioOptions.map((data, index) => (
+                            <RadioButton
+                              label={data.label}
+                              name="status"
+                              value={data.value}
+                              checked={radioOption === data.value}
+                              onChange={(e) => setRadioOption(e.target.value)}
+                              keyProp={index}
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="rateContract__radioOptions--controls">
+                        <AnimatePresence mode="wait">
+                          {radioOption === "1" && (
+                            <motion.div
+                              key="text-input"
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{
+                                opacity: 1,
+                                y: 0,
+                                transition: { duration: 0.2 },
+                              }}
+                              exit={{
+                                opacity: 0,
+                                y: -10,
+                                transition: { duration: 0.2 },
+                              }}
+                            >
+                              <InputField
+                                type="text"
+                                value={searchQuery}
+                                onChange={handleSearch}
+                                placeholder="Search.."
+                                className="rateContract__radioOptions--controls-input"
+                                id="DatatableSearch"
+                              />
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                        <button
+                          className="rateContract__radioOptions--controls-btn"
+                          onClick={handleRateContractDisplay}
+                        >
+                          Submit
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+              {pieChartData.length > 0 && (
+                <div className="rateContract__filterSection--chart">
+                  {/* <h2
                 className="rateContract__heading"
                 style={{ textAlign: "center" }}
               >
                 Rate Contract Status Overview
               </h2> */}
-              <PieChart data={pieChartData} />
+                  <PieChart data={pieChartData} />
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      </ServiceNavbar>
-      <div>
-        {displayTable && (
-          <DataTable
-            masterName={"Rate Contract"}
-            ref={dataTableRef}
-            columns={columns}
-            data={tableData}
-          />
-        )}
-      </div>
+          </ServiceNavbar>
+
+          <div>
+            {displayTable && (
+              <DataTable
+                masterName={"Rate Contract"}
+                ref={dataTableRef}
+                columns={columns}
+                data={tableData}
+              />
+            )}
+          </div>
+        </>)
+      }
     </>
   );
 }

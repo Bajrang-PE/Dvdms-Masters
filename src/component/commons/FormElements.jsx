@@ -130,6 +130,7 @@ export function InputField({
   onChange,
   value,
   disabled = false,
+  readOnly = false
 }) {
   return (
     <input
@@ -141,6 +142,7 @@ export function InputField({
       onChange={onChange}
       value={value}
       disabled={disabled}
+      readOnly={readOnly}
     />
   );
 }
