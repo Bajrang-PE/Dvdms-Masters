@@ -1,10 +1,10 @@
 import axios from "axios";
 
-const BaseUrl = '  http://10.226.27.173:8094';
+// const BaseUrl = 'http://10.226.27.173:8094';
 // const BaseUrl = 'http://10.226.17.6:8084';
 // const BaseUrl = 'http://10.226.29.202:8091';
 
-//const BaseUrl = "http://10.226.29.154:8080/api"; //AD AS
+const BaseUrl = "http://10.226.29.29:8080/"; //AD AS
 // const BaseUrl = "http://10.226.30.86:8091"; //Main Gateway
 
 axios.defaults.baseURL = BaseUrl;

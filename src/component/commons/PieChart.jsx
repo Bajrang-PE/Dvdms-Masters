@@ -5,7 +5,7 @@ import HighchartsReact from "highcharts-react-official";
 const PieChart = ({ title = "", data, setStatus }) => {
   // Convert CSS gradient string to Highcharts SVG gradient object
   const parseGradient = (cssGradient) => {
-    const colorMatches = cssGradient.match(/#(?:[0-9a-fA-F]{3}){1,2}/g);
+    const colorMatches = cssGradient?.match(/#(?:[0-9a-fA-F]{3}){1,2}/g);
     if (!colorMatches || colorMatches.length < 2) {
       return colorMatches?.[0] || "#000"; // fallback to first color or black
     }
