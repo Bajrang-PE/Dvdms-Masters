@@ -48,7 +48,6 @@ const DccBatchTable = React.memo(({
         );
     }, []);
 
-    console.log('selectedRows', selectedRows)
     const handleRowSelect = (index, row, e) => {
         setSelectedRows(prev => {
             const exists = prev.find(item => item.index == index);
@@ -230,7 +229,7 @@ const RemarksBox = React.memo(({ value, onChange }) => (
 ));
 
 
-const SuppIntDccRequest = ({ selectedData }) => {
+const SuppIntDccRequest = ({ selectedData, actionType, getListData }) => {
 
     const dispatch = useDispatch();
     const { value: supplierID, label: supplierName } = useSelector(
@@ -292,12 +291,18 @@ const SuppIntDccRequest = ({ selectedData }) => {
         }
 
         addSuppIntDeskDccReqDetail(val)?.then((res) => {
-            console.log('res', res)
+            if (res?.status === 1) {
+                ToastAlert(res?.message, 'success');
+                handleClose()
+                getListData(supplierID, 0);
+            } else {
+                ToastAlert(res?.message, 'error');
+                // handleClose()
+            }
         })
     }
 
-    console.log('selectedData', selectedData)
-    console.log('selectedRowData', selectedRowData)
+
 
     return (
         <>

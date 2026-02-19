@@ -28,15 +28,16 @@ const existingRcCols = [
   { key: "hstdt_tender_close_date", label: "Tender Close Date" },
 ];
 
-export default function RateContractTenderForm() {
+export default function RateContractTenderForm(props) {
+  const { itemCategories } = props;
   //redux states
   const dispatch = useDispatch();
+
 
   // Controlled state for inputs
   const initialState = {
     sourceType: "",
     tenderList: [],
-    itemCategories: [],
     selectedItemCat: 10,
     selectedTender: "0",
     tenderNumber: "",
@@ -53,6 +54,8 @@ export default function RateContractTenderForm() {
       case "SET_FIELD":
         console.log("Setting this : ", action.field);
         return { ...state, [action.field]: action.value };
+      case "SET_VALUES":
+        return { ...state, ...action?.payload };
       case "RESET_FORM":
         return initialState;
       default:
@@ -74,13 +77,7 @@ export default function RateContractTenderForm() {
     if (value !== "0") {
       dispatcher({ type: "SET_FIELD", field: "isDisabled", value: true });
 
-      const response = await getExistingTenderDetails(
-        998,
-        1,
-        formState.selectedItemCat,
-        value
-      );
-
+      const response = await getExistingTenderDetails(998, 1, formState.selectedItemCat, value);
       const {
         hststr_tender_ref_no,
         hstdt_tender_open_date,
@@ -89,31 +86,15 @@ export default function RateContractTenderForm() {
       } = response.at(0);
 
       dispatcher({
-        type: "SET_FIELD",
-        field: "existingRCTableData",
-        value: response,
-      });
+        type: "SET_VALUES", payload: {
+          existingRCTableData: response, 
+          tenderNumber: hststr_tender_ref_no, 
+          tenderOpeningDate: hstdt_tender_open_date, 
+          tenderClosingDate: hstdt_tender_close_date, 
+          tenderAmount: hstnum_tender_amount
+        }
+      })
 
-      dispatcher({
-        type: "SET_FIELD",
-        field: "tenderNumber",
-        value: hststr_tender_ref_no,
-      });
-      dispatcher({
-        type: "SET_FIELD",
-        field: "tenderOpeningDate",
-        value: hstdt_tender_open_date,
-      });
-      dispatcher({
-        type: "SET_FIELD",
-        field: "tenderClosingDate",
-        value: hstdt_tender_close_date,
-      });
-      dispatcher({
-        type: "SET_FIELD",
-        field: "tenderAmount",
-        value: hstnum_tender_amount,
-      });
     } else {
       dispatcher({ type: "SET_FIELD", field: "isDisabled", value: false });
     }
@@ -157,31 +138,6 @@ export default function RateContractTenderForm() {
     const response = await modifyTenderDetails(JSON.stringify(data));
     console.log(response);
   }
-
-  useEffect(() => {
-    const loadItemCategories = async () => {
-      try {
-        let budgetClassOptions = [];
-        const data = await getBudgetClasses(998);
-        data.forEach((element) => {
-          const obj = {
-            label: element.sststr_budget_class_name,
-            value: element.sstnum_budget_class_id,
-          };
-          budgetClassOptions.push(obj);
-        });
-        dispatcher({
-          type: "SET_FIELD",
-          field: "itemCategories",
-          value: budgetClassOptions,
-        });
-      } catch (err) {
-        console.log("Failed to fetch item categories.", err);
-      }
-    };
-
-    loadItemCategories();
-  }, []);
 
   useEffect(() => {
     async function loadTenders() {
@@ -249,9 +205,9 @@ export default function RateContractTenderForm() {
                 Tender Type
               </label>
               <ComboDropDown
-                options={formState.itemCategories}
+                options={itemCategories}
                 onChange={handleChange}
-                name={"itemCategories"}
+                name={"selectedItemCat"}
                 value={formState.selectedItemCat}
               />
             </div>
@@ -295,7 +251,7 @@ export default function RateContractTenderForm() {
                 placeholder="Enter Tender Amount"
                 value={formState.tenderAmount}
                 onChange={handleChange}
-                disabled={formState.isDisabled}
+                // disabled={formState.isDisabled}
               />
             </div>
             <div>
@@ -342,6 +298,7 @@ export default function RateContractTenderForm() {
           )}
         </>
       )}
+
       <div className="bankmaster__container-controls">
         {formState.sourceType === "0" && (
           <>

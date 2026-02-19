@@ -57,6 +57,7 @@ export default function RateContractAddForm() {
   const [suppliers, setSuppliers] = useState([]);
 
   const taxTypes = [{ label: "GST", value: "3" }];
+
   const batchSizeOptions = Array.from({ length: 50 }, (_, i) => ({
     value: i + 1,
     label: String(i + 1),
@@ -190,6 +191,7 @@ export default function RateContractAddForm() {
       }
     });
   };
+
   const unitDrpData = () => {
     getUnitCombo(998)?.then((res) => {
       if (res?.status === 1) {
@@ -455,6 +457,9 @@ export default function RateContractAddForm() {
           ref={dataTableRef}
           columns={existingRcTableCols}
           data={existingRCs}
+          isReport={false}
+          isPagination={false}
+          isSearchReq={false}
         />
       </div>
 
@@ -879,6 +884,9 @@ export default function RateContractAddForm() {
             ref={null}
             columns={bgdetailsTableCols}
             data={bgList}
+            isReport={false}
+            isPagination={false}
+            isSearchReq={false}
           />
         </div>
       </div>

@@ -71,7 +71,6 @@ export default function RateContractTenderForm() {
     bgAmt: "",
     bgSubmissionDate: "",
     bgDetails: ""
-
   };
 
   const [errors, setErrors] = useState({
@@ -97,7 +96,6 @@ export default function RateContractTenderForm() {
   function addFormReducer(state, action) {
     switch (action.type) {
       case "SET_FIELD":
-        console.log("Setting this : ", action.field);
         return { ...state, [action.field]: action.value };
       case "RESET_FORM":
         return initialState;
