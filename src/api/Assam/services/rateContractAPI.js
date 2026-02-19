@@ -1,9 +1,11 @@
 import { fetchData, fetchPostData, fetchPutData } from "../../../utils/ApiHook";
 
+// /assam-services
+
 export const getManufacturers = async (userID) => {
   try {
     const response = await fetchData(
-      `/assam-services/api/assam/supplierMaster/getSupplier?userId=${userID}`
+      `/api/assam/supplierMaster/getSupplier?userId=${userID}`
     );
     return response.data;
   } catch (error) {
@@ -14,7 +16,7 @@ export const getManufacturers = async (userID) => {
 
 export const getMenuList = async () => {
   try {
-    const response = await fetchData(`/assam-services/api/assam/menu/hierarchy`);
+    const response = await fetchData(`/api/assam/menu/hierarchy`);
     return response.data;
   } catch (error) {
     console.error("Error fetching items:", error);
@@ -25,7 +27,7 @@ export const getMenuList = async () => {
 export const getContractTypes = async (hospitalCode) => {
   try {
     const response = await fetchData(
-      `/assam-services/api/assam/rateContracttype/getContractType?hospCode=${hospitalCode}`
+      `/api/assam/rateContracttype/getContractType?hospCode=${hospitalCode}`
     );
     return response.data;
   } catch (error) {
@@ -37,7 +39,7 @@ export const getContractTypes = async (hospitalCode) => {
 export const getBudgetClasses = async (hospitalCode) => {
   try {
     const response = await fetchData(
-      `/assam-services/api/assam/budgetMaster/getBudgetClassification?hospCode=${hospitalCode}`
+      `/api/assam/budgetMaster/getBudgetClassification?hospCode=${hospitalCode}`
     );
 
     return response.data;
@@ -50,7 +52,7 @@ export const getBudgetClasses = async (hospitalCode) => {
 export const getDrugNames = async (hospitalCode, storeId, itemCatNo) => {
   try {
     const response = await fetchData(
-      `/assam-services/api/assam/drugMaster/drugList?hospitalCode=${hospitalCode}&storeId=${storeId}&itemCatno=${itemCatNo}`
+      `/api/assam/drugMaster/drugList?hospitalCode=${hospitalCode}&storeId=${storeId}&itemCatno=${itemCatNo}`
     );
 
     return response.data;
@@ -71,19 +73,19 @@ export const getPieChartData = async (
     let url = ``;
 
     if (!supplierID && itemBrandID) {
-      url = `/assam-services/api/assam/rateContractCount/getRateContractcountNew?hospitalCode=${hospCode}&contractType=${contractTypeID}&itemBrandId=${itemBrandID}&itemCatNo=${itemCatNo}`;
+      url = `/api/assam/rateContractCount/getRateContractcountNew?hospitalCode=${hospCode}&contractType=${contractTypeID}&itemBrandId=${itemBrandID}&itemCatNo=${itemCatNo}`;
     }
 
     if (!itemBrandID && supplierID) {
-      url = `/assam-services/api/assam/rateContractCount/getRateContractcountNew?hospitalCode=${hospCode}&contractType=${contractTypeID}&supplierId=${supplierID}&itemCatNo=${itemCatNo}`;
+      url = `/api/assam/rateContractCount/getRateContractcountNew?hospitalCode=${hospCode}&contractType=${contractTypeID}&supplierId=${supplierID}&itemCatNo=${itemCatNo}`;
     }
 
     if (itemBrandID && supplierID) {
-      url = `/assam-services/api/assam/rateContractCount/getRateContractcountNew?hospitalCode=${hospCode}&contractType=${contractTypeID}&supplierId=${supplierID}&itemBrandId=${itemBrandID}&itemCatNo=${itemCatNo}`;
+      url = `/api/assam/rateContractCount/getRateContractcountNew?hospitalCode=${hospCode}&contractType=${contractTypeID}&supplierId=${supplierID}&itemBrandId=${itemBrandID}&itemCatNo=${itemCatNo}`;
     }
 
     if (!itemBrandID && !supplierID) {
-      url = `/assam-services/api/assam/rateContractCount/getRateContractcountNew?hospitalCode=${hospCode}&contractType=${contractTypeID}&itemCatNo=${itemCatNo}`;
+      url = `/api/assam/rateContractCount/getRateContractcountNew?hospitalCode=${hospCode}&contractType=${contractTypeID}&itemCatNo=${itemCatNo}`;
     }
 
     const response = await fetchData(url);
@@ -96,7 +98,7 @@ export const getPieChartData = async (
 
 export const getRcTableData = async (data) => {
   try {
-    let url = `/assam-services/api/assam/rateContract/getAllRateContractList`;
+    let url = `/api/assam/rateContract/getAllRateContractList`;
     const response = await fetchPostData(url, data);
     return response.data;
   } catch (error) {
@@ -107,7 +109,7 @@ export const getRcTableData = async (data) => {
 
 export const loadTenderList = async (hospitalCode, isValid, itemCatNo) => {
   try {
-    let url = `/assam-services/api/assam/TenderMaster/getTenderCombo?hospitalCode=${hospitalCode}&isvalid=${isValid}&itemcatno=${itemCatNo}`;
+    let url = `/api/assam/TenderMaster/getTenderCombo?hospitalCode=${hospitalCode}&isvalid=${isValid}&itemcatno=${itemCatNo}`;
     const response = await fetchData(url);
     return response.data;
   } catch (error) {
@@ -123,7 +125,7 @@ export const getExistingTenderDetails = async (
   tenderNo
 ) => {
   try {
-    let url = `/assam-services/api/assam/TenderMaster/getExistingTableDetails?hospitalCode=${hospitalCode}&isvalid=${isValid}&itemCatNo=${itemCatNo}&tRef=${tenderNo}`;
+    let url = `/api/assam/TenderMaster/getExistingTableDetails?hospitalCode=${hospitalCode}&isvalid=${isValid}&itemCatNo=${itemCatNo}&tRef=${tenderNo}`;
     const response = await fetchData(url);
     return response.data;
   } catch (error) {
@@ -134,7 +136,7 @@ export const getExistingTenderDetails = async (
 
 export const modifyTenderDetails = async (data) => {
   try {
-    let url = `/assam-services/api/assam/TenderMaster/updateTender`;
+    let url = `/api/assam/TenderMaster/updateTender`;
     const response = await fetchPutData(url, data);
     return response.data;
   } catch (error) {
@@ -145,7 +147,7 @@ export const modifyTenderDetails = async (data) => {
 
 export const getStoreDetails = async (hospCode) => {
   try {
-    let url = `/assam-services/api/assam/storeMaster/getStores?hospCode=${hospCode}`;
+    let url = `/api/assam/storeMaster/getStores?hospCode=${hospCode}`;
     const response = await fetchData(url);
     return response.data;
   } catch (error) {
@@ -156,7 +158,7 @@ export const getStoreDetails = async (hospCode) => {
 
 export const getLevelTypes = async (hospCode) => {
   try {
-    let url = `/assam-services/api/assam/levelMaster/getLevel?hospCode=${hospCode}`;
+    let url = `/api/assam/levelMaster/getLevel?hospCode=${hospCode}`;
     const response = await fetchData(url);
     return response.data;
   } catch (error) {
@@ -167,7 +169,7 @@ export const getLevelTypes = async (hospCode) => {
 
 export const getPackagingType = async (hospCode) => {
   try {
-    let url = `/assam-services/api/assam/PackageMaster/getPackagingList?hospitalCode=${hospCode}`;
+    let url = `/api/assam/PackageMaster/getPackagingList?hospitalCode=${hospCode}`;
     const response = await fetchData(url);
     return response.data;
   } catch (error) {
@@ -178,7 +180,18 @@ export const getPackagingType = async (hospCode) => {
 
 export const saveRateContract = async (data) => {
   try {
-    let url = `/assam-services/api/assam/CreateRateContractMaster/saveRateContract`;
+    let url = `/api/assam/CreateRateContractMaster/saveRateContract`;
+    const response = await fetchPostData(url, data);
+    return response.data;
+  } catch (error) {
+    console.error("Error saving rate contract", error);
+    throw error;
+  }
+};
+
+export const getExistingRateContractData = async (data) => {
+  try {
+    let url = `/api/assam/CreateRateContractMaster/getExistingRateContractDetails`;
     const response = await fetchPostData(url, data);
     return response.data;
   } catch (error) {

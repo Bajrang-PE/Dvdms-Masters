@@ -253,13 +253,13 @@ const DataTable = forwardRef(({ masterName, columns, data, isSearchReq = true, i
         </thead>
         <tbody>
           ${sortedData
-            .map(
-              row => `
+        .map(
+          row => `
               <tr>
                 ${exportColumns?.map(col => `<td>${row[col.field]}</td>`).join('')}
               </tr>`
-            )
-            .join('')}
+        )
+        .join('')}
         </tbody>
       </table>
     `;
@@ -338,7 +338,7 @@ const DataTable = forwardRef(({ masterName, columns, data, isSearchReq = true, i
                 />
               </th>
               {columns.map(col => (
-                <th key={col.field}>
+                <th key={col.field} style={{width:col?.width ? col?.width : ""}}>
                   <span
                     onClick={() => { col?.isJSX || col?.ele ? null : handleSort(col) }}
                     style={{

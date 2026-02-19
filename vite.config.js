@@ -8,5 +8,12 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 5177,
+    // proxy: {
+    //   '/api/v1': {
+    //     target: "http://10.226.27.173:8094",
+    //     changeOrigin: true,
+    //     secure: false
+    //   }
+    // }
   },
 });

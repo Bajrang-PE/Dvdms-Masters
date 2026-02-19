@@ -9,7 +9,7 @@ export const AssamFileRoute = (
         {/* -------------------SERVICES------------------------------------------------------------------- */}
         <Route path="/rate-contract" element={<RateContract />} />
         <Route path="/bank-master" element={<BankMasterList />} />
-        <Route path="/rate-contract/add" element={<RateContractAddAssam />} />
+        {/* <Route path="/rate-contract/add" element={<RateContractAddAssam />} /> */}
 
         {/* -------------------MASTERS-------------------------------------------------------------------- */}
 

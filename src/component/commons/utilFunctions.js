@@ -38,3 +38,8 @@ export function isISODateString(value) {
     )
   );
 }
+
+export const getValueInsideBrackets = (str) =>
+  str.match(/\(([^)]+)\)/)?.[1] || "";
+
+
