@@ -1,9 +1,11 @@
+
 import { fetchData, fetchPostData, fetchPutData } from "../../../utils/ApiHook";
 
-export const getManufacturers = async (userID) => {
+
+export const getContractType = async (hospitalCode) => {
   try {
     const response = await fetchData(
-      `/api/assam/supplierMaster/getSupplier?userId=${userID}`
+      `/dvdms/contract/combo/${hospitalCode}`
     );
     return response.data;
   } catch (error) {
@@ -14,18 +16,8 @@ export const getManufacturers = async (userID) => {
 
 export const getMenuList = async () => {
   try {
-    const response = await fetchData(`/api/assam/menu/hierarchy`);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching items:", error);
-    throw error;
-  }
-};
-
-export const getContractTypes = async (hospitalCode) => {
-  try {
     const response = await fetchData(
-      `/api/assam/rateContracttype/getContractType?hospCode=${hospitalCode}`
+      `/dvdms/store/combo/${hospitalCode}`
     );
     return response.data;
   } catch (error) {
@@ -34,12 +26,11 @@ export const getContractTypes = async (hospitalCode) => {
   }
 };
 
-export const getBudgetClasses = async (hospitalCode) => {
+export const getManufacturers = async (hospitalCode) => {
   try {
     const response = await fetchData(
-      `/api/assam/budgetMaster/getBudgetClassification?hospCode=${hospitalCode}`
+      `/dvdms/supplier/combo/${hospitalCode}`
     );
-
     return response.data;
   } catch (error) {
     console.error("Error fetching items:", error);
@@ -47,56 +38,38 @@ export const getBudgetClasses = async (hospitalCode) => {
   }
 };
 
-export const getDrugNames = async (hospitalCode, storeId, itemCatNo) => {
+
+
+export const getDrugName = async (hospitalCode) => {
   try {
     const response = await fetchData(
-      `/api/assam/drugMaster/drugList?hospitalCode=${hospitalCode}&storeId=${storeId}&itemCatno=${itemCatNo}`
+      `/dvdms/drugbrand/combo/${hospitalCode}`
     );
-
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching drugs:", error);
-    throw error;
-  }
-};
-
-export const getPieChartData = async (
-  hospCode,
-  contractTypeID,
-  supplierID,
-  itemBrandID,
-  itemCatNo
-) => {
-  try {
-    let url = ``;
-
-    if (!supplierID && itemBrandID) {
-      url = `/api/assam/rateContractCount/getRateContractcountNew?hospitalCode=${hospCode}&contractType=${contractTypeID}&itemBrandId=${itemBrandID}&itemCatNo=${itemCatNo}`;
-    }
-
-    if (!itemBrandID && supplierID) {
-      url = `/api/assam/rateContractCount/getRateContractcountNew?hospitalCode=${hospCode}&contractType=${contractTypeID}&supplierId=${supplierID}&itemCatNo=${itemCatNo}`;
-    }
-
-    if (itemBrandID && supplierID) {
-      url = `/api/assam/rateContractCount/getRateContractcountNew?hospitalCode=${hospCode}&contractType=${contractTypeID}&supplierId=${supplierID}&itemBrandId=${itemBrandID}&itemCatNo=${itemCatNo}`;
-    }
-
-    if (!itemBrandID && !supplierID) {
-      url = `/api/assam/rateContractCount/getRateContractcountNew?hospitalCode=${hospCode}&contractType=${contractTypeID}&itemCatNo=${itemCatNo}`;
-    }
-
-    const response = await fetchData(url);
     return response.data;
   } catch (error) {
     console.error("Error fetching items:", error);
     throw error;
   }
 };
+
+
+
+export const getStatus = async (hospitalCode) => {
+  try {
+    const response = await fetchData(
+      `/dvdms/drugbrand/combo/${hospitalCode}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching items:", error);
+    throw error;
+  }
+};
+
 
 export const getRcTableData = async (data) => {
   try {
-    let url = `/api/assam/rateContract/getAllRateContractList`;
+    let url = ` ​/rate-contract​/list`;
     const response = await fetchPostData(url, data);
     return response.data;
   } catch (error) {
@@ -105,84 +78,9 @@ export const getRcTableData = async (data) => {
   }
 };
 
-export const loadTenderList = async (hospitalCode, isValid, itemCatNo) => {
-  try {
-    let url = `/api/assam/TenderMaster/getTenderCombo?hospitalCode=${hospitalCode}&isvalid=${isValid}&itemcatno=${itemCatNo}`;
-    const response = await fetchData(url);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching tender list:", error);
-    throw error;
-  }
-};
 
-export const getExistingTenderDetails = async (
-  hospitalCode,
-  isValid,
-  itemCatNo,
-  tenderNo
-) => {
-  try {
-    let url = `/api/assam/TenderMaster/getExistingTableDetails?hospitalCode=${hospitalCode}&isvalid=${isValid}&itemCatNo=${itemCatNo}&tRef=${tenderNo}`;
-    const response = await fetchData(url);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching tender list:", error);
-    throw error;
-  }
-};
 
-export const modifyTenderDetails = async (data) => {
-  try {
-    let url = `/api/assam/TenderMaster/updateTender`;
-    const response = await fetchPutData(url, data);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching tender list:", error);
-    throw error;
-  }
-};
 
-export const getStoreDetails = async (hospCode) => {
-  try {
-    let url = `/api/assam/storeMaster/getStores?hospCode=${hospCode}`;
-    const response = await fetchData(url);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching tender list:", error);
-    throw error;
-  }
-};
 
-export const getLevelTypes = async (hospCode) => {
-  try {
-    let url = `/api/assam/levelMaster/getLevel?hospCode=${hospCode}`;
-    const response = await fetchData(url);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching tender list:", error);
-    throw error;
-  }
-};
 
-export const getPackagingType = async (hospCode) => {
-  try {
-    let url = `/api/assam/PackageMaster/getPackagingList?hospitalCode=${hospCode}`;
-    const response = await fetchData(url);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching tender list:", error);
-    throw error;
-  }
-};
 
-export const saveRateContract = async (data) => {
-  try {
-    let url = `/api/assam/CreateRateContractMaster/saveRateContract`;
-    const response = await fetchPostData(url, data);
-    return response.data;
-  } catch (error) {
-    console.error("Error saving rate contract", error);
-    throw error;
-  }
-};

@@ -4,9 +4,10 @@ import axios from "axios";
 // const BaseUrl = 'http://10.226.17.6:8084';
 // const BaseUrl = 'http://10.226.29.202:8091';
 
-const BaseUrl = "http://10.226.29.29:8080/"; //AD AS
+// const BaseUrl = "http://10.226.29.29:8080/"; //AD AS
 // const BaseUrl = "http://10.226.30.86:8091"; //Main Gateway
 // const BaseUrl = "http://10.226.30.45:9002"; //HP prd
+ const BaseUrl = "http://10.226.28.223:8027"; //UP pritee
 
 axios.defaults.baseURL = BaseUrl;
 
