@@ -235,7 +235,7 @@ const SuppIntDccRequest = ({ selectedData, actionType, getListData }) => {
     const { value: supplierID, label: supplierName } = useSelector(
         state => state.jhMst.supplierID
     );
-
+    console.log('selectedData', selectedData)
     const [poDetailsList, setPoDetailsList] = useState([]);
     const [poDetails, setPoDetails] = useState({});
     const [remarks, setRemarks] = useState("");

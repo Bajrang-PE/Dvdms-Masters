@@ -75,7 +75,7 @@ const DeliveryDetails = (props) => {
         }
     }
 
-    const SEAT_ID = 14462;
+    const SEAT_ID = 12456;
     const dispatch = useDispatch();
     const [values, dispatcher] = useReducer(reducerActions, initialValues);
     const [preDelDetailList, setPreDelDetailList] = useState([]);
@@ -669,7 +669,7 @@ const DeliveryDetails = (props) => {
             setErrors(prev => ({ ...prev, "challanInvoiceDateErr": "This Field is required!" }))
             isValid = false;
         }
-        if (!values?.deliveryMode?.trim()) {
+        if (!values?.deliveryMode?.toString()?.trim()) {
             setErrors(prev => ({ ...prev, "deliveryModeErr": "This Field is required!" }))
             isValid = false;
         }
@@ -681,28 +681,28 @@ const DeliveryDetails = (props) => {
             setErrors(prev => ({ ...prev, "transNameErr": "This Field is required!" }))
             isValid = false;
         }
-        if (!values?.lrCopy?.trim()) {
-            setErrors(prev => ({ ...prev, "lrCopyErr": "Please select a file" }))
-            isValid = false;
-        }
-        if (!values?.ewayBill?.trim()) {
-            setErrors(prev => ({ ...prev, "ewayBillErr": "Please select a file" }))
-            isValid = false;
-        }
-        if (!values?.invoiceCopy?.trim()) {
-            setErrors(prev => ({ ...prev, "invoiceCopyErr": "Please select a file" }))
-            isValid = false;
-        }
+        // if (!values?.lrCopy?.trim()) {
+        //     setErrors(prev => ({ ...prev, "lrCopyErr": "Please select a file" }))
+        //     isValid = false;
+        // }
+        // if (!values?.ewayBill?.trim()) {
+        //     setErrors(prev => ({ ...prev, "ewayBillErr": "Please select a file" }))
+        //     isValid = false;
+        // }
+        // if (!values?.invoiceCopy?.trim()) {
+        //     setErrors(prev => ({ ...prev, "invoiceCopyErr": "Please select a file" }))
+        //     isValid = false;
+        // }
 
-        if (!values?.drugName?.trim()) {
-            setErrors(prev => ({ ...prev, "drugNameErr": "This Field is required!" }))
-            isValid = false;
-        }
+        // if (!values?.drugName?.trim()) {
+        //     setErrors(prev => ({ ...prev, "drugNameErr": "This Field is required!" }))
+        //     isValid = false;
+        // }
 
-        if (!addedRows?.length || addedRows?.length === 0) {
-            setErrors(prev => ({ ...prev, "addedRowsErr": "Can not save empty drug details" }))
-            isValid = false;
-        }
+        // if (!addedRows?.length || addedRows?.length === 0) {
+        //     setErrors(prev => ({ ...prev, "addedRowsErr": "Can not save empty drug details" }))
+        //     isValid = false;
+        // }
 
 
         if (isValid) {
@@ -996,7 +996,7 @@ const DeliveryDetails = (props) => {
             <div className="employeeMaster__container d-block">
                 <h4 className="employeeMaster__container-heading">Delivery Drug Details</h4>
 
-                <div>
+                <div className='w-50'>
                     <ComboDropDown
                         options={drugNameDrpData}
                         onChange={handleChange}

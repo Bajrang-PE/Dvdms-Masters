@@ -21,7 +21,6 @@ import {
   setStore,
   setSupplierData,
 } from "../../../../features/Ratecontract/rateContractJHKSlice";
-import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRotateRight, faXmark } from "@fortawesome/free-solid-svg-icons";
 import PieChart from "../../../commons/PieChart";
@@ -105,7 +104,7 @@ export default function RateContractJH() {
 
   //effects
   useEffect(() => {
-    
+
     const loadContracts = async () => {
       try {
         const data = await getContractTypes(998);

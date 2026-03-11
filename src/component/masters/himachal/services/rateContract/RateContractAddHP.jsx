@@ -3,27 +3,24 @@ import { useDispatch, useSelector } from 'react-redux';
 import { hidePopup } from '../../../../../features/commons/popupSlice';
 import { ComboDropDown, InputField, RadioButton } from '../../../../commons/FormElements';
 import DataTable from '../../../../commons/Datatable';
-import SelectBox from '../../../../commons/SelectBox';
+import { addHpRcDetails, getHpRcContractDetailsOnTender, getHpRcDownloadFile, getHpRcDrugCmbWithBrand, getHpRcListData, getHpRcSuppEmdDetails, getHpRcSuppLevelCombo, getHpRcTaxTypeCombo, getHpRcTenderCmbOnSuppId, getHpRcUnitCombo, saveHpRcFileUpload } from '../../../../../api/Himachal/services/rateContractAPI_HP';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faClose, faEye } from '@fortawesome/free-solid-svg-icons';
+import { parseDate } from '../../../../commons/utilFunctions';
+import { ToastAlert } from '../../../../../utils/Toast';
+import BottomButtons from '../../../../commons/BottomButtons';
+import MasterPopUpModal from '../../../../commons/MasterPopUpModal';
 
-const existingRcTableCols = [
-  { header: "Supplier Name", field: "suppName" },
-  { header: "Level", field: "levelType" },
-  { header: "Rate/Unit", field: "rate" },
-  { header: "RC No.", field: "hstnumRcNo" },
-  { header: "Contract Validity", field: "bgValidity" },
-  { header: "Tender No.", field: "tenderNo" },
-  { header: "BG Details", field: "bgAmt" },
-];
 const bgdetailsTableCols = [
-  { header: "EMD Amount (₹)", field: "bg_amt" },
-  { header: "EMD From Date", field: "bg_frm_date" },
-  { header: "EMD To Date", field: "bg_to_date" },
-  { header: "EMD No.", field: "hstnum_bg_no" },
-  { header: "Refund Amount", field: "hstnum_refund_amount" },
+  { header: "EMD Amount (₹)", field: "hstnumBgAmt" },
+  { header: "EMD From Date", field: "hstdtBgFrmDate" },
+  { header: "EMD To Date", field: "hstdtBgToDate" },
+  { header: "EMD No.", field: "hstnumBgNo" },
+  { header: "Refund Amount", field: "hstnumRefundAmount" },
 ];
 
 const RateContractAddHP = (props) => {
-  const { drugList } = props;
+  const { suppliers } = props;
 
   const { value: storeID, label: storeName } = useSelector(
     (state) => state.himachalMst.storeID
@@ -31,10 +28,6 @@ const RateContractAddHP = (props) => {
   const { value: contractID, label: contractName } = useSelector(
     (state) => state.himachalMst.contractDetails
   );
-
-
-
-  const taxTypes = [{ label: "GST", value: "3" }];
 
   const batchSizeOptions = Array.from({ length: 50 }, (_, i) => ({
     value: i + 1,
@@ -102,14 +95,19 @@ const RateContractAddHP = (props) => {
   const [selectedFile, setSelectedFile] = useState(null);
 
   const [whetherImported, setWhetherImported] = useState("No");
-  const [drugName, setDrugName] = useState(0);
-  const [itemID, setItemID] = useState(0);
-  const [suppliers, setSuppliers] = useState([]);
+  const [drugName, setDrugName] = useState('');
+  const [drugBrandList, setDrugBrandList] = useState([]);
+  const [tenderNoList, setTenderNoList] = useState([]);
+  const [isFileUploaded, setIsFileUploaded] = useState(false);
+  const [fileName, setFileName] = useState('');
+  const [viewDetails, setViewDetails] = useState([]);
+  const [viewModal, setViewModal] = useState(false);
+  const [taxTypes, setTaxTypes] = useState([]);
 
-  console.log('drugName', drugName)
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    console.log('e.target', e.target)
     const errName = name + "Err";
     dispatcher({ type: "SET_FIELD", field: name, value });
     if (name === 'rate' || name === 'unit') {
@@ -127,87 +125,140 @@ const RateContractAddHP = (props) => {
     dispatcher({ type: "RESET_FORM" });
   }
 
+  const getContractDetailsOnSuppliers = (suppid, tendNo) => {
+    getHpRcContractDetailsOnTender(998, tendNo, suppid)?.then((data) => {
+      if (data?.status === 1) {
+        dispatcher({
+          type: "SET_FIELDS",
+          payload: {
+            tenderNo: tendNo,
+            contractFrom: data?.data[0]?.dtContractFrmDate,
+            contractTo: data?.data[0]?.dtContractToDate,
+            rcFinalDate: data?.data[0]?.dtTenderDate,
+            quotationNo: data?.data[0]?.strQuotationRefNo,
+            acceptanceDate: data?.data[0]?.dtAcceptanceDate,
+            financeCommitteDate: data?.data[0]?.dtFinancialCommDate,
+            bankName: data?.data[0]?.strBankName,
+            branchName: data?.data[0]?.strBranchName,
+            bankIfscCode: data?.data[0]?.strIfscCode,
+            bankID: data?.data[0]?.numBankId,
+            tenderDate: data?.data[0]?.dtTenderDate,
+          },
+        });
+      }
+    });
+  }
+
+  useEffect(() => {
+    if (formState?.supplierName && formState?.tenderNo)
+      getContractDetailsOnSuppliers(formState?.supplierName, formState?.tenderNo);
+  }, [formState?.tenderNo])
+
+
   const getContractDetailsWithTender = () => {
-    const { supplierName, tenderNo } = formState;
-    getTenderNumber(998, supplierName).then((res) => {
+    getHpRcTenderCmbOnSuppId(998, formState?.supplierName, contractID).then((res) => {
       console.log("res", res);
       if (res?.status === 1) {
-        const tendNo = res?.data[0]?.hstnum_tender_no;
-        getContractDetails(998, supplierName, tendNo)?.then((data) => {
-          console.log("data", data);
-          if (data?.status === 1) {
-            dispatcher({
-              type: "SET_FIELDS",
-              payload: {
-                tenderNo: tendNo,
-                contractFrom: data?.data[0]?.contract_frm_date,
-                contractTo: data?.data[0]?.contratct_to_date,
-                rcFinalDate: data?.data[0]?.tender_date,
-                quotationNo: data?.data[0]?.quot_ref_no,
-                acceptanceDate: data?.data[0]?.acceptance_date,
-                financeCommitteDate: data?.data[0]?.fin_comm_date,
-                bankName: data?.data[0]?.bank_name,
-                branchName: data?.data[0]?.hststr_branch_name,
-                bankIfscCode: data?.data[0]?.hststr_ifsc_code,
-                bankID: data?.data[0]?.hstnum_bank_id,
-                tenderDate: data?.data[0]?.tender_date,
-              },
-            });
-          }
-        });
+        const drpDt = res?.data?.length > 0 && res?.data?.map((dt) => ({
+          value: dt?.value,
+          label: dt?.display
+        }))
+        console.log('drpDt', drpDt)
+        if (drpDt?.length > 1) {
+          setTenderNoList(drpDt);
+        } else if (drpDt?.length === 1) {
+          const tendNo = drpDt[0]?.value;
+          setTenderNoList(drpDt);
+          dispatcher({ type: "SET_FIELD", field: 'tenderNo', value: tendNo });
+        } else {
+          setTenderNoList([]);
+        }
       }
     });
   };
 
   const levelTypeDrpData = () => {
-    // getLevelTypeCmb(998)?.then((res) => {
-    //   if (res?.status === 1) {
-    //     const drpDt = res?.data?.map((dt) => ({
-    //       value: dt?.id,
-    //       label: dt?.level_type,
-    //     }));
-    //     setLevelType(drpDt);
-    //   } else {
-    //     setLevelType([]);
-    //   }
-    // });
+    getHpRcSuppLevelCombo(998)?.then((res) => {
+      if (res?.status === 1) {
+        const drpDt = res?.data?.map((dt) => ({
+          value: dt?.value,
+          label: dt?.display,
+        }));
+        setLevelType(drpDt);
+      } else {
+        setLevelType([]);
+      }
+    });
   };
 
+  const getTaxTypeDrpDt = () => {
+    getHpRcTaxTypeCombo(998)?.then((res) => {
+      if (res?.status === 1) {
+        const dt = res?.data?.map((dt) => ({
+          value: dt?.value,
+          label: dt?.display
+        }))
+        setTaxTypes(dt);
+      } else {
+        setTaxTypes([]);
+      }
+    })
+  }
+
   const unitDrpData = () => {
-    // getUnitCombo(998)?.then((res) => {
-    //   if (res?.status === 1) {
-    //     const drpDt = res?.data?.map((dt) => ({
-    //       value: dt?.unit_id,
-    //       label: dt?.unit_name,
-    //     }));
-    //     setUnitDrpDt(drpDt);
-    //   } else {
-    //     setUnitDrpDt([]);
-    //   }
-    // });
+    getHpRcUnitCombo(998)?.then((res) => {
+      if (res?.status === 1) {
+        const drpDt = res?.data?.map((dt) => ({
+          value: dt?.value,
+          label: dt?.display,
+        }));
+        setUnitDrpDt(drpDt);
+      } else {
+        setUnitDrpDt([]);
+      }
+    });
+  };
+
+  const getDrugWithBrandIdDrpDt = () => {
+    getHpRcDrugCmbWithBrand(998, 'ACTIVE')?.then((res) => {
+      if (res?.status === 1) {
+        const drpDt = res?.data
+          ?.filter(dt => dt?.value !== '0')
+          ?.map((dt) => ({
+            value: dt?.value,
+            label: dt?.display,
+          }));
+        setDrugBrandList(drpDt);
+      } else {
+        setDrugBrandList([]);
+      }
+    });
   };
 
   useEffect(() => {
     levelTypeDrpData();
     unitDrpData();
+    getDrugWithBrandIdDrpDt();
+    getTaxTypeDrpDt();
   }, []);
 
   useEffect(() => {
-    // async function fetchExistingRCs() {
-    //   const response = await getExistingRC(998, storeID, drugName, contractID);
-    //   if (response?.status === 1) {
-    //     setExistingRCs(response?.data);
-    //   } else {
-    //     setExistingRCs([]);
-    //   }
-    // }
-    // fetchExistingRCs();
+    async function fetchExistingRCs() {
+      const response = await getHpRcListData(998, '', drugName?.split('^')[0], contractID);
+      if (response?.status === 1) {
+        setExistingRCs(response?.data?.content);
+      } else {
+        setExistingRCs([]);
+      }
+    }
+    if (drugName) {
+      fetchExistingRCs();
+    }
   }, [storeID, drugName, contractID]);
 
   const fetchBGListDt = () => {
     const { supplierName, tenderNo } = formState;
-
-    getBgDetailList(998, supplierName, contractID, tenderNo)?.then((res) => {
+    getHpRcSuppEmdDetails(998, supplierName, tenderNo)?.then((res) => {
       if (res?.status === 1) {
         setBgList(res?.data);
       } else {
@@ -244,26 +295,10 @@ const RateContractAddHP = (props) => {
     }
   }, [formState?.supplierName]);
 
-  useEffect(() => {
-    if (contractID) {
-      // getSuppliersWithContractCmb(998, contractID).then((res) => {
-      //   if (res?.status === 1) {
-      //     const drpDt = res?.data?.map((dt) => ({
-      //       value: dt?.hstnum_supplier_id,
-      //       label: dt?.supp_name,
-      //     }));
-      //     setSuppliers(drpDt);
-      //   } else {
-      //     setSuppliers([]);
-      //   }
-      // });
-    }
-  }, [contractID]);
-
-  const handleSave = () => {
+  const handleSave = (draft) => {
     let isValid = true;
 
-    if (!drugName?.trim()) {
+    if (!drugName?.toString()?.trim()) {
       seterrors((prev => ({ ...prev, 'drugNameErr': "Drug Name is Required!" })));
       isValid = false;
     }
@@ -309,68 +344,67 @@ const RateContractAddHP = (props) => {
     }
 
     if (isValid) {
-      saveContractdetails();
+      saveContractdetails(draft);
     }
 
   }
 
-  const saveContractdetails = () => {
-
+  const saveContractdetails = (isdraft) => {
+    const y = new Date().getFullYear();
     const val = {
-      "gnumHospitalCode": 998,
-      "gnumCancelSeatid": "",
-      "hstnumContractTypeId": contractID,
-      "hstnumBankId": formState?.bankID,
-      "hstnumBranchId": formState?.branchName,
-      "hststrIfscCode": formState?.bankIfscCode,
-      "hstnumBgAmt": parseInt(bgList[0]?.bg_amt || '0'),
-      "hstnumBgNo": bgList[0]?.hstnum_bg_no || '',
-      "strTenderDateDtls": formState?.tenderDate,
-      "hstnumSupplierId": parseInt(formState?.supplierName),
-      "hstnumStoreId": storeID,
-      "hstnumItembrandId": parseInt(drugName),
-      "gnumSeatid": 10001,
-      "gnumIsvalid": 1,
-      "hstnumItemId": parseInt(itemID || 0),
+      "gnumHospitalCode": 998,//
+      // "gnumCancelSeatid": "",
+      "hstnumContractTypeId": contractID,//
+      // "hstnumBankId": formState?.bankID,
+      // "hstnumBranchId": formState?.branchName,
+      // "hststrIfscCode": formState?.bankIfscCode,
+      // "hstnumBgAmt": parseInt(bgList[0]?.bg_amt || '0'),
+      // "hstnumBgNo": bgList[0]?.hstnum_bg_no || '',
+      "hstnumSupplierId": parseInt(formState?.supplierName),//
+      "hstnumStoreId": storeID,//
+      "hstnumItemBrandId": parseInt(drugName),//
+      "gnumSeatid": 10001,//
+      // "gnumIsvalid": 1,
+      "hstnumItemId": parseInt(drugName?.split('^')[1] || 0),//
 
-      "hststrTenderNo": formState?.tenderNo?.toString(),//s
-      "hstnumContractQty": parseInt(formState?.contractedQty),
-      "hstnumShelfLife": parseInt(formState?.shelfLife),
-      "hstnumBatchSize": parseInt(formState?.noOfBatches),
-      "hstnumImportedFlag": whetherImported === "Yes" ? 1 : 0,
-      "sstnumLevelTypeId": parseInt(formState?.level),
-      "hstnumAllocationOrderQty": parseInt(formState?.allocationQty),
-      "hstnumTaxType": parseInt(formState?.taxType),
-      "hstnumRateUnitId": parseInt(formState?.unit),
-      "hstnumRate": parseInt(formState?.rate),
-      "hstnumDeliveryDays": parseInt(formState?.deliveryDay),
-      "hstnumCgst": parseInt(formState?.cgst),
-      "hstnumSgst": parseInt(formState?.sgst),
-      "hstnumDiscount": parseInt(formState?.discount),
-      "gstrRemarks": formState?.remarks,
-      "hstdtContractFrmdate": formState?.contractFrom,
-      "hstdtContractTodate": formState?.contractTo,
-      "hstnumDccRequireFlag": formState?.isDccMandatory ? 1 : 0
+      "hststrTenderNo": formState?.tenderNo?.toString(),//bbbb
+      "hstnumContractQty": parseInt(formState?.contractedQty),//bbb
+      "hstnumShelfLife": parseInt(formState?.shelfLife),//bbb
+      "hstnumBatchSize": parseInt(formState?.noOfBatches),//
+      "hstnumImportedFlag": whetherImported === "Yes" ? 1 : 0,//bbb
+      "sstnumLevelTypeId": parseInt(formState?.level),//
+      "hstnumAllocationOrderQty": parseInt(formState?.allocationQty),//bbb
+      "hstnumTaxType": parseInt(formState?.taxType),//
+      "hstnumRateUnitid": parseInt(formState?.unit?.split('^')[0]),//
+      "hstnumRate": parseInt(formState?.rate),//
+      "hstnumDeliveryDays": parseInt(formState?.deliveryDay),//bbb
+      "hstnumCgst": parseInt(formState?.cgst),//
+      "hstnumSgst": parseInt(formState?.sgst),//
+      "hstnumDiscount": parseInt(formState?.discount),//bbb
+      "gstrRemarks": formState?.remarks,//
+      "hstdtContractFrmdate": new Date(formState?.contractFrom),//
+      "hstdtContractTodate": new Date(formState?.contractTo),//
+      // "hstnumDccRequireFlag": formState?.isDccMandatory ? 1 : 0,
+
+      "hstnumRcNo": "",//
+      "hstdtFinancialStartDate": `${y - 1}-04-01T00:00:00`,//
+      "hstdtFinancialEndDate": `${y}-03-31T00:00:00`,//
+      "hstdtTenderDate": new Date(formState?.tenderDate),//
+      "sstnumItemCatNo": 10,//
+      // "hstnumTenderId": 5001
+      "hststrFileName": fileName,
+      'strDraftFlag': isdraft
     }
 
-    const formData = new FormData();
+    console.log('val', val)
 
-    formData.append("rateContractDto", JSON.stringify(val));
-
-    if (selectedFile) {
-      formData.append("file", selectedFile, selectedFile?.name);
-    }
-
-    // for (let pair of formData.entries()) {
-    //   console.log(pair[0] + ': ', pair[1]);
-    // }
-    addContractdetails(formData)?.then((data) => {
+    addHpRcDetails(val)?.then((data) => {
       if (data?.status === 1) {
-        alert('Rate Contract Added Successfully');
+        ToastAlert('Rate Contract Added Successfully', 'success');
         handleReset();
         dispatch(hidePopup());
       } else {
-        alert(data?.message);
+        ToastAlert(data?.message, 'error');
       }
       console.log('data', data)
     })
@@ -381,37 +415,117 @@ const RateContractAddHP = (props) => {
     setSelectedFile(event.target.files[0]);
   };
 
+  const handleFileUpload = () => {
+    if (selectedFile) {
+      const formData = new FormData();
+      formData.append("file", selectedFile, selectedFile?.name);
+      saveHpRcFileUpload(formData)?.then((res) => {
+        if (res?.status === 1) {
+          setIsFileUploaded(true);
+          setFileName(res?.data?.fileName);
+          setSelectedFile(null);
+          ToastAlert("File uploaded", 'success')
+        } else {
+          ToastAlert(res?.msg, 'error');
+        }
+        console.log('res', res);
+      })
+    } else {
+      ToastAlert("Please select a file", 'error');
+    }
+
+  }
+
+  const handleViewAction = (row) => {
+    getHpRcSuppEmdDetails(998, row?.numSupplierId, row?.hstnumTenderNo)?.then((res) => {
+      if (res?.status === 1) {
+        setViewDetails(res?.data);
+        setViewModal(true);
+      } else {
+        setViewDetails([]);
+        setViewModal(false);
+      }
+    });
+
+  }
+
+  const onCloseModal = () => {
+    setViewModal(false);
+    setViewDetails([]);
+  }
+
+  const existingRcTableCols = [
+    { header: "Supplier Name", field: "strSupplierName", width: "20%" },
+    { header: "Level", field: "strLevelTypeName", width: "8%" },
+    { header: "Rate/Unit", field: "strTax" },
+    { header: "RC No.", field: "hstnumRcNo" },
+    {
+      header: "Contract Validity", field: "hstdtContractTodate", width: "20%", isJSX: true, ele: (row) => (
+        <div style={{
+          textAlign: "center"
+        }}>
+          <span>{`${parseDate(row?.hstdtContractFrmdate)} To ${parseDate(row?.hstdtContractTodate)}`}</span>
+        </div>
+      )
+    },
+    {
+      header: "Tender No.", field: "tenderNo", isJSX: true, width: "18%", ele: (row) => (
+        <div style={{
+          textAlign: "center"
+        }}>
+          <span>{`${row?.strTenderRefNo}(${row?.hstnumTenderNo})`}</span>
+        </div>
+      )
+    },
+    {
+      header: "BG Details", field: "bgAmt", isJSX: true, width: "8%",
+      ele: (row) => (
+        <div style={{
+          textAlign: "center"
+        }}>
+          <button className="btn btn-sm btn-success" style={{ padding: "1px 3px" }} onClick={() => handleViewAction(row)} title="View"><FontAwesomeIcon icon={faEye} size='sm' /></button>
+        </div>
+      ),
+    },
+  ];
+
+  const mstModalColumn = [
+    { label: "Supplier Name", key: "strSupplier" },
+    { label: "Tender No.", key: "strTenderRefNo", isJSX: true, ele: (row) => (<span>{row?.strTenderRefNo?.split('^')[0]}</span>) },
+    { label: "EMD Amount(₹)", key: "hstnumBgAmt" },
+    { label: "EMD From Date", key: "hstdtBgFrmDate" },
+    { label: "EMD To Date", key: "hstdtBgToDate" },
+    { label: "EMD No.", key: "hstnumBgNo" },
+    { label: "Refund Amount(₹)", key: "hstnumRefundAmount" },
+  ]
+
   return (
-    <section className="rateContractAddJHK">
-      <h3 className="rateContractAddJHK__heading">
+    <section className="unified-wrapper">
+      <h3 className="unified-wrapper__heading">
         Rate Contract Itemwise Details
       </h3>
-      <div className="rateContractAddJHK__container">
-        <h4 className="rateContractAddJHK__container-heading">
+      <div className="unified-wrapper__container">
+        <h4 className="unified-wrapper__container-heading">
           RC Type Details
         </h4>
         <div>
-          <label htmlFor="supplierName" className="rateContractAddJHK__label">
+          <label htmlFor="supplierName" className="Wrapper__label">
             <b>Store Name</b> : {storeName}
           </label>
-          <label htmlFor="contractType" className="rateContractAddJHK__label">
+          <label htmlFor="contractType" className="Wrapper__label">
             <b>Contract Type</b> : {contractName}
           </label>
           <div>
-            <label
-              htmlFor="taxType"
-              className="rateContractAddJHK__label required-label"
-            >
-              <b>Drug Name</b>
-            </label>
             <ComboDropDown
-              options={drugList}
+              options={drugBrandList}
               onChange={(e) => {
                 setDrugName(e?.target?.value);
-                setItemID(drugList?.find(dt => dt?.value == e?.target?.value)?.itemId || null)
+                // setItemID(drugList?.find(dt => dt?.value == e?.target?.value)?.itemId || null)
+                seterrors({ ...errors, 'drugNameErr': "" });
               }}
               name={"drugName"}
               value={drugName}
+              label={'Drug Name :'}
             />
             {errors?.drugNameErr &&
               <span className="text-sm text-[#9b0000] mt-1 ms-1">
@@ -422,9 +536,9 @@ const RateContractAddHP = (props) => {
         </div>
 
       </div>
-      <h4 className="bg-[#097080] text-white p-2 rounded">
+      <h5 className="bg-[#097080] text-white p-1 rounded">
         Existing Rate Contract
-      </h4>
+      </h5>
       <div style={{ marginBottom: "3rem" }}>
         <DataTable
           masterName={"Existing Rate Contract"}
@@ -437,81 +551,76 @@ const RateContractAddHP = (props) => {
         />
       </div>
 
-      <div className="rateContractAddJHK__container">
-        <h4 className="rateContractAddJHK__container-heading">
+      <div className="unified-wrapper__container">
+        <h4 className="unified-wrapper__container-heading">
           Contract Details
         </h4>
 
         <div>
-          <label
-            htmlFor="taxType"
-            className="rateContractAddJHK__label required-label"
-          >
-            Supplier Name:
-          </label>
-          <SelectBox
-            id="supplierName"
-            options={suppliers}
+          <ComboDropDown
+            options={suppliers?.filter(dt => dt?.value !== '0')}
             onChange={handleChange}
             name={"supplierName"}
             value={formState?.supplierName}
-            className="Wrapper__select p-4"
-            error={errors?.supplierNameErr}
+            label={"Tender No.:"}
+            isRequired
           />
+          {errors?.supplierNameErr &&
+            <span className="text-sm text-[#9b0000] mt-1 ms-1">
+              {errors?.supplierNameErr}
+            </span>
+          }
         </div>
 
         <div>
-          <label
-            htmlFor="taxType"
-            className="rateContractAddJHK__label required-label"
-          >
-            Tender No.:
-          </label>
-          <SelectBox
-            id="tenderNo"
-            options={[]}
+          <ComboDropDown
+            options={tenderNoList}
             onChange={handleChange}
             name={"tenderNo"}
             value={formState?.tenderNo}
-            placeholder={`${formState?.tenderNo ? formState?.tenderNo : 'select value'}`}
-            className="Wrapper__select p-4"
-            disabled={formState?.tenderNo}
-            error={formState?.tenderNo ? "" : errors?.tenderNoErr}
+            isDisabled={tenderNoList?.length === 1}
+            label={"Tender No.:"}
+            isRequired
           />
+          {errors?.tenderNoErr &&
+            <span className="text-sm text-[#9b0000] mt-1 ms-1">
+              {errors?.tenderNoErr}
+            </span>
+          }
         </div>
 
         <div>
-          <label htmlFor="" className="rateContractAddJHK__label mb-0">
+          <label htmlFor="" className="Wrapper__label mb-0">
             Contract From :{" "}
             <span className="fs-6 fw-normal">{formState?.contractFrom}</span>{" "}
           </label>
         </div>
         <div>
-          <label htmlFor="" className="rateContractAddJHK__label mb-0">
+          <label htmlFor="" className="Wrapper__label mb-0">
             Contract To :{" "}
             <span className="fs-6 fw-normal">{formState?.contractTo}</span>{" "}
           </label>
         </div>
         <div>
-          <label htmlFor="" className="rateContractAddJHK__label mb-0">
+          <label htmlFor="" className="Wrapper__label mb-0">
             RC Finalization Date :{" "}
             <span className="fs-6 fw-normal">{formState?.rcFinalDate}</span>{" "}
           </label>
         </div>
         <div>
-          <label htmlFor="" className="rateContractAddJHK__label mb-0">
+          <label htmlFor="" className="Wrapper__label mb-0">
             Quotation No. :{" "}
             <span className="fs-6 fw-normal">{formState?.quotationNo}</span>{" "}
           </label>
         </div>
         <div>
-          <label htmlFor="" className="rateContractAddJHK__label mb-0">
+          <label htmlFor="" className="Wrapper__label mb-0">
             Acceptance Date :{" "}
             <span className="fs-6 fw-normal">{formState?.acceptanceDate}</span>{" "}
           </label>
         </div>
         <div>
-          <label htmlFor="" className="rateContractAddJHK__label mb-0">
+          <label htmlFor="" className="Wrapper__label mb-0">
             Financial Committee Date :{" "}
             <span className="fs-6 fw-normal">
               {formState?.financeCommitteDate}
@@ -519,80 +628,67 @@ const RateContractAddHP = (props) => {
           </label>
         </div>
         <div>
-          <label htmlFor="" className="rateContractAddJHK__label mb-0">
+          <label htmlFor="" className="Wrapper__label mb-0">
             Bank Name :{" "}
             <span className="fs-6 fw-normal">{formState?.bankName}</span>{" "}
           </label>
         </div>
         <div>
-          <label htmlFor="" className="rateContractAddJHK__label mb-0">
+          <label htmlFor="" className="Wrapper__label mb-0">
             Branch Name :{" "}
             <span className="fs-6 fw-normal">{formState?.branchName}</span>{" "}
           </label>
         </div>
         <div>
-          <label htmlFor="" className="rateContractAddJHK__label mb-0">
+          <label htmlFor="" className="Wrapper__label mb-0">
             Bank IFSC Code :{" "}
             <span className="fs-6 fw-normal">{formState?.bankIfscCode}</span>{" "}
           </label>
         </div>
       </div>
 
-      <div className="rateContractAddJHK__container">
-        <h4 className="rateContractAddJHK__container-heading">
+      <div className="unified-wrapper__container">
+        <h4 className="unified-wrapper__container-heading">
           Tender Details
         </h4>
 
         <div>
-          <label htmlFor="contractedQty" className="employeeMaster__label">
-            Contracted Qty.
-          </label>
           <InputField
             id="contractedQty"
-            className="rateContractAddJHK__input"
+            className="Wrapper__inputs"
             type="text"
             name={"contractedQty"}
             placeholder="Enter Qty."
             value={formState?.contractedQty}
             onChange={handleChange}
+            isNumber
+            label={"Contracted Qty. :"}
           />
         </div>
 
         <div>
-          <label
-            htmlFor="shelfLife"
-            className="employeeMaster__label required-label"
-          >
-            Shelf Life(In days)
-          </label>
           <InputField
             id="shelfLife"
-            className="rateContractAddJHK__input"
+            className="Wrapper__inputs"
             type="text"
             name={"shelfLife"}
             placeholder="Enter value"
             value={formState?.shelfLife}
             onChange={handleChange}
+            isNumber
+            label={"Shelf Life(In days) :"}
+            isError={errors?.shelfLifeErr}
+            isRequired
           />
-          {errors?.shelfLifeErr &&
-            <span className="text-sm text-[#9b0000] mt-1 ms-1">
-              {errors?.shelfLifeErr}
-            </span>
-          }
         </div>
 
         <div>
-          <label
-            htmlFor="taxType"
-            className="rateContractAddJHK__label required-label"
-          >
-            No of Batches:
-          </label>
           <ComboDropDown
             options={batchSizeOptions}
             onChange={handleChange}
             name={"noOfBatches"}
             value={formState?.noOfBatches}
+            label={'No of Batches :'}
           />
           {errors?.noOfBatchesErr &&
             <span className="text-sm text-[#9b0000] mt-1 ms-1">
@@ -601,8 +697,8 @@ const RateContractAddHP = (props) => {
           }
         </div>
 
-        <div className="bankmaster__container">
-          <label className="bankmaster__label required-label">
+        <div className="">
+          <label className="Wrapper__label required-label d-block">
             {" "}
             Whether Imported:
           </label>
@@ -612,6 +708,7 @@ const RateContractAddHP = (props) => {
             value="Yes"
             checked={whetherImported === "Yes"}
             onChange={(e) => setWhetherImported(e?.target?.value)}
+            className="ms-2"
           />
           <RadioButton
             label="No"
@@ -619,21 +716,17 @@ const RateContractAddHP = (props) => {
             value="No"
             checked={whetherImported === "No"}
             onChange={(e) => setWhetherImported(e?.target?.value)}
+            className="ms-2"
           />
         </div>
 
         <div>
-          <label
-            htmlFor="level"
-            className="rateContractAddJHK__label required-label"
-          >
-            Level
-          </label>
           <ComboDropDown
             options={levelType}
             onChange={handleChange}
             name={"level"}
             value={formState?.level}
+            label={'Level :'}
           />
           {errors?.levelErr &&
             <span className="text-sm text-[#9b0000] mt-1 ms-1">
@@ -643,32 +736,26 @@ const RateContractAddHP = (props) => {
         </div>
 
         <div>
-          <label htmlFor="allocationQty" className="employeeMaster__label">
-            Allocation of Ordered Qty.(%)
-          </label>
           <InputField
             id="allocationQty"
-            className="rateContractAddJHK__input"
+            className="Wrapper__inputs"
             type="text"
             name={"allocationQty"}
             placeholder="Enter qty"
             value={formState?.allocationQty}
             onChange={handleChange}
+            isNumber
+            label={"Allocation of Ordered Qty.(%) :"}
           />
         </div>
 
         <div>
-          <label
-            htmlFor="taxType"
-            className="rateContractAddJHK__label required-label"
-          >
-            Tax Type
-          </label>
           <ComboDropDown
             options={taxTypes}
             onChange={handleChange}
             name={"taxType"}
             value={formState?.taxType}
+            label={'Tax Type :'}
           />
           {errors?.taxTypeErr &&
             <span className="text-sm text-[#9b0000] mt-1 ms-1">
@@ -678,54 +765,40 @@ const RateContractAddHP = (props) => {
         </div>
 
         <div>
-          <label
-            htmlFor="cgst"
-            className="employeeMaster__label required-label"
-          >
-            CGST (%)
-          </label>
           <InputField
             id="cgst"
-            className="rateContractAddJHK__input"
+            className="Wrapper__inputs"
             type="text"
             name={"cgst"}
             placeholder="Enter value"
             value={formState?.cgst}
             onChange={handleChange}
+            isNumber
+            label={'CGST (%) :'}
+            isError={errors?.cgstErr}
+            isRequired
           />
-          {errors?.cgstErr &&
-            <span className="text-sm text-[#9b0000] mt-1 ms-1">
-              {errors?.cgstErr}
-            </span>
-          }
         </div>
 
         <div>
-          <label
-            htmlFor="sgst"
-            className="employeeMaster__label required-label"
-          >
-            SGST (%)
-          </label>
           <InputField
             id="sgst"
-            className="rateContractAddJHK__input"
+            className="Wrapper__inputs"
             type="text"
             name={"sgst"}
             placeholder="Enter value"
             value={formState?.sgst}
             onChange={handleChange}
+            isNumber
+            label={'SGST (%) :'}
+            isError={errors?.sgstErr}
+            isRequired
           />
-          {errors?.sgstErr &&
-            <span className="text-sm text-[#9b0000] mt-1 ms-1">
-              {errors?.sgstErr}
-            </span>
-          }
         </div>
         <div>
           <label
             htmlFor="rate"
-            className="employeeMaster__label required-label"
+            className="Wrapper__label required-label"
           >
             Rate/Unit
           </label>
@@ -733,12 +806,13 @@ const RateContractAddHP = (props) => {
             <div className="col-4">
               <InputField
                 id="rate"
-                className="rateContractAddJHK__input"
+                className="Wrapper__inputs"
                 type="text"
                 name={"rate"}
                 placeholder="Enter value"
                 value={formState?.rate}
                 onChange={handleChange}
+                isNumber
               />
             </div>
             <ComboDropDown
@@ -746,7 +820,7 @@ const RateContractAddHP = (props) => {
               onChange={handleChange}
               name={"unit"}
               value={formState?.unit}
-              addOnClass="col-8"
+              addOnClass="col-8 m-0"
             />
           </div>
           {errors?.rateUnitErr &&
@@ -757,74 +831,47 @@ const RateContractAddHP = (props) => {
         </div>
 
         <div>
-          <label
-            htmlFor="deliveryDay"
-            className="employeeMaster__label required-label"
-          >
-            Delivery Day(s)
-          </label>
           <InputField
             id="deliveryDay"
-            className="rateContractAddJHK__input"
+            className="Wrapper__inputs"
             type="text"
             name={"deliveryDay"}
             placeholder="Enter days"
             value={formState?.deliveryDay}
             onChange={handleChange}
+            isNumber
+            label={"Delivery Day's :"}
+            isError={errors?.deliveryDayErr}
+            isRequired
           />
-          {errors?.deliveryDayErr &&
-            <span className="text-sm text-[#9b0000] mt-1 ms-1">
-              {errors?.deliveryDayErr
-              }
-            </span>
-          }
         </div>
         <div>
-          <label htmlFor="discount" className="employeeMaster__label">
-            Discount (%)
-          </label>
           <InputField
             id="discount"
-            className="rateContractAddJHK__input"
+            className="Wrapper__inputs"
             type="text"
             name={"discount"}
             placeholder="Enter discount"
             value={formState?.discount}
             onChange={handleChange}
+            isNumber
+            label={"Discount (%) :"}
           />
         </div>
       </div>
 
-      <div className="rateContractAddJHK__container">
-        <h4 className="rateContractAddJHK__container-heading">
+      <div className="unified-wrapper__container">
+        <h4 className="unified-wrapper__container-heading">
           Specification Upload
         </h4>
 
         <div>
-          <label htmlFor="file" className="employeeMaster__label">
-            Specification (pdf) :
-          </label>
-          <input
-            className="rateContractAddJHK__fileUpload"
-            type="file"
-            placeholder='Choose file...'
-            onChange={onFileChange}
-          />
-          <button
-            className="bankmaster__container-controls-btn"
-            // onClick={handleFileUpload}
-          >
-            Upload File
-          </button>
-        </div>
-
-        <div>
-          <label htmlFor="remarks" className="employeeMaster__label">
+          <label htmlFor="remarks" className="Wrapper__label">
             Remarks :
           </label>
           <textarea
             id="remarks"
-            className="rateContractAddJHK__input"
+            className="Wrapper__inputs"
             type="text"
             name={"remarks"}
             placeholder="Enter here..."
@@ -832,10 +879,44 @@ const RateContractAddHP = (props) => {
             onChange={handleChange}
           />
         </div>
+
+        <div>
+          <label htmlFor="file" className="Wrapper__label d-block">
+            Upload File (PDF) :
+          </label>
+          {isFileUploaded ?
+            (<>
+              <span
+                style={{ color: 'blue', cursor: 'pointer' }}
+                onClick={() => getHpRcDownloadFile(fileName)}
+              >
+                {fileName}
+              </span>
+              <span className="text-danger ms-2" title="Remove File" onClick={() => { setIsFileUploaded(false); setFileName("") }} role="button"> <FontAwesomeIcon icon={faClose} size="sm" /></span>
+            </>) :
+            (<>
+              <input
+                className="Wrapper__inputs fileUpload w-50"
+                type="file"
+                onChange={onFileChange}
+                role='button'
+              />
+
+              <button
+                className="buttons__container-controls-btn ms-2"
+                onClick={handleFileUpload}
+              >
+                Upload File
+              </button>
+            </>)
+          }
+        </div>
+
+
       </div>
 
       <div className="">
-        <h4 className="bg-[#097080] text-white p-2 rounded">EMD Details</h4>
+        <h5 className="bg-[#097080] text-white p-1 rounded">EMD Details</h5>
 
         <div style={{ marginBottom: "3rem" }}>
           <DataTable
@@ -850,21 +931,12 @@ const RateContractAddHP = (props) => {
         </div>
       </div>
 
-      <div className="bankmaster__container-controls">
-        <button className="bankmaster__container-controls-btn" onClick={handleSave}>Save</button>
-        <button
-          className="bankmaster__container-controls-btn"
-          onClick={handleReset}
-        >
-          Reset
-        </button>
-        <button
-          className="bankmaster__container-controls-btn"
-          onClick={handleClose}
-        >
-          Close
-        </button>
-      </div>
+      {viewModal &&
+        <MasterPopUpModal title={'EMD Details'} onCloseModal={onCloseModal} column={mstModalColumn} data={viewDetails} />
+      }
+
+      <BottomButtons isSave={true} isReset={true} isClose={true} onSave={() => handleSave('0')} onReset={handleReset} onClose={handleClose} onDraft={() => handleSave('1')} isDraft={true} />
+
     </section>
   );
 }

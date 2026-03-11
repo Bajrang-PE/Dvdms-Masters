@@ -12,7 +12,7 @@ const SuppIntQrDetails = (props) => {
         (state) => state.jhMst.supplierID
     );
 
-    const SEAT_ID = 14462;
+    const SEAT_ID = 12456;
     const dispatch = useDispatch();
     const [poDetails, setPoDetails] = useState([]);
     const [values, setValues] = useState({ suppName: "", poType: "", poGenPer: "", poDate: "", PoNumber: "", storeId: "", itemName: "", poOrderQty: "", remarks: "" });

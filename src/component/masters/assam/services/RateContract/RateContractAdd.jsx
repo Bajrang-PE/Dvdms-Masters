@@ -287,7 +287,7 @@ export default function RateContractAddAssam(props) {
   async function handleSave() {
     const data = {
       gnumHospitalCode: 998,
-      hstnumItemId: formState.selectedDrug,
+      // hstnumItemId: formState.selectedDrug,
       sstnumItemCatNo: formState.selectedBudgetclass,
       sstnumLevelTypeId: formState.selectedLevel,
       hststrTenderNo: formState.selectedTender,
