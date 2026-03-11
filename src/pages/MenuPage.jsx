@@ -108,6 +108,7 @@ const MenuPage = () => {
   }, []);
 
   const services = [
+     { title: "Central Purchase Order Generation", link: "central-purchase-order" },
     { title: "Rate Contract", link: "rate-contract" },
     { title: "Challan Process", link: "challan-process" },
     { title: "Single Program Po Desk", link: "single-prog-po-desk" },

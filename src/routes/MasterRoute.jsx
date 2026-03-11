@@ -5,6 +5,8 @@ import { AssamFileRoute } from "./Assam/AssamFileRoute";
 import HimachalPrivateRoute from "./Himachal/HimachalPrivateRoute";
 import { HimachalFileRoute } from "./Himachal/HimachalFileRoute";
 import { STATE_CONFIG } from "../utils/StateConfig";
+import UPPrivateRoute from "./UttarPardesh/UPPrivateRoute";
+import { UPFileRoute } from "./UttarPardesh/UPFileRoute";
 
 const LoadingSpinner = lazy(() => import("../component/commons/LoadingSpinner"));
 const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
@@ -22,6 +24,7 @@ const MasterRoute = () => {
     AS: <Route element={<AssamPrivateRoute />}>{AssamFileRoute}</Route>,
     JH: <Route element={<JharkhandPrivateRoute />}>{JharkhandFileRoute}</Route>,
     HP: <Route element={<HimachalPrivateRoute />}>{HimachalFileRoute}</Route>,
+    UP: <Route element={<UPPrivateRoute />}>{UPFileRoute}</Route>,
   };
 
 

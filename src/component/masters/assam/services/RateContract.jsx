@@ -331,6 +331,8 @@ export default function RateContract() {
 
         data.forEach((item) => {
           const { count, label, status, color } = item;
+
+          
           statusData.push({
             name: label,
             y: Number(count),
