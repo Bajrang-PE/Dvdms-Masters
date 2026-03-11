@@ -1,5 +1,4 @@
-import { fetchData, fetchPostData, fetchPostFormData, fetchPutData } from "../../../utils/ApiHook";
-
+import { fetchBlobData, fetchData, fetchPatchData, fetchPostData, fetchPostFormData, fetchPutData } from "../../../utils/ApiHook";
 
 export const getHpRcContractTypesCmb = async (hospitalCode, status) => {
     try {
@@ -12,7 +11,6 @@ export const getHpRcContractTypesCmb = async (hospitalCode, status) => {
         throw error;
     }
 };
-
 export const getHpRcSuppliersCmb = async (hospitalCode, contractTypeId, status) => {
     try {
         const response = await fetchData(
@@ -24,7 +22,6 @@ export const getHpRcSuppliersCmb = async (hospitalCode, contractTypeId, status) 
         throw error;
     }
 };
-
 export const getHpRcDrugNamesCmb = async (hospitalCode, supplierId, contractTypeId, status) => {
     try {
         const response = await fetchData(
@@ -36,7 +33,15 @@ export const getHpRcDrugNamesCmb = async (hospitalCode, supplierId, contractType
         throw error;
     }
 };
-
+export const getHpRcDrugCmbWithBrand = async (hospitalCode, status) => {
+    try {
+        const response = await fetchData(`/hp-api/items/item-combo?hospitalCode=${hospitalCode}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching drugs:", error);
+        throw error;
+    }
+};
 export const getHpRcStoreNameCmb = async (hospitalCode, seatid) => {
     try {
         const response = await fetchData(
@@ -48,7 +53,6 @@ export const getHpRcStoreNameCmb = async (hospitalCode, seatid) => {
         throw err;
     }
 };
-
 export const getHpRcStatusCmb = async () => {
     try {
         const response = await fetchData(
@@ -60,7 +64,6 @@ export const getHpRcStatusCmb = async () => {
         throw err;
     }
 };
-
 export const getHpRcSingleRcDetails = async (hospitalCode, rcId) => {
     try {
         const response = await fetchData(
@@ -72,7 +75,6 @@ export const getHpRcSingleRcDetails = async (hospitalCode, rcId) => {
         throw err;
     }
 };
-
 export const getHpRcGraphDataCounts = async (hospitalCode, suppId, itemBrandId, contractTypeId) => {
     try {
         const response = await fetchData(
@@ -84,7 +86,6 @@ export const getHpRcGraphDataCounts = async (hospitalCode, suppId, itemBrandId, 
         throw err;
     }
 };
-
 export const getHpRcListData = async (hospitalCode, suppId, itemBrandId, contractTypeId, status, pageNo, size) => {
     try {
         const params = new URLSearchParams();
@@ -106,7 +107,6 @@ export const getHpRcListData = async (hospitalCode, suppId, itemBrandId, contrac
         throw err;
     }
 };
-
 export const getHpRcTenderCombo = async (hospitalCode, storeId, rcId) => {
     try {
         const response = await fetchData(
@@ -198,7 +198,7 @@ export const saveHpRcRefundEmdDetails = async (data) => {
         throw error
     }
 }
-export const saveHpRcBankCombo = async (hospitalCode) => {
+export const getHpRcBankCombo = async (hospitalCode) => {
     try {
         const response = await fetchData(`/hp-api/banks/combo?hospitalCode=${hospitalCode}`);
         return response?.data;
@@ -207,7 +207,7 @@ export const saveHpRcBankCombo = async (hospitalCode) => {
         throw error
     }
 }
-export const saveHpRcBankBranches = async (hospitalCode, bankId, distId) => {
+export const getHpRcBankBranches = async (hospitalCode, bankId, distId) => {
     try {
         const response = await fetchData(`/hp-api/banks/combo-branches?hospitalCode=${hospitalCode}&bankId=${bankId}&districtId=${distId || 0}`);
         return response?.data;
@@ -216,4 +216,127 @@ export const saveHpRcBankBranches = async (hospitalCode, bankId, distId) => {
         throw error
     }
 }
+export const getHpRcTenderCmbOnSuppId = async (hospitalCode, suppId, rcId) => {
+    try {
+        const response = await fetchData(`/hp-api/tenders/combo-by-supplier-rc-type?hospitalCode=${hospitalCode}&supplierId=${suppId}&rcTypeId=${rcId}`);
+        return response?.data;
+    } catch (error) {
+        console?.error("API Error : ", error)
+        throw error
+    }
+}
+export const getHpRcContractDetailsOnTender = async (hospitalCode, tenNo, suppId) => {
+    try {
+        const response = await fetchData(`/hp-api/tenders/contract-details?hospitalCode=${hospitalCode}&tenderNo=${tenNo}&supplierId=${suppId}`);
+        return response?.data;
+    } catch (error) {
+        console?.error("API Error : ", error)
+        throw error
+    }
+}
+export const cencelHpRcDetail = async (data) => {
+    try {
+        const response = await fetchPatchData(`/hp-api/rate-contracts/cancel`, data);
+        return response?.data;
+    } catch (error) {
+        console?.error("API Error : ", error)
+        throw error
+    }
+}
+export const addHpRcDetails = async (data) => {
+    try {
+        const response = await fetchPostData(`/hp-api/rate-contracts/save`, data);
+        console.log('response', response)
+        return response?.data;
+    } catch (error) {
+        console?.error("API Error : ", error)
+        throw error
+    }
+}
+export const mpdifyHpRcDetail = async (data) => {
+    try {
+        const response = await fetchPatchData(`/hp-api/rate-contracts/update`, data);
+        return response?.data;
+    } catch (error) {
+        console?.error("API Error : ", error)
+        throw error
+    }
+}
+export const getHpRcUnitCombo = async (hospitalCode) => {
+    try {
+        const response = await fetchData(`/hp-api/unit/combo?hospitalCode=${hospitalCode}&unitId=630001`);
+        return response?.data;
+    } catch (error) {
+        console.error('API Error', error);
+        throw error;
+    }
+}
+export const getHpRcSuppLevelCombo = async (hospitalCode) => {
+    try {
+        const response = await fetchData(`/hp-api/rate-contracts/supplier-level-combo?hospitalCode=${hospitalCode}&status=1`);
+        return response?.data;
+    } catch (error) {
+        console.error('API Error', error);
+        throw error;
+    }
+}
+export const getHpRcTaxTypeCombo = async (hospitalCode, isVat) => {
+    try {
+        const response = await fetchData(`/hp-api/common/tax-combo?hospitalCode=${hospitalCode}&withVat=${isVat || 0}`);
+        return response?.data;
+    } catch (error) {
+        console.error('API Error', error);
+        throw error;
+    }
+}
+export const getHpRcFullDetails = async (hospitalCode, rcId, suppId) => {
+    try {
+        const response = await fetchData(`/hp-api/rate-contracts/details?hospitalCode=${hospitalCode}&rcId=${rcId}&supplierId=${suppId}`);
+        return response?.data;
+    } catch (error) {
+        console.error('API Error', error);
+        throw error;
+    }
+}
+export const getHpRcDownloadFile = async (fileName) => {
+    if (!fileName) {
+        alert('File Not Available')
+        return;
+    }
+    try {
+        const response = await fetchBlobData(`/hp-api/files/download/${fileName}`);
+        const blob = new Blob([response.data], {
+            type: response.headers["content-type"],
+        });
 
+        const url = window.URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+        link.href = url;
+
+        const contentDisposition = response.headers["content-disposition"];
+        const downloadedFileName =
+            contentDisposition?.split("filename=")[1]?.replace(/"/g, "") || fileName;
+
+        link.setAttribute("download", downloadedFileName);
+
+        document.body.appendChild(link);
+        link.click();
+
+        link.remove();
+        window.URL.revokeObjectURL(url);
+        return response?.data;
+    } catch (error) {
+        console.error('API Error', error);
+        throw error;
+    }
+}
+export const getHpRcEMDDetailsByRc = async (hospitalCode, rcId) => {
+    try {
+        const response = await fetchData(`/hp-api/tenders/rc-bg-details?hospitalCode=${hospitalCode}&rcId=${rcId}`);
+        return response?.data;
+    } catch (error) {
+        console.error('API Error', error);
+        throw error;
+    }
+}

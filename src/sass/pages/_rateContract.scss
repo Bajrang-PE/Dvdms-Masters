@@ -3,7 +3,8 @@
 @use "../utilities/remConvertor" as *;
 @use "sass:color";
 
-.rateContract {
+.rateContract,
+.homeWrapper {
   &__heading {
     font-family: $secondary-font;
     font-size: rem10(1.7);
@@ -19,10 +20,12 @@
 
   &__filterSection {
     display: flex;
+    padding: .5rem;
 
     &--filters {
       flex: 0 1 64%;
     }
+
     &--chart {
       // padding-top: 1.3rem;
       flex: 0 1 35%;
@@ -65,12 +68,10 @@
         left: -75%;
         width: 50%;
         height: 100%;
-        background: linear-gradient(
-          120deg,
-          rgba(255, 255, 255, 0) 0%,
-          rgba(255, 255, 255, 0.2) 50%,
-          rgba(255, 255, 255, 0) 100%
-        );
+        background: linear-gradient(120deg,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.2) 50%,
+            rgba(255, 255, 255, 0) 100%);
         transform: skewX(-20deg);
         opacity: 0;
         transition: all 0.6s ease-out;
@@ -93,6 +94,7 @@
       }
     }
   }
+
   &__container {
     display: flex;
     width: 100%;
@@ -100,6 +102,7 @@
     flex-wrap: wrap;
     align-items: center;
     margin-bottom: rem10(2);
+
     &--dropdown {
       flex: 0 1 rem10(25);
     }

@@ -27,7 +27,7 @@ const SupplierInterfaceDeskJH = () => {
         { label: "Forcefully Closed", value: "9" }
     ];
 
-    const SEAT_ID = 14462;
+    const SEAT_ID = 12456;
     const dataTableRef = useRef();
     const dispatch = useDispatch();
     const [suppName, setSuppName] = useState('');

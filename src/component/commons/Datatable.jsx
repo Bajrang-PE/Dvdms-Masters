@@ -57,7 +57,7 @@ const DataTable = forwardRef(({ masterName, columns, data, isSearchReq = true, i
 
     const filtered = data.filter(row =>
       columns.some(col => {
-        if (col?.isJSX) return false;
+        // if (col?.isJSX) return false;
         const cellValue = row[col.field];
         return cellValue && cellValue.toString().toLowerCase().includes(query);
       })
@@ -270,7 +270,9 @@ const DataTable = forwardRef(({ masterName, columns, data, isSearchReq = true, i
   // Pagination Logic
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-  const currentRows = isPagination ? sortedData?.slice(indexOfFirstRow, indexOfLastRow) : sortedData;
+  const currentRows = isPagination && sortedData?.length > 0 ? sortedData?.slice(indexOfFirstRow, indexOfLastRow) : sortedData;
+
+  console.log('sortedData', sortedData)
 
   const handleRowsPerPageChange = event => {
     setRowsPerPage(parseInt(event.target.value, 10));
@@ -338,9 +340,9 @@ const DataTable = forwardRef(({ masterName, columns, data, isSearchReq = true, i
                 />
               </th>
               {columns.map(col => (
-                <th key={col.field} style={{width:col?.width ? col?.width : ""}}>
+                <th key={col.field} style={{ width: col?.width ? col?.width : "" }}>
                   <span
-                    onClick={() => { col?.isJSX || col?.ele ? null : handleSort(col) }}
+                    onClick={() => {handleSort(col) }}
                     style={{
                       cursor: 'pointer',
                       userSelect: 'none',
@@ -386,9 +388,7 @@ const DataTable = forwardRef(({ masterName, columns, data, isSearchReq = true, i
                       />
                     </td>
                     {columns.map(col => (
-                      <>
-                        <td key={col.field}>{col.isJSX && col?.ele ? col?.ele(row) : row[col?.field]}</td>
-                      </>
+                      <td key={col.field}>{col.isJSX && col?.ele ? col?.ele(row) : row[col?.field]}</td>
                     ))}
                   </tr>
                 );

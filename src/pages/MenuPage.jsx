@@ -109,9 +109,12 @@ const MenuPage = () => {
 
   const services = [
     { title: "Rate Contract", link: "rate-contract" },
+    { title: "Challan Process", link: "challan-process" },
     { title: "Single Program Po Desk", link: "single-prog-po-desk" },
     { title: "Supplier Interface Desk", link: "supplier-interface-desk" },
-    { title: "Pm darpan service",link: "pm-darpan-service" },
+    { title: "Dcc Upload", link: "dcc-upload" },
+    { title: "Pm darpan service", link: "pm-darpan-service" },
+    { title: "Purchase Order Generation", link: "po-generation" },
     {
       title: "Issue Management",
       sub: [
@@ -137,7 +140,7 @@ const MenuPage = () => {
 
   const reports = [
     { title: "Inventory Management", link: "inventory-management" },
-    { title: "MIS Report" ,link:"mis-report"},
+    { title: "MIS Report", link: "mis-report" },
     {
       title: "Financial Management",
       sub: [
@@ -145,7 +148,7 @@ const MenuPage = () => {
         { title: "Issue to Web-Connected Store", link: "" },
       ],
     },
-    { title: "Purchase Order Management",link:"purchase-order-management" },
+    { title: "Purchase Order Management", link: "purchase-order-management" },
   ];
 
   return (

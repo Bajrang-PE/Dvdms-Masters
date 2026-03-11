@@ -17,7 +17,7 @@ const BillAndReceiveDetails = (props) => {
         (state) => state.jhMst.supplierID
     );
 
-    const SEAT_ID = 14462;
+    const SEAT_ID = 12456;
     const dispatch = useDispatch();
     const [poDetailsList, setPoDetailsList] = useState([]);
     const [poDetails, setPoDetails] = useState([]);

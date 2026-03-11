@@ -8,7 +8,8 @@ const BaseUrl = '  http://10.226.27.173:8094'; //vish
 // const BaseUrl = "http://10.226.30.86:8091"; //Main Gateway
 // const BaseUrl = "http://10.226.30.45:9002"; //HP prd
 
-axios.defaults.baseURL = BaseUrl;
+axios.defaults.baseURL = '';
+// axios.defaults.baseURL = BaseUrl;
 
 // const getAccessToken = () => {
 //     return sessionStorage.getItem('accessToken');
@@ -64,6 +65,18 @@ export const fetchData = async (url, params = null) => {
   }
 };
 
+export const fetchBlobData = async (url) => {
+  try {
+    const response = await axios.get(url, {
+      responseType: "blob",
+    });
+    return response;
+  } catch (error) {
+    console.error("Error in fetchBlobData:", error);
+    throw error;
+  }
+};
+
 export const fetchPostData = async (url, data) => {
   try {
     const response = await axios.post(url, data, {
@@ -109,6 +122,14 @@ export const fetchUpdateData = async (url, data) => {
   try {
     const response = await axios.put(url, data);
     return response.data;
+  } catch (error) {
+    console.log("API Error:", error);
+  }
+};
+export const fetchPatchData = async (url, data) => {
+  try {
+    const response = await axios.patch(url, data);
+    return response;
   } catch (error) {
     console.log("API Error:", error);
   }

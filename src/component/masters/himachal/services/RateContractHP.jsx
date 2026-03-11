@@ -8,17 +8,44 @@ import RateContractTenderHP from './rateContract/RateContractTenderHP';
 import RateContractAddHP from './rateContract/RateContractAddHP';
 import { showPopup } from '../../../../features/commons/popupSlice';
 import PieChart from '../../../commons/PieChart';
-import { getHpRcContractTypesCmb, getHpRcDrugNamesCmb, getHpRcGraphDataCounts, getHpRcListData, getHpRcStatusCmb, getHpRcStoreNameCmb, getHpRcSuppliersCmb } from '../../../../api/Himachal/services/rateContractAPI_HP';
-import { chartColorArr, chartColors } from '../../common/StaticData';
+import { cencelHpRcDetail, getHpRcContractTypesCmb, getHpRcDrugNamesCmb, getHpRcGraphDataCounts, getHpRcListData, getHpRcStatusCmb, getHpRcStoreNameCmb, getHpRcSuppliersCmb } from '../../../../api/Himachal/services/rateContractAPI_HP';
+import { chartColorArr } from '../../common/StaticData';
+import { parseDate } from '../../../commons/utilFunctions';
+import RcModifyViewFormHP from './rateContract/RcModifyViewFormHP';
+import { ToastAlert } from '../../../../utils/Toast';
 
 const columns = [
     { header: "Supplier Name", field: "strSupplierName" },
     { header: "Drug Name", field: "strItemName", width: "20%" },
     { header: "Rate/Unit", field: "ratePerUnit" },
     { header: "Tax%", field: "strTax" },
-    { header: "Contract From", field: "hstdtContractFrmdate" },
-    { header: "Contract To", field: "hstdtContractTodate" },
-    { header: "RC No.", field: "hstnumRcNo" },
+    {
+        header: "Contract From", field: "hstdtContractFrmdate", isJSX: true, ele: (row) => (
+            <div style={{
+                textAlign: "center"
+            }}>
+                <span>{`${parseDate(row?.hstdtContractFrmdate)}`}</span>
+            </div>
+        )
+    },
+    {
+        header: "Contract To", field: "hstdtContractTodate", isJSX: true, ele: (row) => (
+            <div style={{
+                textAlign: "center"
+            }}>
+                <span>{`${parseDate(row?.hstdtContractTodate)}`}</span>
+            </div>
+        )
+    },
+    {
+        header: "RC No.", field: "hstnumRcId", isJSX: true, ele: (row) => (
+            <div style={{
+                textAlign: "center"
+            }}>
+                <span>{row?.hstnumRcNo ? row?.hstnumRcNo : row?.hstnumRcId}</span>
+            </div>
+        )
+    },
     { header: "Tender No.", field: "tenderId" },
 ];
 
@@ -46,16 +73,25 @@ const RateContractHP = () => {
 
     const componentsList = [
         { mappingKey: "Tender", componentName: () => <RateContractTenderHP suppliers={suppliersDrpDt} /> },
-        { mappingKey: "add", componentName: () => <RateContractAddHP drugList={drugNameDrpDt} /> },
-        { mappingKey: "modify", componentName: () => <Rc drugList={drugNameDrpDt} /> },
-        { mappingKey: "view", componentName: () => <RateContractAddHP drugList={drugNameDrpDt} /> },
+        { mappingKey: "add", componentName: () => <RateContractAddHP drugList={drugNameDrpDt} suppliers={suppliersDrpDt} /> },
+        { mappingKey: "modify", componentName: () => <RcModifyViewFormHP selectedData={selectedRowRc} actionMode={'modify'} /> },
+        { mappingKey: "view", componentName: () => <RcModifyViewFormHP selectedData={selectedRowRc} actionMode={'view'} /> },
     ];
 
     const buttonDataset = [
         { label: "Add", onClick: (() => { handleActionComp('add') }) },
         { label: "Tender Details", onClick: (() => { handleActionComp('Tender') }) },
-        { label: "Modify", onClick: (() => { handleActionComp('modify') }) },
-        { label: "View", onClick: (() => { handleActionComp('view') }) },
+        ...(selectedRowRc?.length > 0 ? [
+            { label: "View", onClick: (() => { handleActionComp('view') }) },
+        ] : []),
+
+        ...((selectedRowRc?.length > 0 && selectedRowRc[0]?.gnumIsvalid == 9) ? [
+            { label: "Modify", onClick: (() => { handleActionComp('modify') }) },
+        ] : []),
+
+        ...((selectedRowRc?.length > 0 && selectedRowRc[0]?.gnumIsvalid === 1) ? [
+            { label: "Cencel", onClick: (() => { handleCancelRc('cancel') }) },
+        ] : []),
     ];
 
     function handleActionComp(key) {
@@ -65,6 +101,32 @@ const RateContractHP = () => {
 
     const handleRowSelect = (row) => {
         setSelectedRowRc(row);
+    }
+
+    const handleCancelRc = () => {
+        const cancelRemark = prompt('PLEASE ENTER REMARKS FOR CANCELLATION!');
+        if (cancelRemark && cancelRemark?.trim()) {
+            const val = {
+                "hstnumRcId": selectedRowRc[0]?.hstnumRcId,
+                "gnumHospitalCode": 998,
+                "hstnumStoreId": parseInt(storeName),
+                "gnumSeatid": SEAT_ID,
+                "hststrCancelRmks": cancelRemark,
+                "gnumIsvalid": 0
+            }
+            cencelHpRcDetail(val)?.then((res) => {
+                if (res?.status === 1) {
+                    ToastAlert(res?.msg, 'success');
+                    getGraphDataForRc();
+                    getRcListData(selectedSupplier, selectedDrug, selectedContractType, activeStatus);
+                    setSelectedRowRc([]);
+                } else {
+                    ToastAlert(res?.msg, 'error');
+                }
+            })
+        } else {
+            alert('PLEASE ENTER VALID REMARKS FOR CANCELLATION !');
+        }
     }
 
     const getRcListData = (selectedSupplier, selectedDrug, selectedContractType, activeStatus) => {
@@ -77,7 +139,6 @@ const RateContractHP = () => {
             console.log('res', res)
         })
     }
-
 
     useEffect(() => {
         const timeout = setTimeout(() => {
@@ -240,9 +301,6 @@ const RateContractHP = () => {
     useEffect(() => {
         getGraphDataForRc();
     }, [selectedSupplier, selectedContractType, selectedDrug]);
-
-    console.log('pieChartData', pieChartData)
-    console.log('activeStatus', activeStatus)
 
     return (
         <>

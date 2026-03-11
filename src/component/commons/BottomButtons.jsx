@@ -1,12 +1,20 @@
 import React from 'react'
 
-const BottomButtons = ({ isSave = true, isReset = true, isClose = true, onSave = null, onReset = null, onClose = null }) => {
+const BottomButtons = ({ isSave = true, isReset = true, isClose = true, onSave = null, onReset = null, onClose = null, onDraft = null, isDraft = true }) => {
 
     return (
-        <div className="bankmaster__container-controls">
+        <div className="buttons__container-controls">
+            {isDraft &&
+                <button
+                    className="buttons__container-controls-btn"
+                    onClick={onDraft}
+                >
+                    Draft Save
+                </button>
+            }
             {isSave &&
                 <button
-                    className="bankmaster__container-controls-btn"
+                    className="buttons__container-controls-btn"
                     onClick={onSave}
                 >
                     Save
@@ -14,7 +22,7 @@ const BottomButtons = ({ isSave = true, isReset = true, isClose = true, onSave =
             }
             {isReset &&
                 <button
-                    className="bankmaster__container-controls-btn"
+                    className="buttons__container-controls-btn"
                     onClick={onReset}
                 >
                     Reset
@@ -22,7 +30,7 @@ const BottomButtons = ({ isSave = true, isReset = true, isClose = true, onSave =
             }
             {isClose &&
                 <button
-                    className="bankmaster__container-controls-btn"
+                    className="buttons__container-controls-btn"
                     onClick={onClose}
                 >
                     Close

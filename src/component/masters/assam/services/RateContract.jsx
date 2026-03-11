@@ -218,8 +218,14 @@ export default function RateContract() {
       selectOption: radioOption,
     };
     console.log("Sending data ", queryData);
-    const data = await getRcTableData(JSON.stringify(queryData));
-    setTableData(data);
+    getRcTableData(JSON.stringify(queryData))?.then((res) => {
+      if (res?.status === 1) {
+        setTableData(res?.data);
+      } else {
+        setTableData([]);
+      }
+    });
+
   }
 
   //effects for combos
@@ -350,7 +356,7 @@ export default function RateContract() {
   return (
     <>
       {isRateContractAddForm ?
-        <RateContractAddAssam setIsRateContractAddForm={setIsRateContractAddForm} budgetCategory={budgetClasses} manufacturers={manufacturers} drugList={drugList} loadDrugs={loadDrugs} healthFacilities={healthFacilities} getStores={getStores}/>
+        <RateContractAddAssam setIsRateContractAddForm={setIsRateContractAddForm} budgetCategory={budgetClasses} manufacturers={manufacturers} drugList={drugList} loadDrugs={loadDrugs} healthFacilities={healthFacilities} getStores={getStores} />
         :
         (<>
           <ServiceNavbar

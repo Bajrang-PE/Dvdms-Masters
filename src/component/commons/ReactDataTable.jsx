@@ -5,10 +5,12 @@ import { InputField } from './FormElements';
 
 const ReactDataTable = (props) => {
 
-    const { title, column, data, isSearchReq, isPagination } = props;
+    const { column, data, isSearchReq = true, isPagination = true, scrollHeight = '65vh', showSerialNumber = false } = props;
 
     const [searchQuery, setSearchQuery] = useState('');
     const [sortedData, setSortedData] = useState(data);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
 
     useEffect(() => {
         setSortedData(data);
@@ -60,12 +62,25 @@ const ReactDataTable = (props) => {
                 wordBreak: "break-word",
                 textOverflow: "unset",
                 lineHeight: "1.2",
-                paddingTop: "18px",
+                paddingTop: "10px",
                 paddingBottom: "8px",
-                fontWeight: "bold"
+                fontWeight: "bold",
+                paddingLeft: "8px",
+                paddingRight: "8px"
             },
         },
     }
+
+    const formatColumns = [{
+        name: (<span>S.No.</span>),
+        selector: (row, index) => index + 1 + (rowsPerPage * currentPage - rowsPerPage),
+        width: "6%",
+        wrap: true,
+        sortable: true
+    }]
+
+    const finalColumns = showSerialNumber ? [...formatColumns, ...column] : column;
+
 
     return (
         <div>
@@ -102,12 +117,14 @@ const ReactDataTable = (props) => {
                     selectableRowsHighlight
                     highlightOnHover
                     responsive
-                    fixedHeaderScrollHeight='65vh'
-                    columns={column}
+                    fixedHeaderScrollHeight={scrollHeight}
+                    columns={finalColumns}
                     data={sortedData}
                     pagination={isPagination}
                     // pointerOnHover
                     customStyles={tableCustomStyles}
+                    onChangePage={(page) => setCurrentPage(page)}
+                    onChangeRowsPerPage={(newPerPage) => { setRowsPerPage(newPerPage); }}
                 />
             </div>
         </div>

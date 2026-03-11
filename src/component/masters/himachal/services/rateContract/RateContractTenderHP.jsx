@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { hidePopup } from '../../../../../features/commons/popupSlice';
 import { ComboDropDown, DatePickerComponent, InputField, RadioButton } from '../../../../commons/FormElements';
 import ReactDataTable from '../../../../commons/ReactDataTable';
-import { getHpRcEmdRefundDetails, getHpRcSuppEmdDetails, getHpRcSuppTenderDetails, getHpRcTenderCombo, saveHpRcBankCombo, saveHpRcFileUpload, saveHpRcNewEmdDetails, saveHpRcRefundEmdDetails, saveHpRcTenderDetails } from '../../../../../api/Himachal/services/rateContractAPI_HP';
+import { getHpRcEmdRefundDetails, getHpRcSuppEmdDetails, getHpRcSuppTenderDetails, getHpRcTenderCombo, getHpRcBankCombo, saveHpRcFileUpload, saveHpRcNewEmdDetails, saveHpRcRefundEmdDetails, saveHpRcTenderDetails, getHpRcDownloadFile } from '../../../../../api/Himachal/services/rateContractAPI_HP';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClose, faEdit, faEye, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { getValueInsideBrackets } from '../../../../commons/utilFunctions';
@@ -210,7 +210,7 @@ const RateContractTenderHP = (props) => {
     async function getBankNames() {
       try {
         let tenders = [];
-        const data = await saveHpRcBankCombo(998);
+        const data = await getHpRcBankCombo(998);
         data.data.forEach((element) => {
           const obj = {
             label: element?.display,
@@ -1026,7 +1026,7 @@ const RateContractTenderHP = (props) => {
               (<>
                 <span
                   style={{ color: 'blue', cursor: 'pointer' }}
-                  onClick={() => alert('bbb')}
+                  onClick={() => getHpRcDownloadFile(fileName)}
                 >
                   {fileName}
                 </span>
