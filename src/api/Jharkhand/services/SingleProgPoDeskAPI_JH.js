@@ -3,7 +3,7 @@ import { fetchData, fetchPostData } from "../../../utils/ApiHook";
 export const getSinglePoStoreName = async (hospitalCode, seatId) => {
     try {
         const response = await fetchData(
-            `/jhk-services/api/v1/single-po-gen/store-name?hospCode=${hospitalCode}&seatId=${seatId}`
+            `/api/v1/single-po-gen/store-name?hospCode=${hospitalCode}&seatId=${seatId}`
         );
         return response.data;
     } catch (err) {
@@ -15,7 +15,19 @@ export const getSinglePoStoreName = async (hospitalCode, seatId) => {
 export const getSinglePoListData = async (hospitalCode, storeId, status) => {
     try {
         const response = await fetchData(
-            `/jhk-services/api/v1/single-po-gen/list-data?hospCode=${hospitalCode}&storeId=${storeId}&status=${status}`
+            `/api/v1/single-po-gen/list-data?hospCode=${hospitalCode}&storeId=${storeId}&status=${status}`
+        );
+        return response.data;
+    } catch (err) {
+        console.error("Error fetching store name : ", err);
+        throw err;
+    }
+};
+
+export const getSinglePoItemCmbData = async (hospitalCode, authType) => {
+    try {
+        const response = await fetchData(
+            `/api/v1/single-po-gen/po-item-list?hospCode=${hospitalCode}&authType=${authType}`
         );
         return response.data;
     } catch (err) {
@@ -27,7 +39,7 @@ export const getSinglePoListData = async (hospitalCode, storeId, status) => {
 export const getSinglePoCancelPoData = async (hospitalCode, storeId, poNo) => {
     try {
         const response = await fetchData(
-            `/jhk-services/api/v1/single-po-gen/cancel-purchase-order?hospCode=${hospitalCode}&StoreId=${storeId}&poNo=${poNo}`
+            `/api/v1/single-po-gen/cancel-purchase-order?hospCode=${hospitalCode}&StoreId=${storeId}&poNo=${poNo}`
         );
         return response.data;
     } catch (err) {
@@ -39,7 +51,7 @@ export const getSinglePoCancelPoData = async (hospitalCode, storeId, poNo) => {
 export const getSinglePoComponentDetails = async (hosCode, poType, mode, storeId, poNo) => {
     try {
         const response = await fetchData(
-            `/jhk-services/api/v1/single-po-gen/component-details?hospCode=${hosCode}&poTypeId=${poType}&mode=${mode}&storeId=${storeId}&poNo=${poNo}`
+            `/api/v1/single-po-gen/component-details?hospCode=${hosCode}&poTypeId=${poType}&mode=${mode}&storeId=${storeId}&poNo=${poNo}`
         );
         return response.data;
     } catch (err) {
@@ -51,7 +63,7 @@ export const getSinglePoComponentDetails = async (hosCode, poType, mode, storeId
 export const getSinglePoPrograammeCombo = async (hosCode, storeId, brandId, identPrd) => {
     try {
         const response = await fetchData(
-            `/jhk-services/api/v1/single-po-gen/programme-combo?hospCode=${hosCode}&storeId=${storeId}&brandId=${brandId}&indentPeriod=${identPrd}`
+            `/api/v1/single-po-gen/programme-combo?hospCode=${hosCode}&storeId=${storeId}&brandId=${brandId}&indentPeriod=${identPrd}`
         );
         return response.data;
     } catch (err) {
@@ -63,7 +75,7 @@ export const getSinglePoPrograammeCombo = async (hosCode, storeId, brandId, iden
 export const getSinglePoFundingSrcCmbWithGst = async (hosCode, storeId, budgetClassId, programmeId) => {
     try {
         const response = await fetchData(
-            `/jhk-services/api/v1/single-po-gen/fundingsrc-combo-with-gst?hospCode=${hosCode}&storeId=${storeId}&budgetClassId=${budgetClassId}&programmeId=${programmeId}`
+            `/api/v1/single-po-gen/fundingsrc-combo-with-gst?hospCode=${hosCode}&storeId=${storeId}&budgetClassId=${budgetClassId}&programmeId=${programmeId}`
         );
         return response.data;
     } catch (err) {
@@ -75,7 +87,7 @@ export const getSinglePoFundingSrcCmbWithGst = async (hosCode, storeId, budgetCl
 export const getSinglePoTestingData = async (data) => {
     try {
         const response = await fetchPostData(
-            `/jhk-services/api/v1/single-po-gen/testing`, data
+            `/api/v1/single-po-gen/testing`, data
         );
         return response.data;
     } catch (err) {
@@ -87,7 +99,7 @@ export const getSinglePoTestingData = async (data) => {
 export const getSinglePoDwhPoDetails = async (data) => {
     try {
         const response = await fetchPostData(
-            `/jhk-services/api/v1/single-po-gen/dwh-po-details`, data
+            `/api/v1/single-po-gen/dwh-po-details`, data
         );
         return response.data;
     } catch (err) {
@@ -99,7 +111,7 @@ export const getSinglePoDwhPoDetails = async (data) => {
 export const modifySinglePoDwhPoCancelSave = async (data) => {
     try {
         const response = await fetchPostData(
-            `/jhk-services/api/v1/single-po-gen/cancel-save`, data
+            `/api/v1/single-po-gen/cancel-save`, data
         );
         return response.data;
     } catch (err) {
@@ -111,7 +123,117 @@ export const modifySinglePoDwhPoCancelSave = async (data) => {
 export const modifySinglePoDwhPoModifySave = async (data) => {
     try {
         const response = await fetchPostData(
-            `/jhk-services/api/v1/single-po-gen/update-po`, data
+            `/api/v1/single-po-gen/update-po`, data
+        );
+        return response.data;
+    } catch (err) {
+        console.error("Error fetching store name : ", err);
+        throw err;
+    }
+};
+
+export const getPoTypeCombo = async (hospitalCode, storeId, cat) => {
+    try {
+        const response = await fetchData(
+            `/api/v1/single-po-gen/po-types-combo?hospCode=${hospitalCode}&storeId=${storeId}&itemCat=${cat}`
+        );
+        return response.data;
+    } catch (err) {
+        console.error("Error fetching store name : ", err);
+        throw err;
+    }
+};
+
+export const getJHPoProgramCombo = async (hospitalCode, storeId, brandId, period) => {
+    try {
+        const response = await fetchData(
+            `/api/v1/single-po-gen/programme-combo?hospCode=${hospitalCode}&storeId=${storeId}&brandId=${brandId}&indentPeriod=${period}`
+        );
+        return response.data;
+    } catch (err) {
+        console.error("Error fetching store name : ", err);
+        throw err;
+    }
+};
+
+export const getJHPoFundingSrcCombo = async (hospitalCode, storeId, drugClCode, prgId, period) => {
+    try {
+        const response = await fetchData(
+            `/api/v1/single-po-gen/funding-source-combo?hospCode=${hospitalCode}&storeId=${storeId}&drugClassCode=${drugClCode}&programmeId=${prgId}&poGenPeriod=${period}`
+        );
+        return response.data;
+    } catch (err) {
+        console.error("Error fetching store name : ", err);
+        throw err;
+    }
+};
+
+export const getJHPoSupplierValues = async (data) => {
+    try {
+        const response = await fetchPostData(
+            `/api/v1/single-po-gen/get-supplier-values`, data
+        );
+        return response.data;
+    } catch (err) {
+        console.error("Error fetching store name : ", err);
+        throw err;
+    }
+};
+
+export const getJHPoDwhPoDetails = async (data) => {
+    try {
+        const response = await fetchPostData(
+            `/api/v1/single-po-gen/dwh-po-hlp`, data
+        );
+        return response.data;
+    } catch (err) {
+        console.error("Error fetching store name : ", err);
+        throw err;
+    }
+};
+
+///////////////////////////////////////INDENT APIS /////////////////////////////////////////////////////
+
+export const getJHPoIndentNumberCombo = async () => {
+    try {
+        const response = await fetchData(
+            `/api/v1/single-po-gen/indent-cell-po-dtl`
+        );
+        return response.data;
+    } catch (err) {
+        console.error("Error fetching store name : ", err);
+        throw err;
+    }
+};
+
+export const getJHPoIndentProgramCombo = async (hospitalCode, indentNo) => {
+    try {
+        const response = await fetchData(
+            `/api/v1/single-po-gen/indent-cell-po-prog-dtl?hospCode=${hospitalCode}&indentPoNo=${indentNo}`
+        );
+        return response.data;
+    } catch (err) {
+        console.error("Error fetching store name : ", err);
+        throw err;
+    }
+};
+
+export const getJHPoIndentFundingSrcCombo = async (hospitalCode, storeId, indentNo, prgId, period) => {
+    try {
+        const response = await fetchData(
+            `/api/v1/single-po-gen/indent-cell-po-funding-src?hospCode=${hospitalCode}&storeId=${storeId}&indentPoNo=${indentNo}&programmeId=${prgId}&indentPeriod=${period}`
+        );
+        return response.data;
+    } catch (err) {
+        console.error("Error fetching store name : ", err);
+        throw err;
+    }
+};
+
+export const getJHPoIndenDrugNameCombo = async (hospitalCode, indentNo) => {
+    try {
+        const response = await fetchData(
+            `/api/v1/single-po-gen/indent-cell-po-drug-dtl?hospCode=${hospitalCode}&indentPoNo=${indentNo}`
         );
         return response.data;
     } catch (err) {

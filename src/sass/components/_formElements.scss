@@ -55,6 +55,7 @@
     background-repeat: no-repeat;
     background-position: right 0.75rem center;
     background-size: rem10(2);
+    word-break: break-all;
 
     &:focus {
       border: 1px solid indigo;

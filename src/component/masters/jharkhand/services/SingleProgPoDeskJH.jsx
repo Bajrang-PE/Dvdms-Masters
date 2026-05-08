@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react'
 import ServiceNavbar from '../../../commons/ServiceNavbar';
 import { ComboDropDown } from '../../../commons/FormElements';
 import DataTable from '../../../commons/Datatable';
-import { setStore } from '../../../../features/Ratecontract/rateContractJHKSlice';
 import { useDispatch } from 'react-redux';
 import { getSinglePoListData, getSinglePoStoreName } from '../../../../api/Jharkhand/services/SingleProgPoDeskAPI_JH';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -34,12 +33,15 @@ const SingleProgPoDeskJH = () => {
   const [storeName, setStoreName] = useState();
   const [stores, setStores] = useState([]);
   const [activeStatus, setActiveStatus] = useState("1");
+  const [selectedStore, setSelectedStore] = useState({});
+
+  console.log('selectedStore', selectedStore)
 
   const componentsList = [
-    { mappingKey: "Generate", componentName: (props) => (<GenerateSingleProgPoJH selectedData={selectedRowRc} actionType={"Generate"} />) },
-    { mappingKey: "Modify", componentName: (props) => (<SingleProgPoModifyJH selectedData={selectedRowRc} actionType={"Modify"} getAllListData={getAllListData}/>) },
+    { mappingKey: "Generate", componentName: (props) => (<GenerateSingleProgPoJH store={selectedStore} selectedData={selectedRowRc} actionType={'generate'} />) },
+    { mappingKey: "Modify", componentName: (props) => (<SingleProgPoModifyJH selectedData={selectedRowRc} actionType={"Modify"} getAllListData={getAllListData} />) },
     { mappingKey: "Cancel", componentName: (props) => (<CancelSingleProgPoJH selectedData={selectedRowRc} actionType={"Cancel"} />) },
-    { mappingKey: "View", componentName: (props) => (<SingleProgPoModifyJH selectedData={selectedRowRc} actionType={"View"} getAllListData={getAllListData}/>) },
+    { mappingKey: "View", componentName: (props) => (<SingleProgPoModifyJH selectedData={selectedRowRc} actionType={"View"} getAllListData={getAllListData} />) },
   ];
 
   const columns = [
@@ -87,9 +89,11 @@ const SingleProgPoDeskJH = () => {
         }))
         setStores(drpDt);
         setStoreName(drpDt?.at(0)?.value);
-        dispatch(setStore(drpDt?.at(0)));
+        console.log('drpDt', drpDt)
+        setSelectedStore(drpDt?.at(0));
       } else {
         setStores([]);
+        setSelectedStore({});
       }
     })
   }
@@ -130,9 +134,7 @@ const SingleProgPoDeskJH = () => {
                 options={stores}
                 onChange={(e) => {
                   setStoreName(e.target.value);
-                  dispatch(
-                    setStore(stores?.find((dt) => dt?.value == e.target.value))
-                  );
+                  setSelectedStore(stores?.find((dt) => dt?.value == e.target.value))
                 }}
                 value={storeName}
                 label={"Store Name"}

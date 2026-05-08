@@ -1,28 +1,22 @@
 import React, { useEffect, useReducer, useState } from 'react'
-import DataTable from '../../../../commons/Datatable';
 import ReactDataTable from '../../../../commons/ReactDataTable';
-import InputBox from '../../../../commons/InputBox';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { hidePopup } from '../../../../../features/commons/popupSlice';
 import { DatePickerComponent, InputField } from '../../../../commons/FormElements';
 import RichTextEditor from '../../../../commons/RichTextEditor';
-import { getSinglePoComponentDetails, getSinglePoDwhPoDetails, getSinglePoTestingData, modifySinglePoDwhPoModifySave } from '../../../../../api/Jharkhand/services/SingleProgPoDeskAPI_JH';
+import { getSinglePoComponentDetails } from '../../../../../api/Jharkhand/services/SingleProgPoDeskAPI_JH';
+import { getHpPoDetails, saveApprovedPoDetails } from '../../../../../api/Himachal/services/poGenerationAPI_HP';
+import { fetchData } from '../../../../../utils/ApiHook';
+import InputBox from '../../../../commons/InputBox';
+import { ToastAlert } from '../../../../../utils/Toast';
 
-const SingleProgPoModifyJH = (props) => {
-    const { selectedData, actionType, getAllListData } = props;
+const PoApprovalVerifyHP = (props) => {
+    const { store, selectedData, actionType } = props;
 
-    const { value: storeID, label: storeName } = useSelector(
-        (state) => state.rateContractJHK.storeID
-    );
-
-    const rcDetailsColms = [
-        { header: "Supplier", field: "supplier" },
-        { header: "Rate/Unit(Inclusive Of Tax)", field: "rateUnit" },
-        { header: "Tax(%)", field: "tax" },
-    ]
+    const { value: storeID, label: storeName } = store;
 
     const initialState = {
-        //PO detail
+        //PO detail 
         poType: "",
         poGenPeriod: "",
         poDate: '',
@@ -43,6 +37,8 @@ const SingleProgPoModifyJH = (props) => {
         pCommitteeMeetCopy: "",
         remarks: "",
         rateUnit: "",
+        suggestedQty: '',
+        poOrdQty: '',
 
         //component details
         tAndc: "",
@@ -68,10 +64,13 @@ const SingleProgPoModifyJH = (props) => {
     const [rcDetailsList, setRcDetailsList] = useState([]);
     const [poDetailsList, setPoDetailsList] = useState([]);
     const [selectedRowId, setSelectedRowId] = useState(null);
-    const [orderQuantity, setOrderQuantity] = useState({});
-    const [allPoData, setAllPoData] = useState([]);
+    const [orderQuantity, setOrderQuantity] = useState(0);
+    const [allPoData, setAllPoData] = useState({});
     const [totalOrderQuantity, setTotalOrderQuantity] = useState(0);
     const [componentDetails, setComponentDetails] = useState([]);
+
+    console.log('rcDetailsList', rcDetailsList)
+    console.log('poDetailsList', poDetailsList)
 
     const handleReset = () => {
         dispatcher({ type: 'RESET_FORM' });
@@ -114,89 +113,76 @@ const SingleProgPoModifyJH = (props) => {
         const upRow = { ...row, "index": index }
         setSelectedRowId(upRow);
     };
-
-    const handleQuantityChange = (rowId, value) => {
-        setOrderQuantity(prev => {
-            const updated = [...prev];
-            updated[rowId] = value;
-            return updated;
-        });
-
+    const handleQuantityChange = (field, value) => {
+        setPoDetailsList(prev => [{ ...prev[0], [field]: value }]);
+        setOrderQuantity(value);
     };
 
     useEffect(() => {
         if (selectedData?.length > 0 && storeID) {
-            getAllPoDataTesting(selectedData[0]?.poNo, storeID, selectedData[0]?.poDate)
+            getAllPoDataTesting(selectedData[0]?.poNo, storeID)
             getPoComponentDetails(selectedData[0]?.poTypeId, 3, storeID, selectedData[0]?.poNo)
         }
     }, [selectedData])
 
-    useEffect(() => {
-        if (allPoData?.length > 0 && storeID) {
-            getAllPoDetailsList();
-        }
-    }, [allPoData])
+    const getRCDetailsList = (rcId) => {
+        fetchData(`/hp-api/rate-contracts?hospitalCode=998&rcId=${rcId}`)?.then((res) => {
+            if (res?.data?.status === 1) {
+                setRcDetailsList(res?.data?.data?.content)
+                const poDt = [{ storeName: storeName, anualDmdQty: 0, QtyPipeline: 0, currentStock: 0, reorderLevel: 0, suggestedQty: formState?.suggestedQty, orderQty: formState?.poOrdQty }]
+                setPoDetailsList(poDt)
+            } else {
+                setRcDetailsList([]);
+            }
+        })
+    }
 
     useEffect(() => {
-        if (poDetailsList?.length > 0) {
-            const orderQuantity = poDetailsList?.map((dt, index) => (dt[5]?.split('#')[0]));
-
-            const totalBudget = poDetailsList?.reduce(
-                (sum, row) => sum + (row[9] ?? 0),
-                0
-            );
-            const totalQuantity = orderQuantity?.reduce((a, b) => parseInt(a) + parseInt(b || 0));
-            const totalAvailBudget = (totalBudget || 0) + (allPoData[0]?.poDetails?.po_net_amount || 0)
-            dispatcher({ type: "SET_FIELD", field: "budgetAvail", value: totalAvailBudget || 0 });
-            setOrderQuantity(orderQuantity);
-            setTotalOrderQuantity(totalQuantity);
-        }
-    }, [poDetailsList])
-
-    const getAllPoDataTesting = (poNo, storeId, poDate) => {
-        const val = {
-            "gnumHospitalCode": 998,
-            "hstnumPoNo": poNo,
-            "hstnumStoreId": storeId,
-            "strFinancialStartDate": "1-Apr-2024",
-            "strFinancialToDate": "31-Mar-2025",
-            "hstnumSupplierId": 0,
-            "hstdtPoDate": new Date(poDate)
+        if (formState?.rcId) {
+            getRCDetailsList(formState?.rcId);
         }
 
-        getSinglePoTestingData(val)?.then((data) => {
+    }, [formState?.rcId])
+
+    const getAllPoDataTesting = (poNo, storeId) => {
+
+        getHpPoDetails(998, poNo, storeId)?.then((data) => {
             if (data?.status === 1) {
-                setAllPoData([data?.data]);
-                const poData = data?.data?.poDetails;
+                setAllPoData(data?.data);
+                const poData = data?.data;
                 dispatcher({
                     type: 'SET_FIELDS', payload: {
-                        poType: poData?.po_type,
-                        poGenPeriod: poData?.fin_year,
-                        poDate: poData?.po_date,
-                        poNumber: poData?.hstnum_po_no,
-                        supplierName: poData?.supp_name,
-                        drugName: poData?.item_name,
-                        itemCategory: poData?.item_cat_dtl,
-                        itemSpecification: poData?.item_specifile,
-                        programmeName: poData?.programme_name,
-                        fundingSource: poData?.funding_source_name,
+                        poType: poData?.strPoType,
+                        poGenPeriod: poData?.strFinancialYear,
+                        poDate: poData?.dtPoDate,
+                        poNumber: poData?.numPoNo,
+                        supplierName: poData?.strSupplierName,
+                        drugName: poData?.strItemCatName,
+                        itemCategory: poData?.strItemCatName,
+                        itemSpecification: poData?.strItemSpecifile,
+                        programmeName: poData?.strProgrammeName,
+                        fundingSource: poData?.strFundingSourceName,
                         budgetAvail: '',
-                        gstNo: data?.data?.gstNo,
+                        gstNo: data?.gstNo,
                         //Purchase Details
-                        poRef: poData?.po_prefix_no,
-                        totalPoCost: poData?.po_net_amount,
-                        pCommitteeMeetDate: poData?.pur_committee_date === '---' ? '' : poData?.pur_committee_date,
+                        poRef: poData?.strPoPrefixNo,
+                        totalPoCost: poData?.numPoNetAmount,
+                        pCommitteeMeetDate: poData?.dtPurCommitteeDate === '---' ? '' : poData?.dtPurCommitteeDate,
                         pCommitteeMeetCopy: 'NA',
-                        remarks: poData?.po_remarks,
-                        rateUnit: data?.data?.rateUnit,
+                        remarks: poData?.strPoRemarks,
+                        rateUnit: data?.rateUnit,
+                        suggestedQty: poData?.numRcSuggestQty,
+                        poOrdQty: poData?.numPoOrdQty,
+                        numItemCatNo: poData?.numItemCatNo,
 
                         //component details
-                        tAndc: ''
+                        tAndc: '',
+                        rcId: poData?.numRcId
                     }
                 });
-                setRcDetailsList([{ "supplier": poData?.supp_name, "rateUnit": data?.data?.rateUnit, "tax": poData?.hstnum_tax }])
+                setTotalOrderQuantity(poData?.numPoOrdQty);
             } else {
-                setAllPoData([]);
+                setAllPoData({});
             }
         })
     }
@@ -212,99 +198,87 @@ const SingleProgPoModifyJH = (props) => {
         })
     }
 
-    const getAllPoDetailsList = () => {
-        const val = {
-            gnumHospitalCode: 998,
-            hstnumStoreId: storeID,
-            strIndentPeriodValue: allPoData[0]?.poDetails?.fin_year,
-            strComboPOTypeId: `${allPoData[0]?.poDetails?.sstnum_potype_id}^${allPoData[0]?.poDetails?.auth_type}^${allPoData[0]?.poDetails?.rc_flag}`,
-            hstdtPoDate: new Date(allPoData[0]?.poDetails?.po_date),
-            hstnumItembrandId: parseInt(allPoData[0]?.itemBrandId),
-            programmeId: allPoData[0]?.poDetails?.hstnum_programme_id,
-            strIndentCellPOCombo: "0",
-            hstnumSupplierId: parseInt(allPoData[0]?.poDetails?.hstnum_supplier_id),
-            hstnumPoNo: allPoData[0]?.poDetails?.hstnum_po_no,
-            fundingSourceId: allPoData[0]?.poDetails?.hstnum_funding_source_id,
-            strContractType: allPoData[0]?.poDetails?.sstnum_potype_id,
-            strViewFlg: "1",
-        }
-
-        getSinglePoDwhPoDetails(val).then((res) => {
-            if (res?.status === 1) {
-                setPoDetailsList(res?.data)
-            } else {
-                setPoDetailsList([]);
-            }
-        })
-    }
-
     const handleTotalQuantity = () => {
-        const totalQuantity = orderQuantity?.reduce((a, b) => Number(a) + Number(b || 0));
-        setTotalOrderQuantity(totalQuantity);
-        const rate = Number(formState?.rateUnit?.split("/")?.[0] || 0);
-        const totalpocost = totalQuantity * rate;
-        dispatcher({ type: "SET_FIELD", field: "totalPoCost", value: totalpocost?.toFixed(2) || 0 });
-    }
+        const quantities = parseInt(orderQuantity) || 0;
+        setTotalOrderQuantity(quantities);
+
+        const ratePerUnit = Number(rcDetailsList[0]?.ratePerUnit?.split('/')[0]) || 0;
+        const tax = Number(rcDetailsList[0]?.strTax?.split('%')[0]) || 0;
+        const discount = rcDetailsList[0]?.numDiscount;
+
+        const finalRate = handleAllRateChange(ratePerUnit, allPoData?.numBaseUnitvalue, discount, tax)
+        const totalCost = quantities * finalRate;
+
+        dispatcher({
+            type: "SET_FIELD",
+            field: "totalPoCost",
+            value: totalCost.toFixed(2)
+        });
+    };
+
 
     const saveModifyPoDetails = () => {
         const val = {
-            "hstnumPoNo": formState?.poNumber,
             "gnumHospitalCode": 998,
-            "hstnumStoreId": storeID,
-            "strVerifiedBy": allPoData[0]?.poDetails?.hststr_verify_by,
-            "strDRemarks": formState?.remarks,
-            "strPODetailsHidValue": poDetailsList?.map(dt => dt.slice(0, 6).join("^")) || [],
-            "strQrderQty1": orderQuantity || [],
-            "strQrderQty2": poDetailsList?.map((dt, index) => (dt[5]?.split('#')[1])) || [],
-            "strQrderQty3": poDetailsList?.map((dt, index) => (dt[5]?.split('#')[2])) || [],
-            "strQrderQty4": poDetailsList?.map((dt, index) => (dt[5]?.split('#')[3])) || [],
+            "hstnumStoreId": parseInt(storeID),
+            "sstnumItemCatNo": parseInt(allPoData?.numItemCatNo),
+            "strComboPOTypeId": allPoData?.numPoTypeId,
+            "hstnumPoNo": allPoData?.numPoNo,
+            "sstnumPurchaseSourceId": allPoData?.numPurchaseSourceId || 0,
+            "hstnumSupplierId": allPoData?.numSupplierId,
+            "hstdtPoDate": new Date(allPoData?.dtPoDate),
+            "gnumSeatid": SEAT_ID,
+            "hststrApprovedBy": "",
+            "financialYear": allPoData?.strFinancialYear,
+            "gstrPoRemarks": formState?.remarks,
+            "hstnumRcId": allPoData?.numRcId,
+            "hstnumProgramId": allPoData?.numProgrammeId,
+            "hstnumFundingSourceId": allPoData?.numFundingSourceId || 0,
+            "StrApproveType": "1",//DHS" or "3" and "NORMAL" or "1"
 
-            "newStrPoTypeId": allPoData[0]?.poDetails?.sstnum_potype_id,
-            "strPOFinancialYear": allPoData[0]?.poDetails?.fin_year,
-            "hstdtPoDate": new Date(allPoData[0]?.poDetails?.po_date),
-            "programmeId": allPoData[0]?.poDetails?.hstnum_programme_id,
-            "fundingSourceId": allPoData[0]?.poDetails?.hstnum_funding_source_id,
-            "hstnumRcId": allPoData[0]?.poDetails?.rc_id,
-            "hstnumSupplierId": allPoData[0]?.poDetails?.hstnum_supplier_id,
-            "poItemIdValues": allPoData[0]?.poItemIdValues,
-            "strComboPOTypeId": allPoData[0]?.poDetails?.sstnum_potype_id,
-            "hstnumTax": allPoData[0]?.poDetails?.hstnum_tax,
-            "strItemManufacturerId": allPoData[0]?.poDetails?.hstnum_supplier_id,
-            "strDDeliveryDays": allPoData[0]?.deliveryDaysMap?.delivery_days1,//
-            "strDDeliveryDays2": allPoData[0]?.deliveryDaysMap?.delivery_days2,//
-            "strDDeliveryDays3": allPoData[0]?.deliveryDaysMap?.delivery_days3,//
-            "strDDeliveryDays4": allPoData[0]?.deliveryDaysMap?.delivery_days4,//
-            "gnumSeatId": SEAT_ID,
-            // "strChk": allPoData[0]?.poDetails?.po_date,//
-            "strDPurchaseSource": allPoData[0]?.poDetails?.sstnum_purchase_source_id,
-            "strDQuotationNo": allPoData[0]?.poDetails?.quotation_no,
-            "strDQuotationDate": allPoData[0]?.poDetails?.quotation_date,
-            "strVerifiedDate": allPoData[0]?.poDetails?.verify_date,
-            "strPoRefrenceNo": allPoData[0]?.poDetails?.hstnum_ref_po_no,
-            "strPoRefrenceNoText": formState?.poRef,
-            "strNextPoDate": allPoData[0]?.poDetails?.next_po_date,
-            "strPurchaseCommitteMeetingDate": formState?.pCommitteeMeetDate,
-            "strRPPONo": '',//
-            "strIndentCellPOCombo": '',
-            "strDComponentId": componentDetails?.map((dt) => (dt?.hstnum_component_id?.toString())),
-            "strDComponentValue": componentDetails?.map((dt) => (dt?.nvl?.toString()))
+            "items": [
+                {
+                    "hstnumItemBrandId": rcDetailsList[0]?.hstnumItembrandId,
+                    "hstnumItemId": rcDetailsList[0]?.hstnumItemId,
+                    "hstnumRate": Number(rcDetailsList[0]?.ratePerUnit?.split('/')[0]),
+                    "hstnumRateUnitid": rcDetailsList[0]?.numRateUnitid,
+                    "hstnumItemTax": Number(rcDetailsList[0]?.strTax?.split('%')[0]),
+                    "hstnumOrderQty": totalOrderQuantity,
+                    "hstnumDeliveryLocation": parseInt(storeID),
+                    "strDDeliveryDays": rcDetailsList[0]?.numDeliveryDays,
+                    "hstnumTotDemandedQty": rcDetailsList[0]?.hstnumItembrandId,
+                    "hstnumTotOrderedQty": totalOrderQuantity,
+                    "hstnumManufId": allPoData?.numSupplierId
 
+                }
+            ]
         }
-        console.log('val', val)
-        modifySinglePoDwhPoModifySave(val)?.then((data) => {
+        saveApprovedPoDetails(val)?.then((data) => {
+            console.log('data', data)
             if (data?.status === 1) {
-                alert("Po Modified successfully");
-                handleClose();
+                ToastAlert(data?.msg, 'success');
                 handleReset();
-                getAllListData();
+                handleClose();
             } else {
-                alert('failed');
+                ToastAlert(data?.msg, 'error');
             }
         })
     }
 
     const handleModifyPo = () => {
         let isValid = true;
+        if (!formState?.remarks?.trim()) {
+            ToastAlert("Please enter approval remarks", 'error');
+            isValid = false;
+        }
+        if (!totalOrderQuantity) {
+            ToastAlert("Total order quantity should not empty", 'error');
+            isValid = false;
+        }
+        if (rcDetailsList?.length === 0) {
+            ToastAlert("Rate Contract list not available", 'error');
+            isValid = false;
+        }
         if (isValid) {
             saveModifyPoDetails();
         }
@@ -320,8 +294,20 @@ const SingleProgPoModifyJH = (props) => {
         );
     };
 
+    const handleAllRateChange = (ratePerUnit, unitVal, numDiscount, strTax) => {
+        const rate = Number(ratePerUnit);
+        const unit = Number(unitVal);
+        const discount = Number(numDiscount);
+        const tax = Number(strTax);
 
-    const poDetailsCols = [
+        const total = (rate / unit) - (rate / unit * discount) / 100;
+
+        const rateWithTax = (total / unit) + (total / unit * tax) / 100;
+
+        return rateWithTax
+    };
+
+    const rcDetailsColms = [
         {
             name: <input
                 type="checkbox"
@@ -341,42 +327,81 @@ const SingleProgPoModifyJH = (props) => {
             width: "5%"
         },
         {
+            name: (<span>Supplier</span>),
+            selector: row => row?.strSupplierName,
+            sortable: true,
+            wrap: true,
+        },
+        {
+            name: (<span>Rate</span>),
+            selector: row => row?.ratePerUnit,
+            sortable: true,
+            wrap: true,
+        },
+        {
+            name: (<span>Discount(%)</span>),
+            selector: row => row?.numDiscount,
+            sortable: true,
+            wrap: true,
+        },
+        {
+            name: (<span>Tax (%)</span>),
+            selector: row => row?.strTax?.split('%')[0],
+            sortable: true,
+            wrap: true,
+        },
+        {
+            name: (<span>Rate With Tax</span>),
+            selector: row => handleAllRateChange(parseInt(row?.ratePerUnit?.split('/')[0]), allPoData?.numBaseUnitvalue, row?.numDiscount, parseInt(row?.strTax?.split('%')[0])),
+            sortable: true,
+            wrap: true,
+        }
+    ]
+
+    const poDetailsCols = [
+        {
             name: (<span>Store Name</span>),
-            selector: row => row[0],
+            selector: row => row?.storeName,
             sortable: true,
             wrap: true,
-            width: "20%"
+            // width: "20%"
         },
         {
-            name: (<span>Available Budget</span>),
-            selector: row => row[9],
-            sortable: true,
-            wrap: true,
-        },
-        {
-            name: (<span>Annual Demanded Quantity (A)</span>),
-            selector: row => row[1]?.split('#')[0],
+            name: (<span>Annual Demanded Quantity</span>),
+            selector: row => row?.anualDmdQty,
             sortable: true,
             wrap: true,
         },
         {
-            name: (<span>Ordered Quantity (B)</span>),
-            selector: row => row[1]?.split('#')[1],
+            name: (<span>Quantity. In Pipeline(Transit)</span>),
+            selector: row => row?.QtyPipeline,
             sortable: true,
             wrap: true,
         },
         {
             name: (<span>Current Stock</span>),
-            selector: row => row[1]?.split('#')[4],
+            selector: row => row?.currentStock,
             sortable: true,
             wrap: true,
         },
         {
-            name: (<span>Suggested Qty. (A-B)</span>),
-            selector: row => row[1]?.split('#')[0] - row[1]?.split('#')[1],
+            name: (<span>Reorder Level</span>),
+            selector: row => row?.reorderLevel,
             sortable: true,
             wrap: true,
         },
+        {
+            name: (<span>Suggested Qty.</span>),
+            selector: row => row?.suggestedQty,
+            sortable: true,
+            wrap: true,
+        },
+        // {
+        //     name: (<span>*Order Quantity(No.)</span>),
+        //     selector: row => row?.orderQty,
+        //     sortable: true,
+        //     wrap: true,
+        // },
         {
             name: (<span>*Order Quantity(No.)</span>),
             cell: (row, index) =>
@@ -387,9 +412,9 @@ const SingleProgPoModifyJH = (props) => {
                         type="text"
                         name={"orderQuantiy"}
                         placeholder=""
-                        value={orderQuantity[index] || ""}
-                        disabled={selectedRowId?.index !== index}
-                        onChange={(e) => { handleQuantityChange(index, e?.target?.value); }}
+                        value={row?.orderQty}
+                        // disabled={selectedRowId?.index !== index}
+                        onChange={(e) => { handleQuantityChange("orderQty", e?.target?.value); }}
                         onBlur={handleTotalQuantity}
                     />
 
@@ -402,7 +427,7 @@ const SingleProgPoModifyJH = (props) => {
     return (
         <section className="rateContractAddJHK">
             <h3 className="rateContractAddJHK__heading">
-                {`${actionType === "View" ? "Purchase Order View Form ( Centrally Rc )" : "Purchase Order Modify Form ( Centrally Rc )"}`}
+                {`Purchase Order Approval Form ( Centrally Po )`}
             </h3>
 
             <div className="rateContractAddJHK__container">
@@ -495,16 +520,14 @@ const SingleProgPoModifyJH = (props) => {
             </div>
 
             <div className="">
-                <h4 className="bg-[#097080] text-white p-1 rounded fw-normal ">Rate Contract Details</h4>
+                <h5 className="bg-[#097080] text-white p-1 rounded fw-normal ">Rate Contract Details</h5>
                 <div style={{ marginBottom: "2rem" }}>
-                    <DataTable
-                        masterName={"Rate Contract Details"}
-                        ref={null}
-                        columns={rcDetailsColms}
-                        data={rcDetailsList}
-                        isPagination={false}
+                    <ReactDataTable
+                        title={''}
+                        column={rcDetailsColms}
+                        data={rcDetailsList?.length > 0 ? rcDetailsList : []}
                         isSearchReq={false}
-                        isReport={false}
+                        isPagination={false}
                     />
                 </div>
             </div>
@@ -545,69 +568,48 @@ const SingleProgPoModifyJH = (props) => {
                 </div>
 
                 <div>
-                    {actionType === "Modify" ?
-                        <>
-                            <label htmlFor="tenderNo" className="employeeMaster__label required-label">
-                                PO Reference
-                            </label>
-                            <InputField
-                                id="poRef"
-                                className="employeeMaster__input"
-                                type="text"
-                                name={"poRef"}
-                                placeholder="Enter..."
-                                value={formState?.poRef}
-                                onChange={handleChange}
-                            />
-                        </>
-                        :
-                        <label htmlFor="" className="rateContractAddJHK__label mb-0">
-                            PO Reference :{" "}
-                            <span className="fs-6 fw-normal">{formState?.poRef}</span>
-                        </label>
-                    }
+                    <label htmlFor="tenderNo" className="employeeMaster__label">
+                        PO Reference
+                    </label>
+                    <InputField
+                        id="poRef"
+                        className="employeeMaster__input"
+                        type="text"
+                        name={"poRef"}
+                        placeholder="Enter..."
+                        value={formState?.poRef}
+                        onChange={handleChange}
+                    />
                 </div>
 
                 <div>
-                    {actionType === "Modify" ?
-                        <DatePickerComponent
-                            selectedDate={formState.pCommitteeMeetDate}
-                            setSelectedDate={(e) => handleDateChange(e, "pCommitteeMeetDate")}
-                            labelText={"Purchase Committee Meeting Date"}
-                            labelFor={"pCommitteeMeetDate"}
-                            name={"pCommitteeMeetDate"}
-                            allowMin={true}
-                        />
-                        :
-                        <label htmlFor="" className="rateContractAddJHK__label mb-0">
-                            Purchase Committee Meeting Date :{" "}
-                            <span className="fs-6 fw-normal">{formState.pCommitteeMeetDate || "NA"}</span>{" "}
-                        </label>
-                    }
+
+                    <DatePickerComponent
+                        selectedDate={formState.pCommitteeMeetDate}
+                        setSelectedDate={(e) => handleDateChange(e, "pCommitteeMeetDate")}
+                        labelText={"Purchase Committee Meeting Date"}
+                        labelFor={"pCommitteeMeetDate"}
+                        name={"pCommitteeMeetDate"}
+                        allowMin={true}
+                        isRequired
+                    />
+
                 </div>
 
                 <div>
-                    {actionType === "Modify" ?
-                        <>
-                            <label htmlFor="remarks" className="employeeMaster__label">
-                                Remarks :
-                            </label>
-                            <textarea
-                                id="remarks"
-                                className="rateContractAddJHK__input"
-                                type="text"
-                                name={"remarks"}
-                                placeholder="Enter here..."
-                                value={formState?.remarks}
-                                onChange={handleChange}
-                            />
-                        </>
-                        :
-                        <label htmlFor="" className="rateContractAddJHK__label mb-0">
-                            Remarks :{" "}
-                            <span className="fs-6 fw-normal">{formState.remarks}</span>{" "}
-                        </label>
-                    }
+                    <label htmlFor="remarks" className="employeeMaster__label required-label">
+                        Remarks :
+                    </label>
+                    <textarea
+                        id="remarks"
+                        className="rateContractAddJHK__input"
+                        type="text"
+                        name={"remarks"}
+                        placeholder="Enter here..."
+                        value={formState?.remarks}
+                        onChange={handleChange}
+                    />
+
                 </div>
             </div>
 
@@ -656,9 +658,10 @@ const SingleProgPoModifyJH = (props) => {
             </div>
 
             <div className="bankmaster__container-controls">
-                {actionType === "Modify" &&
-                    <button className="bankmaster__container-controls-btn" onClick={handleModifyPo}>Save</button>
-                }
+
+                <button className="bankmaster__container-controls-btn" onClick={handleModifyPo}>Approve</button>
+                <button className="bankmaster__container-controls-btn" onClick={null}>Reject</button>
+
                 <button
                     className="bankmaster__container-controls-btn"
                     onClick={handleClose}
@@ -678,4 +681,4 @@ const SingleProgPoModifyJH = (props) => {
     );
 }
 
-export default SingleProgPoModifyJH
+export default PoApprovalVerifyHP

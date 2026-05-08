@@ -22,7 +22,7 @@ const UnifiedContextApi = ({ children }) => {
         return {
             tabs: [
                 { id: "home", title: "Home", path: ``, closable: false },
-                { id: "bankmaster", title: "Bank Master", path: `bank-master`, closable: true },
+                { id: "dashboard", title: "Dashboard", path: `dashboard`, closable: false },
             ],
             activeTab: "home"
         };

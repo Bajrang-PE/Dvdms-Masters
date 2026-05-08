@@ -1,15 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react'
-import ServiceNavbar from '../../../commons/ServiceNavbar';
-import { ComboDropDown } from '../../../commons/FormElements';
-import DataTable from '../../../commons/Datatable';
+import ServiceNavbar from '../../../../commons/ServiceNavbar';
+import { ComboDropDown } from '../../../../commons/FormElements';
+import DataTable from '../../../../commons/Datatable';
 import { useDispatch } from 'react-redux';
-import { showPopup } from '../../../../features/commons/popupSlice';
-import { getCommonHpFinYearCmb, getCommonHpStoreNameCmb } from '../../../../api/Himachal/commonAPI_HP';
-import { getHpPoGenGraphDataCounts, getHpPoGenListData, getHpPoGenStatusCmb } from '../../../../api/Himachal/services/poGenerationAPI_HP';
-import { chartColorArr } from '../../common/StaticData';
-import PieChart from '../../../commons/PieChart';
-import PoGenerationFormHP from './poGeneration/PoGenerationFormHP';
-import PoModifyViewFormHP from './poGeneration/PoModifyViewFormHP';
+import { showPopup } from '../../../../../features/commons/popupSlice';
+import { getCommonHpStoreNameCmb } from '../../../../../api/Himachal/commonAPI_HP';
+import { getHpPoApprKpiDataCountsDetails, getHpPoApprStatusCmbDetails, getHpPoGenListData } from '../../../../../api/Himachal/services/poGenerationAPI_HP';
+import { chartColorArr } from '../../../common/StaticData';
+import PieChart from '../../../../commons/PieChart';
+import PoApprovalVerifyHP from './PoApprovalVerifyHP';
+import PoModifyViewFormHP from '../poGeneration/PoModifyViewFormHP';
+
 
 const columns = [
     { header: "PO Prefix", field: "poPrefix" },
@@ -18,27 +19,19 @@ const columns = [
     { header: "PO Value", field: "poNetAmount" },
     { header: "Supplier Name", field: "supplierName" },
     { header: "Drug Name", field: "itemName" },
-    { header: "Rate Contract Name", field: "rateContractName" },
-    { header: "Supply Status", field: "strSupplyStatus" },
-
-    { header: "Total Ordered Qty.", field: "poOrdQty" },
-    { header: "Programme Name", field: "programmeName" },
-
-    { header: "PO Approval Remarks", field: "strPoRemarks" },
+    { header: "Rate Contract Name", field: "rateContractName" }
 ];
 
-const PoGenerationHP = () => {
+const PoApprovalListHP = () => {
 
     const dispatch = useDispatch();
     const dataTableRef = useRef();
     const SEAT_ID = 14409;
 
     const [storeNameDrpDt, setStoreNameDrpDt] = useState([]);
-    const [finYearDrpDt, setFinYearDrpDt] = useState([]);
     const [poStatusDrpDt, setPoStatusDrpDt] = useState([]);
 
     const [storeName, setStoreName] = useState("");
-    const [finYear, setFinYear] = useState("");
     const [poStatus, setPoStatus] = useState("");
     const [userSelection, setUserSelection] = useState("");
     const [selectedRowRc, setSelectedRowRc] = useState(null);
@@ -47,25 +40,17 @@ const PoGenerationHP = () => {
     const [selectedStore, setSelectedStore] = useState({});
 
     const componentsList = [
-        { mappingKey: "generate", componentName: () => <PoGenerationFormHP store={selectedStore} selectedData={selectedRowRc} actionType={'generate'} /> },
-        { mappingKey: "modify", componentName: () => <PoModifyViewFormHP store={selectedStore} selectedData={selectedRowRc} actionType={'Modify'} /> },
-        { mappingKey: "view", componentName: () => <PoModifyViewFormHP store={selectedStore} selectedData={selectedRowRc} actionType={'View'} /> },
-        { mappingKey: "cancel", componentName: () => <RateContractTenderHP suppliers={suppliersDrpDt} /> },
+        { mappingKey: "verify", componentName: () => <PoApprovalVerifyHP store={selectedStore} selectedData={selectedRowRc} actionType={'verify'} getGraphDataForRc={getGraphDataForRc} /> },
+        { mappingKey: "view", componentName: () => <PoModifyViewFormHP store={selectedStore} selectedData={selectedRowRc} actionType={'View'} /> }
     ];
 
     const buttonDataset = [
-        { label: "Generate", onClick: (() => { handleActionComp('generate') }) },
+        { label: "Verify", onClick: (() => { handleActionComp('verify') }) },
         ...(selectedRowRc?.length > 0 ? [
             { label: "View", onClick: (() => { handleActionComp('view') }) },
+            { label: "Print", onClick: (() => { handleActionComp('print') }) },
         ] : []),
 
-        ...((selectedRowRc?.length > 0 ) ? [
-            { label: "Modify", onClick: (() => { handleActionComp('modify') }) },
-        ] : []),
-
-        ...((selectedRowRc?.length > 0 && selectedRowRc[0]?.gnumIsvalid === 1) ? [
-            { label: "Cencel", onClick: (() => { handleCancelRc('cancel') }) },
-        ] : []),
     ];
 
     function handleActionComp(key) {
@@ -78,30 +63,6 @@ const PoGenerationHP = () => {
     }
 
     useEffect(() => {
-
-        const loadFinYearDrpDt = async () => {
-            try {
-                let yearList = [];
-                const data = await getCommonHpFinYearCmb(998, 10);
-                if (data?.status === 1) {
-                    data?.data.forEach((element) => {
-
-                        const obj = {
-                            label: element?.display,
-                            value: element?.value,
-                        };
-                        yearList.push(obj);
-                    });
-                    setFinYearDrpDt(yearList);
-                    setFinYear(yearList.at(0).value);
-                } else {
-                    setFinYearDrpDt([]);
-                    setFinYear("");
-                }
-            } catch (err) {
-                console.log("Failed to fetch drugs.", err);
-            }
-        };
 
         const loadStoreNameDrpData = async () => {
             try {
@@ -133,7 +94,7 @@ const PoGenerationHP = () => {
         const loadStatusDrpData = async () => {
             try {
                 let status = [];
-                const data = await getHpPoGenStatusCmb();
+                const data = await getHpPoApprStatusCmbDetails();
                 if (data?.status === 1) {
                     data?.data.forEach((element) => {
                         const obj = {
@@ -152,14 +113,13 @@ const PoGenerationHP = () => {
             }
         };
 
-        loadFinYearDrpDt();
         loadStoreNameDrpData();
         loadStatusDrpData();
     }, [dispatch]);
 
 
     const getGraphDataForRc = () => {
-        getHpPoGenGraphDataCounts(998, storeName, finYear)?.then((data) => {
+        getHpPoApprKpiDataCountsDetails(998, storeName)?.then((data) => {
             if (data?.status === 1) {
                 let statusData = [];
 
@@ -173,6 +133,8 @@ const PoGenerationHP = () => {
                     });
                 });
                 setPieChartData(statusData);
+                setRcListData([]);
+                setPoStatus('');
             } else {
                 setPieChartData([]);
             }
@@ -180,25 +142,26 @@ const PoGenerationHP = () => {
     }
 
     useEffect(() => {
-        if (storeName && finYear) {
+        if (storeName) {
             getGraphDataForRc();
         }
-    }, [storeName, finYear]);
+    }, [storeName]);
 
-    const getPoGenListData = (storeId, financialYear, status) => {
-        getHpPoGenListData(998, storeId, financialYear, status)?.then((res) => {
+    const getPoGenListData = (storeId, status) => {
+        getHpPoGenListData(998, storeId, '', status)?.then((res) => {
             if (res?.status === 1) {
                 setRcListData(res?.data?.content);
             } else {
                 setRcListData([]);
             }
+            console.log('res', res)
         })
     }
 
     useEffect(() => {
         const timeout = setTimeout(() => {
             if (!poStatus) return;
-            getPoGenListData(storeName, finYear, poStatus);
+            getPoGenListData(storeName, poStatus);
         }, 200);
         return () => clearTimeout(timeout);
     }, [poStatus]);
@@ -207,7 +170,7 @@ const PoGenerationHP = () => {
         <>
             <ServiceNavbar
                 buttons={buttonDataset}
-                heading={"Single Drug PO Generation Desk"}
+                heading={"Single Program Purchase Order Approval"}
                 userSelection={userSelection}
                 componentsList={componentsList}
                 isLargeDataset={true}
@@ -226,15 +189,6 @@ const PoGenerationHP = () => {
                                 label={"Store Name"}
                                 addOnClass="homeWrapper__container--dropdown"
                                 name={'storeName'}
-                            />
-
-                            <ComboDropDown
-                                options={finYearDrpDt}
-                                onChange={(e) => setFinYear(e.target.value)}
-                                value={finYear}
-                                label={"Financial Year"}
-                                addOnClass="homeWrapper__container--dropdown"
-                                name={'finYear'}
                             />
                             <ComboDropDown
                                 options={poStatusDrpDt}
@@ -299,4 +253,4 @@ const PoGenerationHP = () => {
     )
 }
 
-export default PoGenerationHP
+export default PoApprovalListHP

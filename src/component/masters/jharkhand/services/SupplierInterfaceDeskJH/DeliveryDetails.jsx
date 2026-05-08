@@ -199,6 +199,8 @@ const DeliveryDetails = (props) => {
                     label: dt?.hstnum_schedule_no
                 }))
                 setScheduleNoDrpData(drpData);
+            } else {
+                setScheduleNoDrpData([]);
             }
         })
     }
@@ -446,7 +448,7 @@ const DeliveryDetails = (props) => {
                     .map((r, i) => ({ ...r, columnNo: i + 1 }));
                 setAddedRows(updatedRows);
             } else {
-                ToastAlert("No rows available",'error');
+                ToastAlert("No rows available", 'error');
             }
         } else {
             if (rows.length > 0) {
@@ -455,7 +457,7 @@ const DeliveryDetails = (props) => {
                     .map((r, i) => ({ ...r, columnNo: i + 1 }));
                 setRows(updatedRows);
             } else {
-                ToastAlert("No rows available",'error');
+                ToastAlert("No rows available", 'error');
             }
         }
 
@@ -549,17 +551,17 @@ const DeliveryDetails = (props) => {
             const rowNo = i + 1;
 
             if (!row?.batchNoName) {
-                ToastAlert(`Row ${rowNo}: Please select Batch No`,'error');
+                ToastAlert(`Row ${rowNo}: Please select Batch No`, 'error');
                 return;
             }
 
             if (!row?.mfgDate) {
-                ToastAlert(`Row ${rowNo}: Manufacturing Date should not empty`,'error');
+                ToastAlert(`Row ${rowNo}: Manufacturing Date should not empty`, 'error');
                 return;
             }
 
             if (!row?.expDate) {
-                ToastAlert(`Row ${rowNo}:  Expiry Date should not empty`,'error');
+                ToastAlert(`Row ${rowNo}:  Expiry Date should not empty`, 'error');
                 return;
             }
 
@@ -567,17 +569,17 @@ const DeliveryDetails = (props) => {
             expDate.setHours(0, 0, 0, 0);
 
             if (expDate <= today) {
-                ToastAlert(`Row ${rowNo}: Expiry date must be greater than current date`,'error');
+                ToastAlert(`Row ${rowNo}: Expiry date must be greater than current date`, 'error');
                 return;
             }
 
             if (!row?.unit) {
-                ToastAlert(`Row ${rowNo}: Please select Unit`,'error');
+                ToastAlert(`Row ${rowNo}: Please select Unit`, 'error');
                 return;
             }
 
             if (!row?.NPCDCS) {
-                ToastAlert(`Row ${rowNo}: total quantity should not empty`,'error');
+                ToastAlert(`Row ${rowNo}: total quantity should not empty`, 'error');
                 return;
             }
         }
@@ -646,10 +648,10 @@ const DeliveryDetails = (props) => {
         addSuppIntDeskDeliveryDetails(formData)?.then((res) => {
 
             if (res?.status === 1) {
-                ToastAlert(res?.message,'success')
+                ToastAlert(res?.message, 'success')
                 getDeliveryDetails(selectedData[0]?.hstnum_po_no, selectedData[0]?.hstnum_store_id);
             } else {
-                ToastAlert(res?.message,'error')
+                ToastAlert(res?.message, 'error')
             }
         })
     }

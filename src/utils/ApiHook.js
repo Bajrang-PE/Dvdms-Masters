@@ -8,8 +8,8 @@ const BaseUrl = '  http://10.226.27.173:8094'; //vish
 // const BaseUrl = "http://10.226.30.86:8091"; //Main Gateway
 // const BaseUrl = "http://10.226.30.45:9002"; //HP prd
 
-axios.defaults.baseURL = '';
-// axios.defaults.baseURL = BaseUrl;
+// axios.defaults.baseURL = '';
+axios.defaults.baseURL = BaseUrl;
 
 // const getAccessToken = () => {
 //     return sessionStorage.getItem('accessToken');

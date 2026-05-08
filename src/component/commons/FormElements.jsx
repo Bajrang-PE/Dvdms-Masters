@@ -163,7 +163,8 @@ export function InputField({
   isAlpha = false,
   label,
   isRequired,
-  isError
+  isError,
+  addOnClass
 }) {
 
   const handleChange = (e) => {
@@ -289,7 +290,7 @@ export function InputField({
   return (
     <>
       <div
-        className={`Wrapper`}>
+        className={`Wrapper ${addOnClass}`}>
         {label && <label className={`Wrapper__label ${isRequired ? 'required-label' : ""}`}>{label}</label>}
 
         <input

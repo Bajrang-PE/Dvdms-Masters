@@ -3,7 +3,7 @@ import { fetchData, fetchDeleteData, fetchPostData, fetchPostFormData, fetchUpda
 export const getContractTypes = async (hospitalCode) => {
   try {
     const response = await fetchData(
-      `/jhk-services/api/v1/rate-contract-dtl/contract-type-combo?hospCode=${hospitalCode}`
+      `/api/v1/rate-contract-dtl/contract-type-combo?hospCode=${hospitalCode}`
     );
     return response.data;
   } catch (error) {
@@ -15,7 +15,7 @@ export const getContractTypes = async (hospitalCode) => {
 export const getLevelTypeCmb = async (hospitalCode) => {
   try {
     const response = await fetchData(
-      `/jhk-services/api/v1/rate-contract-dtl/level-type-combo?hospCode=${hospitalCode}`
+      `/api/v1/rate-contract-dtl/level-type-combo?hospCode=${hospitalCode}`
     );
     return response?.data;
   } catch (error) {
@@ -27,7 +27,7 @@ export const getLevelTypeCmb = async (hospitalCode) => {
 export const getUnitCombo = async (hospitalCode) => {
   try {
     const response = await fetchData(
-      `/jhk-services/api/v1/rate-contract-dtl/unit-combo?hospCode=${hospitalCode}`
+      `/api/v1/rate-contract-dtl/unit-combo?hospCode=${hospitalCode}`
     );
     return response?.data;
   } catch (error) {
@@ -39,7 +39,7 @@ export const getUnitCombo = async (hospitalCode) => {
 export const getSuppliers = async (hospitalCode) => {
   try {
     const response = await fetchData(
-      `/jhk-services/api/v1/rate-contract-dtl/supplier-combo?hospCode=${hospitalCode}`
+      `/api/v1/rate-contract-dtl/supplier-combo?hospCode=${hospitalCode}`
     );
     return response.data?.data;
   } catch (error) {
@@ -51,7 +51,7 @@ export const getSuppliers = async (hospitalCode) => {
 export const getSuppliersWithContractCmb = async (hospitalCode, contractId) => {
   try {
     const response = await fetchData(
-      `/jhk-services/api/v1/rate-contract-dtl/contract-dtls-supp-cmb?hospCode=${hospitalCode}&contractTypeId=${contractId}`
+      `/api/v1/rate-contract-dtl/contract-dtls-supp-cmb?hospCode=${hospitalCode}&contractTypeId=${contractId}`
     );
     return response?.data;
   } catch (error) {
@@ -63,7 +63,7 @@ export const getSuppliersWithContractCmb = async (hospitalCode, contractId) => {
 export const getDrugNames = async (hospitalCode) => {
   try {
     const response = await fetchData(
-      `/jhk-services/api/v1/rate-contract-dtl/drug-combo?hospCode=${hospitalCode}`
+      `/api/v1/rate-contract-dtl/drug-combo?hospCode=${hospitalCode}`
     );
     return response.data;
   } catch (error) {
@@ -75,7 +75,7 @@ export const getDrugNames = async (hospitalCode) => {
 export const getStoreName = async (hospitalCode) => {
   try {
     const response = await fetchData(
-      `/jhk-services/api/v1/rate-contract-dtl/storeName-combo?hospCode=${hospitalCode}`
+      `/api/v1/rate-contract-dtl/storeName-combo?hospCode=${hospitalCode}`
     );
     return response.data;
   } catch (err) {
@@ -94,7 +94,7 @@ export const getRateContractList = async (
 ) => {
   try {
     const response = await fetchData(
-      `/jhk-services/api/v1/rate-contract-dtl/ratecontract-list?hospCode=${hospitalCode}&supplierId=${supplierID}&contractTypeId=${contractID}&status=${isActive}&storeId=${storeId}&itemBrandId=${itemBrandId}`
+      `/api/v1/rate-contract-dtl/ratecontract-list?hospCode=${hospitalCode}&supplierId=${supplierID}&contractTypeId=${contractID}&status=${isActive}&storeId=${storeId}&itemBrandId=${itemBrandId}`
     );
     return response.data;
   } catch (error) {
@@ -106,7 +106,7 @@ export const getRateContractList = async (
 export const getTenderNameForAddTender = async (hospitalCode, storeID) => {
   try {
     const response = await fetchData(
-      `/jhk-services/api/v1/rate-contract-dtl/tender-no-for-add-tender?hospCode=${hospitalCode}&storeId=${storeID}`
+      `/api/v1/rate-contract-dtl/tender-no-for-add-tender?hospCode=${hospitalCode}&storeId=${storeID}`
     );
     return response.data;
   } catch (error) {
@@ -118,7 +118,7 @@ export const getTenderNameForAddTender = async (hospitalCode, storeID) => {
 export const getBanks = async (hospitalCode) => {
   try {
     const response = await fetchData(
-      `/jhk-services/api/v1/rate-contract-dtl/bank-combo?hospCode=${hospitalCode}`
+      `/api/v1/rate-contract-dtl/bank-combo?hospCode=${hospitalCode}`
     );
     return response.data;
   } catch (error) {
@@ -135,7 +135,7 @@ export const getExistingRC = async (
 ) => {
   try {
     const response = await fetchData(
-      `/jhk-services/api/v1/rate-contract-dtl/existing-rate-Contract?hospCode=${hospitalCode}&storeId=${storeID}&itemBrandId=${itemBrandId}&contractTypeId=${contractID}`
+      `/api/v1/rate-contract-dtl/existing-rate-Contract?hospCode=${hospitalCode}&storeId=${storeID}&itemBrandId=${itemBrandId}&contractTypeId=${contractID}`
     );
     return response.data;
   } catch (error) {
@@ -147,7 +147,7 @@ export const getExistingRC = async (
 export const getBgDetailList = async (hospitalCode, suppID, rcId, tenderNo) => {
   try {
     const response = await fetchData(
-      `/jhk-services/api/v1/rate-contract-dtl/bg-details?hospCode=${hospitalCode}&supplierId=${suppID}&rcId=${rcId}&tenderNo=${tenderNo}`
+      `/api/v1/rate-contract-dtl/bg-details?hospCode=${hospitalCode}&supplierId=${suppID}&rcId=${rcId}&tenderNo=${tenderNo}`
     );
     return response?.data;
   } catch (error) {
@@ -159,7 +159,7 @@ export const getBgDetailList = async (hospitalCode, suppID, rcId, tenderNo) => {
 export const getContractDetails = async (hospitalCode, suppID, tenderNo) => {
   try {
     const response = await fetchData(
-      `/jhk-services/api/v1/rate-contract-dtl/contract-details?hospCode=${hospitalCode}&supplierId=${suppID}&tenderNo=${tenderNo}`
+      `/api/v1/rate-contract-dtl/contract-details?hospCode=${hospitalCode}&supplierId=${suppID}&tenderNo=${tenderNo}`
     );
     return response?.data;
   } catch (error) {
@@ -171,7 +171,7 @@ export const getContractDetails = async (hospitalCode, suppID, tenderNo) => {
 export const getTenderNumber = async (hospitalCode, suppID) => {
   try {
     const response = await fetchData(
-      `/jhk-services/api/v1/rate-contract-dtl/tender-no?hospCode=${hospitalCode}&supplierId=${suppID}`
+      `/api/v1/rate-contract-dtl/tender-no?hospCode=${hospitalCode}&supplierId=${suppID}`
     );
     return response?.data;
   } catch (error) {
@@ -183,7 +183,7 @@ export const getTenderNumber = async (hospitalCode, suppID) => {
 export const getExistingSuppliers = async (hospitalCode, tenderNo) => {
   try {
     const response = await fetchData(
-      `/jhk-services/api/v1/rate-contract-dtl/supplier-details?hospCode=${hospitalCode}&tenderNo=${tenderNo}`
+      `/api/v1/rate-contract-dtl/supplier-details?hospCode=${hospitalCode}&tenderNo=${tenderNo}`
     );
     return response?.data;
   } catch (error) {
@@ -195,7 +195,7 @@ export const getExistingSuppliers = async (hospitalCode, tenderNo) => {
 export const getRcGraphData = async (hospitalCode, storeId, suppId, contractTypId, itemBrandId) => {
   try {
     const response = await fetchData(
-      `/jhk-services/api/v1/rate-contract-dtl/graph-data?hospitalCode=${hospitalCode}&storeId=${storeId}&supplierId=${suppId}&contractTypeId=${contractTypId}&itemBrandId=${itemBrandId}`
+      `/api/v1/rate-contract-dtl/graph-data?hospitalCode=${hospitalCode}&storeId=${storeId}&supplierId=${suppId}&contractTypeId=${contractTypId}&itemBrandId=${itemBrandId}`
     );
     return response?.data;
   } catch (error) {
@@ -207,7 +207,7 @@ export const getRcGraphData = async (hospitalCode, storeId, suppId, contractTypI
 export const getRefundBgDetailList = async (hospitalCode, tenderNo) => {
   try {
     const response = await fetchData(
-      `/jhk-services/api/v1/rate-contract-dtl/refund-details?hospCode=${hospitalCode}&tenderNo=${tenderNo}`
+      `/api/v1/rate-contract-dtl/refund-details?hospCode=${hospitalCode}&tenderNo=${tenderNo}`
     );
     return response?.data;
   } catch (error) {
@@ -232,7 +232,7 @@ export const addTenderdetails = async (data) => {
 export const addContractdetails = async (data) => {
   try {
     // const response = await fetchPostFormData(
-    //   `/jhk-services/api/v1/rate-contract-dtl/save-rate-contract`,
+    //   `/api/v1/rate-contract-dtl/save-rate-contract`,
     //   data
     // );
     const response = await fetchPostFormData(
@@ -249,7 +249,7 @@ export const addContractdetails = async (data) => {
 export const uploadFileTenderdetails = async (data) => {
   try {
     const response = await fetchPostData(
-      `/jhk-services/api/v1/rate-contract-dtl/upload-file`,
+      `/api/v1/rate-contract-dtl/upload-file`,
       data
     );
     return response;
@@ -262,7 +262,7 @@ export const uploadFileTenderdetails = async (data) => {
 export const addNewBgDetails = async (data) => {
   try {
     const response = await fetchUpdateData(
-      `/jhk-services/api/v1/rate-contract-dtl/edit-bg-action-new-save`,
+      `/api/v1/rate-contract-dtl/edit-bg-action-new-save`,
       data
     );
     return response?.data;
@@ -275,7 +275,7 @@ export const addNewBgDetails = async (data) => {
 export const addRefundBgDetails = async (data) => {
   try {
     const response = await fetchUpdateData(
-      `/jhk-services/api/v1/rate-contract-dtl/edit-bg-action-refund-save`,
+      `/api/v1/rate-contract-dtl/edit-bg-action-refund-save`,
       data
     );
     return response?.data;
@@ -288,7 +288,7 @@ export const addRefundBgDetails = async (data) => {
 export const deleteSupplierDetails = async (hospCode, suppId, tenderno, seatId) => {
   try {
     const response = await fetchDeleteData(
-      `/jhk-services/api/v1/rate-contract-dtl/delete-record?hospCode=${hospCode}&supplierId=${suppId}&tenderNo=${tenderno}&seatId=${seatId}`
+      `/api/v1/rate-contract-dtl/delete-record?hospCode=${hospCode}&supplierId=${suppId}&tenderNo=${tenderno}&seatId=${seatId}`
     );
     return response;
   } catch (error) {
@@ -300,7 +300,7 @@ export const deleteSupplierDetails = async (hospCode, suppId, tenderno, seatId) 
 export const cancelRateContract = async (data) => {
   try {
     const response = await fetchPostData(
-      `/jhk-services/api/v1/rate-contract-dtl/cancel-rate-contract`,
+      `/api/v1/rate-contract-dtl/cancel-rate-contract`,
       data
     );
     return response?.data;

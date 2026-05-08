@@ -2,13 +2,17 @@ import React, { useEffect, useState } from 'react'
 import ServiceNavbar from '../../../../commons/ServiceNavbar';
 import { ComboDropDown } from '../../../../commons/FormElements';
 import DataTable from '../../../../commons/Datatable';
-import { fetchCPListData } from '../../../../../api/Jharkhand/services/ChallanProcessAPI_JH';
-
-
+import { fetchCPListData, fetchDrugNameDrpDt, fetchPoNumberDrpDt, fetchStoreNameDrpDt, fetchSuppliersDrpDt } from '../../../../../api/Jharkhand/services/ChallanProcessAPI_JH';
+import ReceiveChallanProcess from './ReceiveChallanProcess';
+import { showPopup } from '../../../../../features/commons/popupSlice';
+import { useDispatch } from 'react-redux';
+import VerifyChallanProcess from './VerifyChallanProcess';
+import CancelAndViewChallanJH from './CancelAndViewChallanJH';
 
 const ChallanProcessJh = () => {
 
-    const SEAT_ID = 14409;
+    const SEAT_ID = 14462;
+    const dispatch = useDispatch();
     const [storeNameDrpDt, setStoreNameDrpDt] = useState([]);
     const [drugNameDrpDt, setDrugNameDrpDt] = useState([]);
     const [poNoDrpDt, setPoNoDrpDt] = useState([]);
@@ -17,34 +21,40 @@ const ChallanProcessJh = () => {
     const poStatusDrpDt = [{ value: "1", label: "Active" }, { value: "2", label: "Closed" }];
     const challanStatusDrpDt = [
         { value: "0", label: "All" },
-        { value: "1", label: "Receive Pending" },
-        { value: "2", label: "Verify Pending" },
-        { value: "3", label: "Freeze Pending" },
-        { value: "4", label: "Closed" },
+        { value: "1", label: "Receive Pending" }, //0
+        { value: "2", label: "Verify Pending" },//9
+        { value: "3", label: "Freeze Pending" },//2
+        { value: "4", label: "Closed" },//1
     ];
 
     const [selectedRowRc, setSelectedRowRc] = useState(null);
     const [userSelection, setUserSelection] = useState("");
     const [challanListData, setChallanListData] = useState([]);
     const [values, setValues] = useState({
-        storeName: "", poStatus: "1", drugName: "", poNo: "", suppName: "", challanStatus: "0"
+        storeName: "", poStatus: "1", drugName: "0", poNo: "0", suppName: "0", challanStatus: "0"
     })
 
     const columns = [
-        { header: "PO No.", field: "strSupplierName" },
-        { header: "PO Date", field: "strItemName", },
-        { header: "Dispatch Date", field: "ratePerUnit" },
-        { header: "Invoice No.", field: "strTax" },
-        { header: "Received Date", field: "hstdtContractFrmdate" },
-        { header: "Drug Name", field: "hstdtContractTodate" },
-        { header: "Dispatch/Rec Qty.", field: "hstnumRcId", isJSX: true },
-        { header: "Ack. Qty.", field: "tenderId" },
-        { header: "Status", field: "status" },
+        { header: "PO No.", field: "strPoNo" },
+        { header: "PO Date", field: "strPoDate", },
+        { header: "Dispatch Date", field: "strDeliveryDate" },
+        { header: "Invoice No.", field: "strDeliveryNo" },
+        { header: "Received Date", field: "strReceiveDate" },
+        { header: "Drug Name", field: "strItemBrandName" },
+        { header: "Dispatch/Rec Qty.", field: "strReceivedQuantityView" },
+        { header: "Ack. Qty.", field: "strAcceptedQty" },
+        { header: "Status", field: "strChallanStatus" },
     ];
 
     const handleChange = (e) => {
         const { name, value } = e?.target;
-        if (name) {
+        if (name === "poStatus") {
+            setValues({ ...values, [name]: value, drugName: "0", poNo: "0", suppName: "0", challanStatus: "0" });
+        } else if (name === "drugName") {
+            setValues({ ...values, [name]: value, poNo: "0", suppName: "0", challanStatus: "0" });
+        } else if (name === "poNo") {
+            setValues({ ...values, [name]: value, suppName: "0", challanStatus: "0" });
+        } else {
             setValues({ ...values, [name]: value });
         }
     }
@@ -54,33 +64,123 @@ const ChallanProcessJh = () => {
     }
 
     const componentsList = [
-        { mappingKey: "Tender", componentName: () => <RateContractTenderHP suppliers={suppliersDrpDt} /> },
-        { mappingKey: "add", componentName: () => <RateContractAddHP drugList={drugNameDrpDt} suppliers={suppliersDrpDt} /> },
-        { mappingKey: "modify", componentName: () => <RcModifyViewFormHP selectedData={selectedRowRc} actionMode={'modify'} /> },
-        { mappingKey: "view", componentName: () => <RcModifyViewFormHP selectedData={selectedRowRc} actionMode={'view'} /> },
+        { mappingKey: "receive", componentName: () => <ReceiveChallanProcess selectedData={selectedRowRc} actionMode={'receive'} /> },
+        { mappingKey: "verify", componentName: () => <VerifyChallanProcess selectedData={selectedRowRc} actionMode={'verify'} /> },
+        { mappingKey: "freeze", componentName: () => <CancelAndViewChallanJH selectedData={selectedRowRc} actionMode={'freeze'} /> },
+        { mappingKey: "view", componentName: () => <CancelAndViewChallanJH selectedData={selectedRowRc} actionMode={'view'} /> },
+        { mappingKey: "cancel", componentName: () => <CancelAndViewChallanJH selectedData={selectedRowRc} actionMode={'cancel'} challanStatus={selectedRowRc[0]?.hstnumChallanStatus}/> },
     ];
 
     const buttonDataset = [
-        { label: "Receive", onClick: (() => { handleActionComp('receive') }), icon: " " },
-        { label: "Verify", onClick: (() => { handleActionComp('verify') }) },
-        ...(selectedRowRc?.length > 0 ? [
+        ...((selectedRowRc?.length > 0 && selectedRowRc[0]?.hstnumChallanStatus === 0) ? [
+            { label: "Receive", onClick: (() => { handleActionComp('receive') }), icon: " " },
+        ] : []),
+
+        ...((selectedRowRc?.length > 0 && selectedRowRc[0]?.hstnumChallanStatus === 9) ? [
+            { label: "Verify", onClick: (() => { handleActionComp('verify') }) },
+        ] : []),
+
+        ...((selectedRowRc?.length > 0 && selectedRowRc[0]?.hstnumChallanStatus === 2) ? [
             { label: "Freeze", onClick: (() => { handleActionComp('freeze') }) },
         ] : []),
 
-        ...((selectedRowRc?.length > 0 && selectedRowRc[0]?.gnumIsvalid == 9) ? [
+        ...((selectedRowRc?.length > 0 && selectedRowRc[0]?.hstnumChallanStatus !== 1) ? [
             { label: "Cancel", onClick: (() => { handleActionComp('cancel') }) },
         ] : []),
 
-        ...((selectedRowRc?.length > 0 && selectedRowRc[0]?.gnumIsvalid === 1) ? [
-            { label: "View", onClick: (() => { handleCancelRc('view') }) },
+        ...(selectedRowRc?.length > 0 ? [
+            { label: "View", onClick: (() => { handleActionComp('view') }) },
         ] : []),
     ];
 
-    const getCpListData = (storeId, poStoreId, poStatus, itemId, challanStatus, PoNo) => {
-        fetchCPListData(998, storeId, poStoreId, poStatus, itemId, challanStatus, PoNo)?.then((res) => {
+    function handleActionComp(key) {
+        setUserSelection(key);
+        dispatch(showPopup());
+    }
+
+    const loadStoreNameDrpDt = () => {
+        fetchStoreNameDrpDt(998, SEAT_ID)?.then((res) => {
+            if (res?.status === 1) {
+                const data = res?.data?.map(dt => ({
+                    value: dt?.value,
+                    label: dt?.display
+                })) || [];
+                setStoreNameDrpDt(data);
+            } else {
+                setStoreNameDrpDt([]);
+            }
+        })
+    }
+
+    const loadDrugNameDrpDt = (storeId, poStatus) => {
+        fetchDrugNameDrpDt(998, storeId, poStatus)?.then((res) => {
+            if (res?.status === 1) {
+                const data = res?.data?.map(dt => ({
+                    value: dt?.value,
+                    label: dt?.display
+                })) || [];
+                setDrugNameDrpDt(data);
+            } else {
+                setDrugNameDrpDt([]);
+            }
+        })
+    }
+
+    const loadSupplierNameDrpDt = (storeId, poNo) => {
+        fetchSuppliersDrpDt(998, storeId, poNo)?.then((res) => {
+            if (res?.status === 1) {
+                const data = res?.data?.map(dt => ({
+                    value: dt?.value,
+                    label: dt?.display
+                })) || [];
+                setSuppliersDrpDt(data);
+            } else {
+                setSuppliersDrpDt([]);
+            }
+        })
+    }
+
+    const loadPoNoDrpDt = (storeId, poStatus, itemId) => {
+        fetchPoNumberDrpDt(998, storeId, poStatus, itemId)?.then((res) => {
+            if (res?.status === 1) {
+                const data = res?.data?.map(dt => ({
+                    value: dt?.value,
+                    label: dt?.display
+                })) || [];
+                setPoNoDrpDt(data);
+            } else {
+                setPoNoDrpDt([]);
+            }
+        })
+    }
+
+    useEffect(() => {
+        loadStoreNameDrpDt();
+    }, [])
+
+    useEffect(() => {
+        if (values?.storeName && values?.poStatus) {
+            loadDrugNameDrpDt(values?.storeName, values?.poStatus);
+        }
+    }, [values?.storeName, values?.poStatus])
+
+    useEffect(() => {
+        if (values?.storeName && values?.poNo) {
+            loadSupplierNameDrpDt(values?.storeName, values?.poNo?.split('^')[0]);
+        }
+    }, [values?.storeName, values?.poNo])
+
+    useEffect(() => {
+        if (values?.storeName && values?.poStatus && values?.drugName) {
+            loadPoNoDrpDt(values?.storeName, values?.poStatus, values?.drugName);
+        }
+    }, [values?.storeName, values?.poStatus, values?.drugName])
+
+    const getCpListData = (storeId, poStatus, itemId, challanStatus, PoNo) => {
+        fetchCPListData(998, storeId, PoNo?.split('^')[1] || "0", poStatus, itemId, challanStatus, PoNo?.split('^')[0])?.then((res) => {
             console.log('res', res)
             if (res?.status === 1) {
-                setChallanListData(res?.data?.content);
+                setChallanListData(res?.data);
             } else {
                 setChallanListData([]);
             }
@@ -88,13 +188,13 @@ const ChallanProcessJh = () => {
     }
 
     useEffect(() => {
-        const timeout = setTimeout(() => {
-            if (!activeStatus) return;
-            const { storeName, poStatus, drugName, poNo, suppName, challanStatus } = values;
-            getCpListData(storeName, suppName, poStatus, drugName, challanStatus, poNo);
-        }, 200);
-        return () => clearTimeout(timeout);
-    }, [values]);
+        const { storeName, poStatus, drugName, poNo, challanStatus } = values;
+        if (storeName && poStatus && drugName && poNo && challanStatus) {
+            getCpListData(storeName, poStatus, drugName, challanStatus, poNo);
+        }
+    }, [values?.storeName, values?.poStatus, values?.drugName, values?.poNo, values?.challanStatus]);
+
+    console.log('values', values)
 
     return (
         <>
