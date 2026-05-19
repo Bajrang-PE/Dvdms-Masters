@@ -7,13 +7,12 @@ import { hidePopup } from '../../../../../features/commons/popupSlice';
 import { DatePickerComponent, InputField } from '../../../../commons/FormElements';
 import RichTextEditor from '../../../../commons/RichTextEditor';
 import { getSinglePoComponentDetails, getSinglePoDwhPoDetails, getSinglePoTestingData, modifySinglePoDwhPoModifySave } from '../../../../../api/Jharkhand/services/SingleProgPoDeskAPI_JH';
+import { parseDate } from '../../../../commons/utilFunctions';
 
 const SingleProgPoModifyJH = (props) => {
-    const { selectedData, actionType, getAllListData } = props;
+    const { store, selectedData, actionType, getAllListData } = props;
 
-    const { value: storeID, label: storeName } = useSelector(
-        (state) => state.rateContractJHK.storeID
-    );
+    const { value: storeID, label: storeName } = store;
 
     const rcDetailsColms = [
         { header: "Supplier", field: "supplier" },
@@ -43,6 +42,7 @@ const SingleProgPoModifyJH = (props) => {
         pCommitteeMeetCopy: "",
         remarks: "",
         rateUnit: "",
+        tax: "",
 
         //component details
         tAndc: "",
@@ -189,6 +189,7 @@ const SingleProgPoModifyJH = (props) => {
                         pCommitteeMeetCopy: 'NA',
                         remarks: poData?.po_remarks,
                         rateUnit: data?.data?.rateUnit,
+                        tax: poData?.hstnum_tax,
 
                         //component details
                         tAndc: ''
@@ -242,7 +243,9 @@ const SingleProgPoModifyJH = (props) => {
         const totalQuantity = orderQuantity?.reduce((a, b) => Number(a) + Number(b || 0));
         setTotalOrderQuantity(totalQuantity);
         const rate = Number(formState?.rateUnit?.split("/")?.[0] || 0);
-        const totalpocost = totalQuantity * rate;
+        const tax = Number(formState?.tax || 0);
+        const finalRate = rate * tax / 100 + rate;
+        const totalpocost = totalQuantity * finalRate;
         dispatcher({ type: "SET_FIELD", field: "totalPoCost", value: totalpocost?.toFixed(2) || 0 });
     }
 
@@ -261,7 +264,7 @@ const SingleProgPoModifyJH = (props) => {
 
             "newStrPoTypeId": allPoData[0]?.poDetails?.sstnum_potype_id,
             "strPOFinancialYear": allPoData[0]?.poDetails?.fin_year,
-            "hstdtPoDate": new Date(allPoData[0]?.poDetails?.po_date),
+            "strPoDate": parseDate(allPoData[0]?.poDetails?.po_date),
             "programmeId": allPoData[0]?.poDetails?.hstnum_programme_id,
             "fundingSourceId": allPoData[0]?.poDetails?.hstnum_funding_source_id,
             "hstnumRcId": allPoData[0]?.poDetails?.rc_id,
@@ -398,6 +401,7 @@ const SingleProgPoModifyJH = (props) => {
         },
     ]
 
+    console.log('formState', formState)
 
     return (
         <section className="rateContractAddJHK">

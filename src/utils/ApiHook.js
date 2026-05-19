@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BaseUrl = '  http://10.226.27.173:8094'; //vish
+const BaseUrl = '  http://10.226.27.173:8087'; //vish 8087
 // const BaseUrl = 'http://10.226.17.6:8084';
 // const BaseUrl = 'http://10.226.29.202:8091';
 

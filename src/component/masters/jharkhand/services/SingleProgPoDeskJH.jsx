@@ -39,9 +39,9 @@ const SingleProgPoDeskJH = () => {
 
   const componentsList = [
     { mappingKey: "Generate", componentName: (props) => (<GenerateSingleProgPoJH store={selectedStore} selectedData={selectedRowRc} actionType={'generate'} />) },
-    { mappingKey: "Modify", componentName: (props) => (<SingleProgPoModifyJH selectedData={selectedRowRc} actionType={"Modify"} getAllListData={getAllListData} />) },
-    { mappingKey: "Cancel", componentName: (props) => (<CancelSingleProgPoJH selectedData={selectedRowRc} actionType={"Cancel"} />) },
-    { mappingKey: "View", componentName: (props) => (<SingleProgPoModifyJH selectedData={selectedRowRc} actionType={"View"} getAllListData={getAllListData} />) },
+    { mappingKey: "Modify", componentName: (props) => (<SingleProgPoModifyJH store={selectedStore} selectedData={selectedRowRc} actionType={"Modify"} getAllListData={getAllListData} />) },
+    { mappingKey: "Cancel", componentName: (props) => (<CancelSingleProgPoJH store={selectedStore} selectedData={selectedRowRc} actionType={"Cancel"} />) },
+    { mappingKey: "View", componentName: (props) => (<SingleProgPoModifyJH store={selectedStore} selectedData={selectedRowRc} actionType={"View"} getAllListData={getAllListData} />) },
   ];
 
   const columns = [
@@ -116,6 +116,8 @@ const SingleProgPoDeskJH = () => {
       getAllListData();
     }
   }, [storeName, activeStatus])
+
+  console.log('first', tableData?.filter(dt=>dt?.poPrefix == "test2poref304"))
 
   return (
     <>

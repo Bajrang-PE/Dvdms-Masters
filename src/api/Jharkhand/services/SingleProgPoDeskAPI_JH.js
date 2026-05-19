@@ -168,6 +168,18 @@ export const getJHPoFundingSrcCombo = async (hospitalCode, storeId, drugClCode, 
     }
 };
 
+export const getJHPoInitDataVerifyByCombo = async (hospitalCode, storeId) => {
+    try {
+        const response = await fetchData(
+            `/api/v1/single-po-gen/init-data?hospCode=${hospitalCode}&storeId=${storeId}`
+        );
+        return response.data;
+    } catch (err) {
+        console.error("Error fetching store name : ", err);
+        throw err;
+    }
+};
+
 export const getJHPoSupplierValues = async (data) => {
     try {
         const response = await fetchPostData(
@@ -183,7 +195,20 @@ export const getJHPoSupplierValues = async (data) => {
 export const getJHPoDwhPoDetails = async (data) => {
     try {
         const response = await fetchPostData(
-            `/api/v1/single-po-gen/dwh-po-hlp`, data
+            `/api/v1/single-po-gen/get-dwh-po-hlp`, data
+        );
+        return response.data;
+    } catch (err) {
+        console.error("Error fetching store name : ", err);
+        throw err;
+    }
+};
+
+
+export const saveJhGenerateNewPo = async (data) => {
+    try {
+        const response = await fetchPostData(
+            `/api/v1/single-po-gen/insert-new-po`, data
         );
         return response.data;
     } catch (err) {
@@ -234,6 +259,18 @@ export const getJHPoIndenDrugNameCombo = async (hospitalCode, indentNo) => {
     try {
         const response = await fetchData(
             `/api/v1/single-po-gen/indent-cell-po-drug-dtl?hospCode=${hospitalCode}&indentPoNo=${indentNo}`
+        );
+        return response.data;
+    } catch (err) {
+        console.error("Error fetching store name : ", err);
+        throw err;
+    }
+};
+
+export const getJHSinglePoGstNo = async (hospitalCode, storeId) => {
+    try {
+        const response = await fetchData(
+            `/api/v1/single-po-gen/gst-no?hospCode=${hospitalCode}&storeId=${storeId}`
         );
         return response.data;
     } catch (err) {

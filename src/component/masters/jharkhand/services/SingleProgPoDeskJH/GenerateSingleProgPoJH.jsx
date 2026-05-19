@@ -6,9 +6,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { hidePopup } from '../../../../../features/commons/popupSlice';
 import { ComboDropDown, DatePickerComponent, InputField } from '../../../../commons/FormElements';
 import RichTextEditor from '../../../../commons/RichTextEditor';
-import { getJHPoDwhPoDetails, getJHPoFundingSrcCombo, getJHPoIndentNumberCombo, getJHPoProgramCombo, getJHPoSupplierValues, getPoTypeCombo, getSinglePoComponentDetails, getSinglePoDwhPoDetails, getSinglePoItemCmbData, getSinglePoTestingData, modifySinglePoDwhPoModifySave } from '../../../../../api/Jharkhand/services/SingleProgPoDeskAPI_JH';
+import { getJHPoDwhPoDetails, getJHPoFundingSrcCombo, getJHPoIndenDrugNameCombo, getJHPoIndentFundingSrcCombo, getJHPoIndentNumberCombo, getJHPoIndentProgramCombo, getJHPoInitDataVerifyByCombo, getJHPoProgramCombo, getJHPoSupplierValues, getJHSinglePoGstNo, getPoTypeCombo, getSinglePoComponentDetails, getSinglePoDwhPoDetails, getSinglePoItemCmbData, getSinglePoTestingData, modifySinglePoDwhPoModifySave, saveJhGenerateNewPo } from '../../../../../api/Jharkhand/services/SingleProgPoDeskAPI_JH';
 import SelectBox from '../../../../commons/SelectBox';
 import { convertToISODate, parseDate } from '../../../../commons/utilFunctions';
+import { ToastAlert } from '../../../../../utils/Toast';
 
 const GenerateSingleProgPoJH = (props) => {
   const { store, selectedData, actionType } = props;
@@ -45,7 +46,8 @@ const GenerateSingleProgPoJH = (props) => {
     tAndcAccept: false,
     indentPoNo: "",
     quotationDate: "",
-    quotationNo: ""
+    quotationNo: "",
+    verifiedBy: ""
   };
 
   function addFormReducer(state, action) {
@@ -80,13 +82,49 @@ const GenerateSingleProgPoJH = (props) => {
   const [drugList, setDrugList] = useState([]);
   const [poTypeList, setPoTypeList] = useState([]);
   const [indentPoNoList, setIndentPoNoList] = useState([]);
+  const [strIndrx, setStrIndrx] = useState("");
 
   const [errors, setErrors] = useState({
     fundingSourceErr: "", programmeNameErr: "", drugNameErr: ""
   })
 
   const handleReset = () => {
-    dispatcher({ type: 'RESET_FORM' });
+    dispatcher({
+      type: 'SET_FIELDS', payload: {
+        poGenPeriod: "2025 - 2026",
+        poDate: new Date(),
+        poNumber: "",
+        supplierName: "",
+        drugName: "",
+        itemName: "",
+        itemCategory: "",
+        itemSpecification: "",
+        programmeName: "",
+        fundingSource: "",
+        budgetAvail: "",
+        gstNo: "",
+
+        poRef: "",
+        totalPoCost: 0,
+        pCommitteeMeetDate: "",
+        pCommitteeMeetCopy: "",
+        remarks: "",
+        rateUnit: "",
+        deliveryDays: "60",
+
+        tAndc: "",
+        tAndcAccept: false,
+        indentPoNo: "",
+        quotationDate: "",
+        quotationNo: "",
+        verifiedBy: ""
+      }
+    });
+    setPoDetailsList([]);
+    setRcDetailsList([]);
+    setProgramNameList([]);
+    setFundSourceList([]);
+    setDrugList([]);
   }
 
   function handleClose() {
@@ -118,7 +156,18 @@ const GenerateSingleProgPoJH = (props) => {
   };
 
   const handleRowSelect = (row, index) => {
-    const upRow = { ...row, "index": index }
+    const upRow = {
+      ...row,
+      "index": index,
+      discountedRate: row?.suppId?.split('^')[1] || "0",
+      numBaseUnitvalue: row?.suppId?.split('^')[1] || "0",
+      numDiscount: row?.suppId?.split('^')[22] || "",
+      ratePerUnit: row?.suppId?.split('^')[1] || "0",
+      strTax: row?.suppId?.split('^')[11] || "0",
+      totalRate: row?.suppId?.split('^')[3] || "0",
+      strSupplierName: ""
+
+    }
     setSelectedRowId(upRow);
     setOrderQuantity({});
     setTotalOrderQuantity(0);
@@ -128,9 +177,20 @@ const GenerateSingleProgPoJH = (props) => {
 
   const handleQuantityChange = (rowId, value) => {
     if (selectedRowId) {
-      setOrderQuantity(prev => ({
-        ...prev, [rowId]: value
-      }));
+      if (formState?.poType === "21^2") {
+        const isValidRc = IsValidateSelectedRc();
+        if (!isValidRc) return;
+      }
+      const val = parseInt(totalOrderQuantity) || 0;
+      const bud = parseInt(formState?.budgetAvail) || 0;
+
+      if (val > bud) {
+        ToastAlert('Quantity should not more than available budget', 'error')
+      } else {
+        setOrderQuantity(prev => ({
+          ...prev, [rowId]: value
+        }));
+      }
     } else {
       ToastAlert('Please Select RateContract before Entering Quantity', 'error')
     }
@@ -173,41 +233,95 @@ const GenerateSingleProgPoJH = (props) => {
       }
     })
   }
-
-  const getPoProgrammeNameDrpDt = (itemId, year) => {
-    getJHPoProgramCombo(998, storeID, itemId, year)?.then((res) => {
-      let programs = [];
+  const getPoDrugNameDrpDtForIndent = (indentNo) => {
+    getJHPoIndenDrugNameCombo(998, indentNo)?.then((res) => {
+      let drugs = [];
       if (res?.status === 1) {
         res?.data.forEach((element) => {
           const obj = {
-            label: element.display,
-            value: element.value,
+            label: element.item_name,
+            value: element.item_id,
           };
-          programs.push(obj);
+          drugs.push(obj);
         });
-        setProgramNameList(programs);
+        setDrugList(drugs);
       } else {
-        setProgramNameList([]);
+        setDrugList([]);
       }
     })
   }
 
+  const getPoProgrammeNameDrpDt = (itemId, year) => {
+
+    if (formState?.poType === "223^5") {
+      getJHPoIndentProgramCombo(998, formState?.indentPoNo)?.then((res) => {
+        let programs = [];
+        if (res?.status === 1) {
+          res?.data.forEach((element) => {
+            const obj = {
+              label: element.display,
+              value: element.value,
+            };
+            programs.push(obj);
+          });
+          setProgramNameList(programs);
+        } else {
+          setProgramNameList([]);
+        }
+      })
+    } else {
+      getJHPoProgramCombo(998, storeID, itemId, year)?.then((res) => {
+        let programs = [];
+        if (res?.status === 1) {
+          res?.data.forEach((element) => {
+            const obj = {
+              label: element.display,
+              value: element.value,
+            };
+            programs.push(obj);
+          });
+          setProgramNameList(programs);
+        } else {
+          setProgramNameList([]);
+        }
+      })
+    }
+  }
+
   const getPoFundingSourceDrpDt = (storeId, drugClass, programId, year) => {
-    getJHPoFundingSrcCombo(998, storeId, drugClass, programId, year)?.then((res) => {
-      let fundsrc = [];
-      if (res?.status === 1) {
-        res?.data.forEach((element) => {
-          const obj = {
-            label: element.display,
-            value: element.value,
-          };
-          fundsrc.push(obj);
-        });
-        setFundSourceList(fundsrc);
-      } else {
-        setFundSourceList([]);
-      }
-    })
+    if (formState?.poType === "223^5") {
+      getJHPoIndentFundingSrcCombo(998, storeId, formState?.indentPoNo, programId, year)?.then((res) => {
+        let fundsrc = [];
+        if (res?.status === 1) {
+          res?.data.forEach((element) => {
+            const obj = {
+              label: element.display,
+              value: element.value,
+            };
+            fundsrc.push(obj);
+          });
+          setFundSourceList(fundsrc);
+        } else {
+          setFundSourceList([]);
+        }
+      })
+    } else {
+      getJHPoFundingSrcCombo(998, storeId, drugClass, programId, year)?.then((res) => {
+        let fundsrc = [];
+        if (res?.status === 1) {
+          res?.data.forEach((element) => {
+            const obj = {
+              label: element.display,
+              value: element.value,
+            };
+            fundsrc.push(obj);
+          });
+          setFundSourceList(fundsrc);
+        } else {
+          setFundSourceList([]);
+        }
+      })
+    }
   }
 
   const getSupplierValuesOnFundingSrc = (fundId) => {
@@ -215,8 +329,8 @@ const GenerateSingleProgPoJH = (props) => {
       "gnumHospitalCode": 998,
       "hstnumStoreId": parseInt(storeID),
       "strIndentPeriodValue": formState?.poGenPeriod,
-      "strComboPOTypeId": formState?.poType?.split("^")[0],
-      "hstdtPoDate": convertToISODate(parseDate(formState.poDate)),
+      "strComboPOTypeId": formState?.poType + "^1", //rc=1, nonrc=2, for now 1 is hardcoded, because drpdn is hidden on uat
+      "strPoDate": parseDate(formState.poDate),
       "hstnumItembrandId": parseInt(formState?.drugName?.split('^')[1]),
       "programmeId": parseInt(formState.programmeName),
       "fundingSourceId": parseInt(fundId),
@@ -230,8 +344,28 @@ const GenerateSingleProgPoJH = (props) => {
     getJHPoSupplierValues(val)?.then((res) => {
       console.log('res', res)
       if (res?.status === 1) {
-
+        const unitDrpDt = res?.data?.strRateUnitValues?.map((unt) => ({
+          value: unt?.unit_id,
+          label: unt?.unit_name
+        }))
+        const suppDrpDt = res?.data?.suplierCombo?.map((unt) => ({
+          value: unt?.value,
+          label: unt?.display
+        }))
+        dispatcher({
+          type: "SET_FIELDS", payload:
+          {
+            "budgetAvail": res?.data?.budgetAvailable,
+            "deliveryDays": suppDrpDt[0]?.value?.split('^')[4]
+          }
+        });
+        setUnitDrpData(unitDrpDt);
+        setSupplierList(suppDrpDt);
+        setRcDetailsList(res?.data?.poRateDivId || []);
       } else {
+        setUnitDrpData([]);
+        setSupplierList([]);
+        setRcDetailsList([]);
       }
     })
   }
@@ -239,22 +373,25 @@ const GenerateSingleProgPoJH = (props) => {
   const getDwhPoDetailsOnGo = () => {
     const val = {
       "gnumHospitalCode": 998,
-      "hstnumStoreId": "",
-      "strIndentPeriodValue": "",
-      "strComboPOTypeId": "",
-      "hstdtPoDate": "",
-      "hstnumItembrandId": "",
-      "programmeId": "",
+      "hstnumStoreId": parseInt(storeID),
+      "strIndentPeriodValue": formState?.poGenPeriod,
+      "strComboPOTypeId": formState?.poType + "^1", //rc=1, nonrc=2, for now 1 is hardcoded, because drpdn is hidden on uat
+      // "strPoDate": parseDate(formState.poDate),
+      "hstnumItembrandId": parseInt(formState?.drugName?.split('^')[1]),
+      "programmeId": parseInt(formState.programmeName),
+      "fundingSourceId": parseInt(formState?.fundingSource),
+      // "hstnumItemId": parseInt(formState?.drugName?.split('^')[0]),
       "strIndentCellPOCombo": "",
-      "hstnumSupplierId": "",
-      "hstnumPoNo": "",
-      "fundingSourceId": "",
-      "strContractType": ""
+      "hstnumSupplierId": 0,
+      "hstnumPoNo": 0,
+      "strContractType": formState?.poType,
+      "strViewFlg": 0
     }
     getJHPoDwhPoDetails(val)?.then((res) => {
       if (res?.status === 1) {
-
+        setPoDetailsList(res?.data?.purchaseOrderDetails || []);
       } else {
+        setPoDetailsList([])
       }
     })
   }
@@ -274,14 +411,55 @@ const GenerateSingleProgPoJH = (props) => {
     })
   }
 
+  const getPoGstNo = (storeId) => {
+    getJHSinglePoGstNo(998, storeId)?.then((res) => {
+      console.log('res', res)
+      if (res?.status === 1) {
+        dispatcher({ type: "SET_FIELD", field: "gstNo", value: res?.data });
+      } else {
+        dispatcher({ type: "SET_FIELD", field: "gstNo", value: "" });
+      }
+    })
+  }
+
+  const getVerifyByCmbInitData = (storeId) => {
+    getJHPoInitDataVerifyByCombo(998, storeId)?.then((res) => {
+      if (res?.status === 1) {
+        const val = res?.data?.varifiedBy[0]?.str_emp_no || "";
+        dispatcher({ type: "SET_FIELD", field: "verifiedBy", value: val });
+      } else {
+        dispatcher({ type: "SET_FIELD", field: "verifiedBy", value: "" });
+      }
+    })
+  }
+
+  const IsValidateSelectedRc = () => {
+    let isValid = true;
+    if (!selectedRowId?.strSupplierName?.trim()) {
+      ToastAlert("Please select a supplier", "error");
+      return false;
+    }
+    if (!selectedRowId?.ratePerUnit?.trim()) {
+      ToastAlert("Please enter rate", "error");
+      return false;
+    }
+    if (!selectedRowId?.unit?.trim()) {
+      ToastAlert("Please select unit", "error");
+      return false;
+    }
+    return true;
+  }
+
   useEffect(() => {
     if (formState?.poType && formState?.poType !== "223^5") {
       getPoDrugNameDrpDt(formState?.poType?.split("^")[1]);
+      // handleReset();
     } else if (formState?.poType && formState?.poType === "223^5") {
       getIndentNoDrpData();
       setDrugList([]);
+      // handleReset();
     }
-  }, [formState?.poType])
+  }, [formState?.poType, formState?.poGenPeriod])
 
   useEffect(() => {
     if (selectedData?.length > 0 && storeID) {
@@ -293,12 +471,14 @@ const GenerateSingleProgPoJH = (props) => {
   useEffect(() => {
     if (storeID) {
       getPoTypeDrpDt(storeID)
+      getPoGstNo(storeID);
+      getVerifyByCmbInitData(storeID);
     }
   }, [storeID])
 
 
   const getPoComponentDetails = (poType, mode, storeId, poNo) => {
-    getSinglePoComponentDetails(998, poType, mode, storeId, poNo)?.then((res) => {
+    getSinglePoComponentDetails(998, poType, mode, storeId, 0)?.then((res) => {
       if (res?.status === 1) {
         const allData = res?.data?.map((dt) => ({ ...dt, isCheck: false }))
         setComponentDetails(allData);
@@ -315,24 +495,52 @@ const GenerateSingleProgPoJH = (props) => {
       (sum, q) => sum + Number(q || 0),
       0
     );
+    const bud = parseInt(formState?.budgetAvail) || 0;
+    if (formState?.poType === "28^3") {
+      const rate = parseFloat(selectedRowId?.suppId?.split('^')[1]) || 0;
+      const totalCost = totalQuantity * rate;
+      if (totalCost > bud) {
+        ToastAlert('Total order quantity value is more than available budget for selected consignee. ', 'error');
+        dispatcher({
+          type: "SET_FIELD",
+          field: "totalPoCost",
+          value: 0
+        });
+        return;
+      }
+      dispatcher({
+        type: "SET_FIELD",
+        field: "totalPoCost",
+        value: totalCost.toFixed(2)
+      });
+    } else {
+      const rate = parseFloat(selectedRowId?.ratePerUnit?.split('/')[0]) || 0;
+      const tax = parseFloat(selectedRowId?.strTax?.split('%')[0]) || 0;
+      const unit = Number(selectedRowId?.numBaseUnitvalue) || 1;
+      const discount = Number(selectedRowId?.numDiscount) || 0;
 
+      const baseRate = rate / unit;
+      const discountedRate = baseRate - (baseRate * discount) / 100;
+      const finalRate = discountedRate + (discountedRate * tax) / 100;
+      const totalCost = totalQuantity * finalRate;
+
+      if (totalCost > bud) {
+        ToastAlert('Total order quantity value is more than available budget for selected consignee. ', 'error');
+        dispatcher({
+          type: "SET_FIELD",
+          field: "totalPoCost",
+          value: 0
+        });
+        return;
+      }
+
+      dispatcher({
+        type: "SET_FIELD",
+        field: "totalPoCost",
+        value: totalCost.toFixed(2)
+      });
+    }
     setTotalOrderQuantity(totalQuantity);
-
-    const rate = parseFloat(selectedRowId?.ratePerUnit?.split('/')[0]) || 0;
-    const tax = parseFloat(selectedRowId?.strTax?.split('%')[0]) || 0;
-    const unit = Number(selectedRowId?.numBaseUnitvalue) || 1;
-    const discount = Number(selectedRowId?.numDiscount) || 0;
-
-    const baseRate = rate / unit;
-    const discountedRate = baseRate - (baseRate * discount) / 100;
-    const finalRate = discountedRate + (discountedRate * tax) / 100;
-    const totalCost = totalQuantity * finalRate;
-
-    dispatcher({
-      type: "SET_FIELD",
-      field: "totalPoCost",
-      value: totalCost.toFixed(2)
-    });
   };
 
   const getAllRateChange = (ratePerUnit, unitVal, numDiscount, strTax) => {
@@ -350,79 +558,94 @@ const GenerateSingleProgPoJH = (props) => {
     return rateWithTax.toFixed(4);
   };
 
-  const saveModifyPoDetails = () => {
-    const y = new Date().getFullYear();
+  const saveGeneratePoDetails = () => {
+
+    const strRC = selectedRowId?.suppId?.split("^");
     const val = {
       "gnumHospitalCode": 998,
+      "gnumSeatId": SEAT_ID,
       "hstnumStoreId": parseInt(storeID),
-      "sstnumItemCatNo": parseInt(formState?.drugName?.split('^')[5]),
-      "strComboPOTypeId": formState?.poType,
-      "hstnumCurrencyId": 1,
-      "sstnumPurchaseSourceId": 1,
-      "hstnumSupplierId": selectedRowId?.numSupplierId,
-      // "hstdtPoDate": "2026-03-11T00:00:00",
-      "hstdtFinancialStartDate": `${y - 1}-04-01T00:00:00`,//
-      "hstdtFinancialEndDate": `${y}-03-31T00:00:00`,//
-      "gstrPoRemarks": formState?.remarks,
-      "gnumSeatid": SEAT_ID,
-      // "hstnumTax": 12.5,
-      // "hststrVerifyBy": "admin",
-      "hstnumRcId": selectedRowId?.hstnumRcId,
-      "sststrPoPrefixNo": formState?.poRef,
-      "financialYear": formState?.poGenPeriod,
-      "hstnumProgramId": parseInt(formState?.programmeName),
-      "hstnumFundingSourceId": parseInt(formState?.fundingSource),
-      "items": [
-        {
-          "hstnumScheduleNo": 1,
-          "hstnumManufId": selectedRowId?.numSupplierId,
-          "hstnumRate": Number(selectedRowId?.ratePerUnit?.split('/')[0]) || 0,
-          "hstnumRateUnitid": selectedRowId?.numRateUnitid,
-          "hstnumOrderQty": totalOrderQuantity,
-          "hstnumOrderQty2": 0,
-          "hstnumOrderQty3": 0,
-          "hstnumOrderQty4": 0,
-          "gstrRemarks": formState?.remarks,
-          "hstnumItemTax": Number(selectedRowId?.strTax?.split('%')[0]) || 0,
-          "hstnumItemMake": 0,
-          "hstnumDeliveryLocation": parseInt(storeID),
-          "hstnumTotDemandedQty": 0,
-          "hstnumTotOrderedQty": 0,
-          "hstnumTotSuppliedQty": 0,
-          "hstnumTotIssuedQty": 0,
-          "hstnumTotPipelineQty": 0,
-          "hstnumTotInhandQty": 0,
-          "hstnumTotQuarantineQty": 0,
-          "hstnumTotSubstrInhandQty": 0,
-          "hstnumReorderValue": 0.0,
-          "hstnumItemId": parseInt(formState?.drugName?.split('^')[1]),
-          "hstnumItemBrandId": parseInt(formState?.drugName?.split('^')[0]),
-          "strDDeliveryDays": formState?.deliveryDays,
-          "strDDeliveryDays2": "0",
-          "strDDeliveryDays3": "0",
-          "strDDeliveryDays4": "0"
-        }
-      ]
+      // "hstnumPoNo": "",
+      "hstnumItemId": parseInt(formState?.drugName?.split('^')[0]) || 0,
+      "hstnumItembrandId": parseInt(formState?.drugName?.split('^')[1]) || 0,
+      // "reqType": formState?.poType,
+      "itemCat": parseInt(formState?.drugName?.split('^')[5]) || 10,
+      "strComboPOTypeId": formState?.poType || "",
+      "strPoRefrenceNo": formState?.poRef,
+      "strPoRefrenceNoText": formState?.poRef,
+      "strStrIndrx": strIndrx || "0",
+      "strIndentPeriodValue": formState?.poGenPeriod,
+      "strPoDate": parseDate(formState?.poDate),
+      "programmeId": parseInt(formState?.programmeName),
+      "fundingSourceId": parseInt(formState?.fundingSource),
+      "strRPPONo": "",
+      "strLPRCId": formState?.poType !== "21^2" ? ["0"] : [selectedRowId?.suppId?.split('^')[14] || ""],
+      "strLPRate": formState?.poType !== "21^2" ? ["0"] : [selectedRowId?.discountedRate],
+      "strLPUnit": formState?.poType !== "21^2" ? ["0"] : [selectedRowId?.unit],
+      "strLPTax": formState?.poType !== "21^2" ? ["0"] : [selectedRowId?.strTax],
+      "strDiscount": formState?.poType !== "21^2" ? ["0"] : [selectedRowId?.numDiscount],
+      "strSupplierDtl": formState?.poType !== "21^2" ?
+        [
+          strRC[0] + "^" + strRC[1] + "^" + strRC[2] + "^" + strRC[3] + "^" + strRC[4] + "^" + strRC[5] + "^" + strRC[6] + "^" + strRC[7] + "^" + strRC[8] + "^" + strRC[9] + "^" + strRC[10] + "^" + strRC[11] + "^" + strRC[12] + "^0^" + strRC[14] + "^" + strRC[15] + "^" + strRC[16] + "^" + strRC[17] + "^" + strRC[18] + "^" + strRC[19] + "^" + strRC[20] + "^" + strRC[21] + "^" + strRC[22]
+        ] :
+        [
+          selectedRowId?.strSupplierName?.split("^")[0] + "^" + strRC[1] + "^" + strRC[2] + "^" + strRC[3] + "^" + strRC[4] + "^" + strRC[5] + "^" + strRC[6] + "^" + strRC[7] + "^" + strRC[8] + "^" + strRC[9] + "^" + strRC[10] + "^" + strRC[11] + "^" + strRC[12] + "^0^" + strRC[14] + "^" + strRC[15] + "^" + strRC[16] + "^" + strRC[17] + "^" + strRC[20]
+        ],
+
+      "strItemManufacturerId": "0",
+      "strPODetailsHidValue": poDetailsList?.length ? poDetailsList?.map((data) => data[0] + "^" + data[1] + "^" + data[1]?.split("#")[8] + "^" + data[3] + "^" + data[4] + "^" + data[5]) : [],
+      "strQrderQty1": poDetailsList?.length ? poDetailsList?.map((data, index) => orderQuantity[index] ? orderQuantity[index] : data[5]?.split("#")[0]) : [],
+      "strQrderQty2": poDetailsList?.length ? poDetailsList?.map((data, index) => data[5]?.split("#")[1]) : [],
+      "strQrderQty3": poDetailsList?.length ? poDetailsList?.map((data, index) => data[5]?.split("#")[2]) : [],
+      "strQrderQty4": poDetailsList?.length ? poDetailsList?.map((data, index) => data[5]?.split("#")[3]) : [],
+      "strDDeliveryDays": formState?.deliveryDays,
+      "strDDeliveryDays2": "0",
+      "strDDeliveryDays3": "0",
+      "strDDeliveryDays4": "0",
+      "strDPurchaseSource": "0",
+      "strDQuotationNo": formState?.poType !== "21^2" ? "" : formState?.quotationNo, //only for local purchase
+      "strDQuotationDate": formState?.poType !== "21^2" ? "" : formState?.quotationDate,//only for local purchase
+      "strDRemarks": formState?.remarks,
+      "strVerifiedBy": formState?.verifiedBy || "",
+      "strVerifiedDate": parseDate(new Date()),
+      "strNextPoDate": "",
+      "strPurchaseCommitteMeetingDate": formState?.pCommitteeMeetDate,
+      "strFileName": formState?.fileName || "",
+      "strIndentCellPOCombo": "",
+      "strDComponentId": componentDetails?.map(dt => dt?.hstnum_component_id),
+      "strDComponentValue": componentDetails?.map(dt => dt?.nvl)
     }
 
-    addPoHpPODetails(val)?.then((data) => {
+    console.log('val', val)
+
+    saveJhGenerateNewPo(val)?.then((data) => {
+      console.log('data', data)
       if (data?.status === 1) {
-        alert("Po Modified successfully");
+        ToastAlert(data?.msg, 'success');
       } else {
-        alert('failed');
+        ToastAlert(data?.msg, 'error');
       }
     })
   }
 
-  const handleModifyPo = () => {
+  const handleGeneratePo = () => {
     let isValid = true;
-    if (!orderQuantity || Object.keys(orderQuantity).length === 0) {
-      ToastAlert('Please enter order quantity', 'error');
-      isValid = false;
+    // if (!orderQuantity || Object.keys(orderQuantity).length === 0) {
+    //   ToastAlert('Please enter order quantity', 'error');
+    //   isValid = false;
+    // }
+    if (formState?.poType === "21^2") {
+      const isValidRc = IsValidateSelectedRc();
+      if (!isValidRc) return;
     }
 
     if (!selectedRowId || Object.keys(selectedRowId).length === 0) {
       ToastAlert('Please select RC details', 'error');
+      isValid = false;
+    }
+
+    if (!formState?.poRef?.trim()) {
+      ToastAlert('Please enter PO reference', 'error');
       isValid = false;
     }
 
@@ -431,7 +654,7 @@ const GenerateSingleProgPoJH = (props) => {
       isValid = false;
     }
     if (isValid) {
-      saveModifyPoDetails();
+      saveGeneratePoDetails();
     }
   }
 
@@ -444,35 +667,6 @@ const GenerateSingleProgPoJH = (props) => {
       )
     );
   };
-
-  const getRcDetailsListData = () => {
-    getHpRcListData(998, formState?.drugName?.split('^')[0])?.then((res) => {
-      if (res?.status === 1) {
-        const apiData = res?.data?.content || [];
-
-        const nonRcRow = {
-          strContractType: "Non-RC",
-          strSupplierName: "",
-          strLevelTypeName: "-",
-          ratePerUnit: "",
-          numDiscount: "0",
-          strTax: "0",
-          rate: "0",
-          numBaseUnitvalue: "",
-          totalRate: "",
-          discountedRate: "",
-          isManual: true,
-          unit: ""
-        };
-
-        setRcDetailsList([...apiData, nonRcRow]);
-        const poDt = [{ storeName: storeName, anualDmdQty: 0, QtyPipeline: 0, currentStock: 0, reorderLevel: 0, suggestedQty: 10000, orderQty: 0 }]
-        setPoDetailsList(poDt)
-      } else {
-        setRcDetailsList([]);
-      }
-    })
-  }
 
   const handleManualChange = (field, value) => {
     if (field === "unit") {
@@ -503,35 +697,6 @@ const GenerateSingleProgPoJH = (props) => {
     setSelectedRowId(upRow);
   };
 
-  const getSupplierDrpDt = () => {
-    getCommonHpSupplierCombo(998)?.then((res) => {
-      if (res?.status === 1) {
-        const drpDt = res?.data?.map((dt) => ({
-          value: dt?.value,
-          label: dt?.display,
-        }));
-        setSupplierList(drpDt);
-      } else {
-        setSupplierList([]);
-      }
-    })
-  }
-
-  const getUnitDrpDt = () => {
-    getCommonHpUnitCombo(998)?.then((res) => {
-      if (res?.status === 1) {
-        const drpDt = res?.data?.map((dt) => ({
-          value: dt?.value,
-          label: dt?.display,
-        }));
-        setUnitDrpData(drpDt);
-        setSelectedRowId({ ...selectedRowId, 'unit': drpDt?.at(0)?.value })
-      } else {
-        setUnitDrpData([]);
-      }
-    });
-  }
-
   const handleGoButtonClick = () => {
     let isValid = true;
 
@@ -551,62 +716,109 @@ const GenerateSingleProgPoJH = (props) => {
     }
 
     if (isValid) {
-      getRcDetailsListData();
-      getUnitDrpDt();
-      getSupplierDrpDt();
+      getDwhPoDetailsOnGo();
+      getPoComponentDetails(formState?.poType?.split("^")[0], 3, storeID, selectedData[0]?.poNo);
+
     }
   }
+  const calculateSomeTrickyValue = (ind, row) => {
+
+    const poType = formState?.poType?.split("^")[0];
+
+    const rateContractExist =
+      row?.contractType?.split("^")?.[1];
+
+    if (poType === "28" && rcType !== 1) {
+
+      if (
+        rateContractExist === 1 ||
+        rateContractExist === "1"
+      ) {
+
+        alert(
+          "State Rate Contact exist for this item. You can generate PO with this contract type with remarks"
+        );
+      }
+    }
+
+    setStrIndrx(ind);
+
+    // reset qty except PO type 223
+    // if (poType !== "223") {
+
+    //   const updatedQtyObj = {};
+
+    //   Object.keys(orderQuantity || {}).forEach((key) => {
+    //     updatedQtyObj[key] = 0;
+    //   });
+
+    //   setOrderQuantity(updatedQtyObj);
+
+    //   calculateTotalScheduleQty(
+    //     updatedQtyObj,
+    //     poDetailsList,
+    //     1
+    //   );
+    // }
+  };
+
 
   const poDetailsCols = [
 
     {
-      name: (<span>Store Name</span>),
-      selector: row => row?.storeName,
+      name: (<span className='text-center'>Store Name</span>),
+      selector: row => row[0],
       sortable: true,
       wrap: true,
-      // width: "20%"
+      // center: "true"
+      width: "20%"
     },
     {
-      name: (<span>Annual Demanded Quantity</span>),
-      selector: row => row?.anualDmdQty,
+      name: (<span>Available Budget</span>),
+      selector: row => row[9],
       sortable: true,
       wrap: true,
+      center: "true"
     },
     {
-      name: (<span>Quantity. In Pipeline(Transit)</span>),
-      selector: row => row?.QtyPipeline,
+      name: (<span className='text-center'>Annual Demanded Quantity (A)</span>),
+      selector: row => row[1]?.split('#')[0],
       sortable: true,
       wrap: true,
+      center: "true"
     },
     {
-      name: (<span>Current Stock</span>),
-      selector: row => row?.currentStock,
+      name: (<span className='text-center'>Ordered Quantity (B)</span>),
+      selector: row => row[1]?.split('#')[1],
       sortable: true,
       wrap: true,
+      center: "true"
     },
     {
-      name: (<span>Reorder Level</span>),
-      selector: row => row?.reorderLevel,
+      name: (<span className='text-center'>Current Stock</span>),
+      selector: row => row[10],
       sortable: true,
       wrap: true,
+      center: "true"
     },
     {
-      name: (<span>Suggested Qty.</span>),
-      selector: row => row?.suggestedQty,
+      name: (<span className='text-center'>Suggested Qty. (A-B)</span>),
+      selector: row => parseInt(row[1]?.split('#')[0]) - parseInt(row[1]?.split('#')[1]),
       sortable: true,
       wrap: true,
+      center: "true"
     },
     {
-      name: (<span>*Order Quantity(No.)</span>),
+      name: (<span className='text-center'>*Order Quantity(No.)</span>),
       cell: (row, index) =>
         <div style={{ position: 'absolute', top: 3, left: 0 }}>
           <InputBox
             id="orderQuantiy"
             className="bg-[#d2d0c6]"
-            type="text"
+            type="number"
             name={"orderQuantiy"}
             placeholder=""
-            value={orderQuantity[index] || ""}
+            value={orderQuantity[index] || row[5]?.split('#')[0]}
             // disabled={selectedRowId?.index !== index}
             onChange={(e) => { handleQuantityChange(index, e?.target?.value); }}
             onBlur={handleTotalQuantity}
@@ -630,7 +842,7 @@ const GenerateSingleProgPoJH = (props) => {
             <input
               type="checkbox"
               checked={selectedRowId?.index === index}
-              onChange={(e) => { handleRowSelect(row, index) }}
+              onChange={(e) => { handleRowSelect(row, index); calculateSomeTrickyValue(index, row) }}
             />
           </span>
         </div>,
@@ -638,7 +850,7 @@ const GenerateSingleProgPoJH = (props) => {
     },
     {
       name: (<span>Contract Type</span>),
-      selector: row => row?.strContractType?.split('^')[0],
+      selector: row => row?.contractType?.split('^')[0],
       sortable: true,
       wrap: true,
       // width: "20%"
@@ -646,165 +858,179 @@ const GenerateSingleProgPoJH = (props) => {
     {
       name: "Supplier",
       cell: (row, index) =>
-        row.isManual ? (
+        formState?.poType === "21^2" && selectedRowId?.index === index ? (
           <select
             className="w-full py-1 border ring-gray-500 rounded-lg focus:outline-none focus:border-blue-500 transition-all duration-200 mb-2 mt-1"
             onChange={(e) => handleManualChange("strSupplierName", e.target.value)}
+            value={selectedRowId?.strSupplierName || ""}
           >
-            <option>Select Value</option>
+            <option>Select</option>
             {supplierList?.map((sup) => (
               <option value={sup.value}>{sup.label}</option>
             ))}
           </select>
         ) : (
-          row?.strSupplierName
+          row?.suppName
         ),
     },
     {
       name: (<span>Level Type</span>),
-      selector: row => row?.strLevelTypeName,
+      selector: row => row?.supplierLevel,
       sortable: true,
       wrap: true,
     },
     {
-      name: "Rate",
+      name: formState?.poType === "28^3" ? "Rate/Unit(Inclusive of Tax)" : "Rate",
       cell: (row, index) =>
-        row.isManual ? (
+        formState?.poType === "21^2" && selectedRowId?.index === index ? (
           <div className='row'>
             <InputBox
               id="ratePerUnit"
               className="px-2"
               type="text"
               name={"ratePerUnit"}
+              value={selectedRowId?.ratePerUnit || ""}
               placeholder=""
               inputClass="col-6 p-0 mt-1"
               onChange={(e) => { handleManualChange("ratePerUnit", e?.target?.value); }}
               onBlur={handleAllRateChange}
             />
             <div className='col-6 mb-2 p-0 d-flex mt-1'>
-              {/* <div> */}
               <span className='py-1 px-1'>/</span>
               <select
                 className="w-full py-1 border ring-gray-500 rounded-lg focus:outline-none focus:border-blue-500 transition-all duration-200 "
                 onChange={(e) => { handleManualChange("unit", e.target.value) }}
+                value={selectedRowId?.unit || ""}
               >
-                <option>Select Value</option>
+                <option>Select</option>
                 {unitDrpData?.map((sup) => (
                   <option value={sup.value}>{sup.label}</option>
                 ))}
               </select>
-              {/* </div> */}
             </div>
 
           </div>
         ) : (
-          row?.ratePerUnit
+          row?.suppId?.split('^')[1]
         ),
-      width: "18%",
+      // width: "18%",
       center: "true"
     },
-    {
-      name: (<span>Discount(%)</span>),
-      // selector: row => row?.numDiscount,
-      cell: (row, index) =>
-        row.isManual ? (
-          <div style={{ position: 'absolute', top: 5, left: 10, right: 10 }}>
-            <InputBox
-              id="numDiscount"
-              className=""
-              type="text"
-              name={"numDiscount"}
-              placeholder=""
-              value={selectedRowId?.numDiscount}
-              // disabled={selectedRowId?.index !== index}
-              onChange={(e) => { handleManualChange("numDiscount", e?.target?.value); }}
-              onBlur={handleAllRateChange}
-            />
+    ...(formState?.poType !== "28^3" ? [
+      {
+        name: (<span>Discount(%)</span>),
+        cell: (row, index) =>
+          formState?.poType === "21^2" && selectedRowId?.index === index ? (
+            <div style={{ position: 'absolute', top: 5, left: 10, right: 10 }}>
+              <InputBox
+                id="numDiscount"
+                className=""
+                type="text"
+                name={"numDiscount"}
+                value={selectedRowId?.numDiscount || ""}
+                placeholder=""
+                value={selectedRowId?.numDiscount}
+                onChange={(e) => { handleManualChange("numDiscount", e?.target?.value); }}
+                onBlur={handleAllRateChange}
+              />
 
-          </div>
-        ) : (
-          row?.numDiscount
-        ),
-      sortable: true,
-      wrap: true,
-    },
-    {
-      name: (<span>Discounted Rate</span>),
-      // selector: row => row?.numDiscount,
-      cell: (row, index) =>
-        row.isManual ? (
-          <div style={{ position: 'absolute', top: 5, left: 10, right: 10 }}>
-            <InputBox
-              id="discountedRate"
-              className=""
-              type="text"
-              name={"discountedRate"}
-              placeholder=""
-              value={selectedRowId?.discountedRate}
-              disabled={true}
-            // onChange={(e) => { handleManualChange("discountedRate", e?.target?.value); }}
-            // onBlur={handleTotalQuantity}
-            />
+            </div>
+          ) : (
+            row?.numDiscount
+          ),
+        sortable: true,
+        wrap: true,
+      },
 
-          </div>
-        ) : (
-          getAllRateChange(parseFloat(row?.ratePerUnit?.split('/')[0]), row?.numBaseUnitvalue || 1, row?.numDiscount, 0)
-        ),
-      sortable: true,
-      wrap: true,
-    },
+      {
+        name: (<span>Discounted Rate</span>),
+        cell: (row, index) =>
+          formState?.poType === "21^2" && selectedRowId?.index === index ? (
+            <div style={{ position: 'absolute', top: 5, left: 10, right: 10 }}>
+              <InputBox
+                id="discountedRate"
+                className=""
+                type="text"
+                name={"discountedRate"}
+                placeholder=""
+                value={selectedRowId?.discountedRate}
+                disabled={true}
+              />
+
+            </div>
+          ) : (
+            getAllRateChange(parseFloat(row?.ratePerUnit?.split('/')[0]), row?.numBaseUnitvalue || 1, row?.numDiscount, 0)
+          ),
+        sortable: true,
+        wrap: true,
+      },
+    ] : []),
     {
       name: (<span>GST (%)</span>),
-      // selector: row => row?.strTax?.split('%')[0],
       cell: (row, index) =>
-        row.isManual ? (
+        formState?.poType === "21^2" && selectedRowId?.index === index ? (
           <div style={{ position: 'absolute', top: 5, left: 10, right: 10 }}>
             <InputBox
               id="strTax"
               className=""
               type="text"
               name={"strTax"}
+              value={selectedRowId?.strTax || ""}
               placeholder=""
               value={selectedRowId?.strTax}
-              // disabled={selectedRowId?.index !== index}
               onChange={(e) => { handleManualChange("strTax", e?.target?.value); }}
               onBlur={handleAllRateChange}
             />
           </div>
         ) : (
-          row?.strTax?.split('%')[0]
+          row?.suppId?.split('^')[11]
         ),
       sortable: true,
       wrap: true,
     },
-    {
-      name: (<span>(₹)Total Rate(One Unit)(With Tax)</span>),
-      // selector: row => parseInt(row?.ratePerUnit?.split('/')[0]) * parseInt(row?.strTax?.split('%')[0]) / 100 + parseInt(row?.ratePerUnit?.split('/')[0]),
-      cell: (row, index) =>
-        row.isManual ? (
-          <div style={{ position: 'absolute', top: 5, left: 10, right: 10 }}>
-            <InputBox
-              id="totalRate"
-              className=""
-              type="text"
-              name={"totalRate"}
-              placeholder=""
-              value={selectedRowId?.totalRate}
-              disabled={true}
-            // onChange={(e) => { handleManualChange(index, e?.target?.value); }}
-            // onBlur={handleTotalQuantity}
-            />
-          </div>
-        ) : (
-          getAllRateChange(parseFloat(row?.ratePerUnit?.split('/')[0]), row?.numBaseUnitvalue || 1, row?.numDiscount, parseFloat(row?.strTax?.split('%')[0]))
-        ),
-      sortable: true,
-      wrap: true,
-    },
+    ...(formState?.poType !== "28^3" ? [
+      {
+        name: (<span>(₹)Total Rate(One Unit)(With Tax)</span>),
+        cell: (row, index) =>
+          formState?.poType === "21^2" && selectedRowId?.index === index ? (
+            <div style={{ position: 'absolute', top: 5, left: 10, right: 10 }}>
+              <InputBox
+                id="totalRate"
+                className=""
+                type="text"
+                name={"totalRate"}
+                placeholder=""
+                value={selectedRowId?.totalRate}
+                disabled={true}
+              />
+            </div>
+          ) : (
+            getAllRateChange(parseFloat(row?.ratePerUnit?.split('/')[0]), row?.numBaseUnitvalue || 1, row?.numDiscount, parseFloat(row?.strTax?.split('%')[0]))
+          ),
+        sortable: true,
+        wrap: true,
+      },
+    ] : []),
   ]
 
-  console.log('storeID', storeID)
   console.log('formState', formState)
+  console.log('selectedRowId', selectedRowId)
+  console.log('totalOrderQuantity', totalOrderQuantity)
+  console.log('orderQuantity', orderQuantity)
+
+  // * 1.Store Name
+  //   * 2.Annual Qty # Order Qty # Accepted Qty # Issue Qty
+  //     * # Active Stock # Quarntine Stock # Sub - Store Stock
+  //       * # Pipe - Line Qty # Re - Order Level
+  //         * 3.Re - Order Level
+  //           * 4.Location
+  //             * 5.DDW_ID
+  //               * 6.Order Qty(SCHEDULE1 # SCHEDULE2 # SCHEDULE3 # SCHEDULE4)
+  //                 * 7.Programme Mapping Flag
+  //                   * 8.budget(hq)
+  //                     * 9. suggested qty
+  //                       * 10. budget consignee
+  //                         * 11. CURRENT STOCK
 
   return (
     <section className="rateContractAddJHK">
@@ -836,7 +1062,6 @@ const GenerateSingleProgPoJH = (props) => {
             options={poTypeList}
             onChange={(e) => {
               handleChange(e);
-              // getPoDrugNameDrpDt(e?.target?.value?.split("^")[1]);
             }}
             name={"poType"}
             value={formState?.poType}
@@ -853,6 +1078,7 @@ const GenerateSingleProgPoJH = (props) => {
           name="poGenPeriod"
           label={"PO Generation Period :"}
           addOnClass="rateContract__container--dropdown m-0"
+
         />
 
         <DatePickerComponent
@@ -862,6 +1088,7 @@ const GenerateSingleProgPoJH = (props) => {
           labelFor={"poDate"}
           name={"poDate"}
           allowMin={true}
+          isRequired
         />
 
         {formState?.poType === "223^5" &&
@@ -870,7 +1097,7 @@ const GenerateSingleProgPoJH = (props) => {
               options={indentPoNoList}
               onChange={(e) => {
                 handleChange(e);
-                // getPoProgrammeNameDrpDt(e?.target?.value?.split('^')[1], formState?.poGenPeriod)
+                getPoDrugNameDrpDtForIndent(e?.target?.value);
               }}
               value={formState?.indentPoNo}
               name="indentPoNo"
@@ -892,12 +1119,13 @@ const GenerateSingleProgPoJH = (props) => {
             name="drugName"
             label={"Drug Name :"}
             addOnClass="rateContract__container--dropdown m-0"
+            isRequired
           />
-          {/* {errors?.drugNameErr &&
+          {errors?.drugNameErr &&
             <span className="text-sm text-[#9b0000] mt-1 ms-1">
               {errors?.drugNameErr}
             </span>
-          } */}
+          }
 
         </div>
         {formState?.poType !== "223^5" && <div></div>}
@@ -916,27 +1144,43 @@ const GenerateSingleProgPoJH = (props) => {
           </label>
         </div>
 
-        <ComboDropDown
-          options={programNameList}
-          // onChange={handleChange}
-          onChange={(e) => {
-            handleChange(e);
-            getPoFundingSourceDrpDt(storeID, formState?.drugName?.split('^')[5], e?.target?.value, formState?.poGenPeriod);
-          }}
-          name={'programmeName'}
-          value={formState?.programmeName}
-          label={"Programme Name :"}
-          addOnClass="rateContract__container--dropdown m-0"
-        />
+        <div>
+          <ComboDropDown
+            options={programNameList}
+            // onChange={handleChange}
+            onChange={(e) => {
+              handleChange(e);
+              getPoFundingSourceDrpDt(storeID, formState?.drugName?.split('^')[5], e?.target?.value, formState?.poGenPeriod);
+            }}
+            name={'programmeName'}
+            value={formState?.programmeName}
+            label={"Programme Name :"}
+            addOnClass="rateContract__container--dropdown m-0"
+            isRequired
+          />
+          {errors?.programmeNameErr &&
+            <span className="text-sm text-[#9b0000] mt-1 ms-1">
+              {errors?.programmeNameErr}
+            </span>
+          }
+        </div>
 
-        <ComboDropDown
-          options={fundSourceList}
-          onChange={(e) => { handleChange(e); getSupplierValuesOnFundingSrc(e?.target?.value); }}
-          value={formState?.fundingSource}
-          name={'fundingSource'}
-          label={"Funding Source :"}
-          addOnClass="rateContract__container--dropdown m-0"
-        />
+        <div>
+          <ComboDropDown
+            options={fundSourceList}
+            onChange={(e) => { handleChange(e); getSupplierValuesOnFundingSrc(e?.target?.value); }}
+            value={formState?.fundingSource}
+            name={'fundingSource'}
+            label={"Funding Source :"}
+            addOnClass="rateContract__container--dropdown m-0"
+            isRequired
+          />
+          {errors?.programmeNameErr &&
+            <span className="text-sm text-[#9b0000] mt-1 ms-1">
+              {errors?.programmeNameErr}
+            </span>
+          }
+        </div>
 
         <div>
           <label htmlFor="" className="rateContractAddJHK__label mb-0 ">
@@ -969,14 +1213,11 @@ const GenerateSingleProgPoJH = (props) => {
       <div className="">
         <h4 className="bg-[#097080] text-white p-1 rounded fw-normal ">Rate Contract Details</h4>
         <div style={{ marginBottom: "2rem" }}>
-          <DataTable
-            masterName={"Rate Contract Details"}
-            ref={null}
-            columns={rcDetailsColms}
-            data={rcDetailsList}
-            isPagination={false}
+          <ReactDataTable
+            column={rcDetailsColms}
+            data={formState?.poType === "21^2" ? rcDetailsList?.slice(0, 1) : rcDetailsList}
+            isPagination={true}
             isSearchReq={false}
-            isReport={false}
           />
         </div>
       </div>
@@ -1052,6 +1293,7 @@ const GenerateSingleProgPoJH = (props) => {
                 labelFor={"quotationDate"}
                 name={"quotationDate"}
                 allowMin={true}
+                maxiDate={new Date(new Date().setDate(new Date().getDate() - 1))}
               />
             </div>
           </>
@@ -1083,6 +1325,7 @@ const GenerateSingleProgPoJH = (props) => {
             labelFor={"pCommitteeMeetDate"}
             name={"pCommitteeMeetDate"}
             allowMin={true}
+            maxiDate={formState?.poDate ? new Date(formState?.poDate) : new Date()}
           />
         </div>
 
@@ -1117,23 +1360,24 @@ const GenerateSingleProgPoJH = (props) => {
 
       <div className="employeeMaster__container d-block">
         <h4 className="employeeMaster__container-heading">Component Details</h4>
-        <div>
-          <label htmlFor="tAndc" className="employeeMaster__label">
-            Term & Conditions:
-          </label>
-          <RichTextEditor
-            id={formState?.component}
-            name={formState?.component}
-            value={formState?.nvl}
-            onChange={(e) => { handleComponentChange(index, 'nvl', e) }}
-          />
-        </div>
+        {componentDetails?.map((data, index) => (
+
+          <div>
+            <label htmlFor="tAndc" className="employeeMaster__label">
+              {data?.component}:
+            </label>
+            <RichTextEditor
+              id={data?.component}
+              name={data?.component}
+              value={data?.nvl}
+              onChange={(e) => { handleComponentChange(index, 'nvl', e) }}
+            />
+          </div>
+        ))}
       </div>
 
       <div className="bankmaster__container-controls">
-        {actionType === "Modify" &&
-          <button className="bankmaster__container-controls-btn" onClick={handleModifyPo}>Save</button>
-        }
+        <button className="bankmaster__container-controls-btn" onClick={handleGeneratePo}>Save</button>
         <button
           className="bankmaster__container-controls-btn"
           onClick={handleReset}
