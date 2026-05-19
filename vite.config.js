@@ -8,9 +8,25 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 5177,
+    //  proxy: {
+    //   '/hp-api': {
+    //     target: "http://10.226.27.173:8082",
+    //     changeOrigin: true,
+    //     secure: false
+    //   }
+    // }
+    proxy: {
+      '/hp-api': {
+        target: "http://10.226.27.173:8082",
+        changeOrigin: true,
+        secure: false
+      }
+    }
+
+
     // proxy: {
     //   '/hp-api': {
-    //     target: "http://10.226.30.45:9002",
+    //     target: "http://10.226.29.102:8082",
     //     changeOrigin: true,
     //     secure: false
     //   }
@@ -18,7 +34,7 @@ export default defineConfig({
 
     // proxy: {
     //   '/api/v1': {
-    //     target: "http://10.226.27.173:8094",
+    //     target: "http://10.226.30.45:9002",
     //     changeOrigin: true,
     //     secure: false
     //   }

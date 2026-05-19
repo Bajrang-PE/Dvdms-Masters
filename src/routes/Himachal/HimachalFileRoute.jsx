@@ -4,6 +4,7 @@ import RateContractHP from "../../component/masters/himachal/services/RateContra
 import PoGenerationHP from "../../component/masters/himachal/services/PoGenerationHP";
 import PoApprovalListHP from "../../component/masters/himachal/services/poApproval/poApprovalListHP";
 import PoCancelationHP from "../../component/masters/himachal/services/poCancelation/PoCancelationHP";
+import SupplierInterfaceList from "../../component/masters/himachal/services/SupplierInterface/SupplierInterfaceList";
 // const RateContractJH = lazy(() => import("../../component/masters/jharkhand/services/RateContract"));
 
 export const HimachalFileRoute = (
@@ -13,6 +14,7 @@ export const HimachalFileRoute = (
         <Route path="/po-generation" element={<PoGenerationHP />} />
         <Route path="/po-approval" element={<PoApprovalListHP />} />
         <Route path="/po-cancelation" element={<PoCancelationHP />} />
+        <Route path="/supplier-interface-desk" element={<SupplierInterfaceList  />} />
 
 
         {/* -------------------MASTERS-------------------------------------------------------------------- */}

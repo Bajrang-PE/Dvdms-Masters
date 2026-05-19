@@ -1,15 +1,21 @@
 import axios from "axios";
 
-const BaseUrl = '  http://10.226.27.173:8087'; //vish 8087
+// const BaseUrl = 'http://10.226.27.173:8094';
 // const BaseUrl = 'http://10.226.17.6:8084';
 // const BaseUrl = 'http://10.226.29.202:8091';
 
 // const BaseUrl = "http://10.226.29.29:8080/"; //AD AS
 // const BaseUrl = "http://10.226.30.86:8091"; //Main Gateway
 // const BaseUrl = "http://10.226.30.45:9002"; //HP prd
+ //const BaseUrl = "http://10.226.28.223:8027"; //UP pritee
+ // const BaseUrl = "http://10.226.29.102:8082"; //UP shubham  
+   const BaseUrl = "http://10.226.27.173:8082"; //UP vishal
 
-// axios.defaults.baseURL = '';
-axios.defaults.baseURL = BaseUrl;
+
+//axios.defaults.baseURL = '/hp-api';
+
+ axios.defaults.baseURL = '';
+// axios.defaults.baseURL = BaseUrl;
 
 // const getAccessToken = () => {
 //     return sessionStorage.getItem('accessToken');

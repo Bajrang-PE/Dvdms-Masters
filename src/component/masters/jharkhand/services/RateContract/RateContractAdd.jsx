@@ -191,7 +191,6 @@ export default function RateContractAddForm() {
       }
     });
   };
-
   const unitDrpData = () => {
     getUnitCombo(998)?.then((res) => {
       if (res?.status === 1) {
