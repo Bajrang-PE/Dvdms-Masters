@@ -163,7 +163,8 @@ export function InputField({
   isAlpha = false,
   label,
   isRequired,
-  isError
+  isError,
+  addOnClass
 }) {
 
   const handleChange = (e) => {
@@ -289,7 +290,7 @@ export function InputField({
   return (
     <>
       <div
-        className={`Wrapper`}>
+        className={`Wrapper ${addOnClass}`}>
         {label && <label className={`Wrapper__label ${isRequired ? 'required-label' : ""}`}>{label}</label>}
 
         <input
@@ -349,7 +350,9 @@ export const DatePickerComponent = ({
   disableFutureDates = false,
   labelBold = false,
   disabled = false,
-  isRequired = false
+  isRequired = false,
+  miniDate,
+  maxiDate
 }) => {
   const handleChange = (date) => {
     setSelectedDate(date);
@@ -357,9 +360,11 @@ export const DatePickerComponent = ({
 
   // Min date logic
   const minDate = allowMin ? new Date(2000, 0, 1) : new Date();
+  const min = miniDate ? miniDate : new Date();
 
   // Max date logic (today)
   const maxDate = disableFutureDates ? new Date() : undefined;
+  const max = maxiDate ? maxiDate : undefined;
 
   return (
     <div>
@@ -371,8 +376,8 @@ export const DatePickerComponent = ({
         selected={selectedDate}
         onChange={handleChange}
         dateFormat="dd-MMM-yyyy"
-        minDate={minDate}
-        maxDate={maxDate}
+        minDate={!allowMin ? min : minDate}
+        maxDate={disableFutureDates ? maxDate : max}
         placeholderText="dd-MMM-yyyy"
         withPortal
         className="custom-datepicker"

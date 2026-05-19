@@ -70,3 +70,33 @@ export const getHpRcListData = async (hospitalCode, itemBrandId, suppId, contrac
         throw err;
     }
 };
+
+export const getCommonHpUnitCombo = async (hospitalCode) => {
+    try {
+        const response = await fetchData(`/hp-api/unit/combo?hospitalCode=${hospitalCode}`);
+        return response?.data;
+    } catch (error) {
+        console.error('API Error', error);
+        throw error;
+    }
+}
+
+export const getCommonHpSupplierCombo = async (hospitalCode) => {
+    try {
+        const response = await fetchData(`/hp-api/rate-contracts/supplier-combo?hospitalCode=${hospitalCode}&status=1`);
+        return response?.data;
+    } catch (error) {
+        console.error('API Error', error);
+        throw error;
+    }
+}
+
+export const getCommonHpApprByCmbCombo = async (hospitalCode, storeId) => {
+    try {
+        const response = await fetchData(`/hp-api/stores/approved-by-combo?hospitalCode=${hospitalCode}&storeId=${storeId}`);
+        return response?.data;
+    } catch (error) {
+        console.error('API Error', error);
+        throw error;
+    }
+}

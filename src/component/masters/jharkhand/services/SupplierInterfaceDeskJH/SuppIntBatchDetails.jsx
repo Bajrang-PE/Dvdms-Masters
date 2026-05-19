@@ -596,8 +596,6 @@ const SuppIntBatchDetails = (props) => {
                             />
                         </label>
                     </div>
-
-
                 </div>
             }
 

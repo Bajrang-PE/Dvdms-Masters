@@ -6,7 +6,7 @@ import { getSinglePoCancelPoData, modifySinglePoDwhPoCancelSave } from '../../..
 
 const CancelSingleProgPoJH = (props) => {
 
-    const { selectedData } = props;
+    const {store, selectedData } = props;
     const initialState = {
         poType: "",
         poDate: '',
@@ -32,9 +32,8 @@ const CancelSingleProgPoJH = (props) => {
         }
     }
 
-    const { value: storeID, label: storeName } = useSelector(
-        (state) => state.rateContractJHK.storeID
-    );
+     const { value: storeID, label: storeName } = store;
+     
     const SEAT_ID = 14462;
     const dispatch = useDispatch();
     const [formState, dispatcher] = useReducer(addFormReducer, initialState);

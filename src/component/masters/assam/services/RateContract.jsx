@@ -208,7 +208,7 @@ export default function RateContract() {
     const queryData = {
       hstnumStoreId: 99800001,
       sstnumItemCatNo: 10,
-      strLevelTypeId: 1,
+      // strLevelTypeId: 1,
       hstnumContractTypeId: contractType,
       hstnumSupplierId: manufName,
       hstnumItembrandId: itemName,
@@ -216,6 +216,7 @@ export default function RateContract() {
       gnumIsvalid: gnumIsvalid,
       searchItems: radioOption === "0" ? "" : searchQuery,
       selectOption: radioOption,
+
     };
     console.log("Sending data ", queryData);
     getRcTableData(JSON.stringify(queryData))?.then((res) => {

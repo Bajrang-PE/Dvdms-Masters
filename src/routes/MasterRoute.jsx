@@ -15,6 +15,7 @@ const JharkhandPrivateRoute = lazy(() => import("./Jharkhand/JharkhandPrivateRou
 const MenuTopBar = lazy(() => import("../component/headers/MenuTopBar"));
 const MenuTabBar = lazy(() => import("../component/headers/MenuTabBar"));
 const MenuPage = lazy(() => import("../pages/MenuPage"));
+const UnifiedDashboard = lazy(() => import("../pages/UnifiedDashboard"));
 
 const MasterRoute = () => {
   const { stateCode } = useParams();
@@ -61,6 +62,7 @@ const MasterRoute = () => {
         <MenuTabBar />
         <Routes>
           <Route index element={<MenuPage />} />
+          <Route path="/dashboard" element={<UnifiedDashboard />} />
 
           {/* ASSAM */}
           {/* {stateCode === "AS" && (

@@ -1,7 +1,7 @@
 import { lazy } from "react";
 import { Route } from "react-router-dom";
 import DccUploadJH from "../../component/masters/jharkhand/services/DccUpload/DccUploadJH";
-import ChallanProcessJh from "../../component/masters/jharkhand/services/ChallanProcess/ChallanProcessJh";
+import ChallanProcessJh from "../../component/masters/jharkhand/services/ChallanProcess/ChallanProcessJH";
 const RateContractJH = lazy(() => import("../../component/masters/jharkhand/services/RateContract"));
 const BankMasterJH = lazy(() => import("../../component/masters/jharkhand/admin/lists/BankMasterJH"));
 const SingleProgPoDeskJH = lazy(() => import("../../component/masters/jharkhand/services/SingleProgPoDeskJH"));

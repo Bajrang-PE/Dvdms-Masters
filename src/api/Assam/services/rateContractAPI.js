@@ -98,7 +98,7 @@ export const getPieChartData = async (
 
 export const getRcTableData = async (data) => {
   try {
-    let url = `/api/assam/rateContract/getAllRateContractList`;
+    let url = `/api/assam/rateContract/getAllRateContractList1`;
     const response = await fetchPostData(url, data);
     return response.data;
   } catch (error) {

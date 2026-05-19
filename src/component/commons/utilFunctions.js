@@ -43,3 +43,17 @@ export const getValueInsideBrackets = (str) =>
   str.match(/\(([^)]+)\)/)?.[1] || "";
 
 
+export const convertToISODate = (dateStr) => {
+
+  if (!dateStr) return "";
+  const months = {
+    JAN: "01", FEB: "02", MAR: "03", APR: "04", MAY: "05", JUN: "06",
+    JUL: "07", AUG: "08", SEP: "09", OCT: "10", NOV: "11", DEC: "12"
+  };
+
+  const [day, month, year] = dateStr.split("-");
+  const formattedYear = year?.length === 2 ? `20${year}` : year;
+  const formattedMonth = months[month?.toUpperCase()];
+
+  return `${formattedYear}-${formattedMonth}-${day}`;
+};
