@@ -1,5 +1,5 @@
+import { fetchData, fetchPostData } from "../../utils/ApiHook";
 
-import { fetchData, fetchPostData, fetchPutData } from "../../../utils/ApiHook";
 
 
 export const getContractType = async (hospitalCode) => {
