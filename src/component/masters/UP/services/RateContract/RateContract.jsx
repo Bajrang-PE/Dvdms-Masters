@@ -4,7 +4,7 @@ import {
   getContractType, 
   getDrugName, 
   getManufacturers, 
-  getStoreName, // Check API export name in your file
+  // getStoreName, // Check API export name in your file
   getRcTableData 
 } from "../../../../../api/UP/rateContractAPI";
 
@@ -27,11 +27,11 @@ const RateContract = () => {
 
   // 1. Fetch Store Data
   const getStoreComboData = () => {
-    getStoreName(998)?.then((res) => {
-      if (res?.status === 1) {
-        setStoreDrpData(res.data.map(dt => ({ value: dt.storeId, label: dt.storeName })));
-      }
-    });
+    // getStoreName(998)?.then((res) => {
+    //   if (res?.status === 1) {
+    //     setStoreDrpData(res.data.map(dt => ({ value: dt.storeId, label: dt.storeName })));
+    //   }
+    // });
   };
 
   // 2. Fetch Contract Type Data
