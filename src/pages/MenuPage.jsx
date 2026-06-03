@@ -116,7 +116,8 @@ const MenuPage = () => {
     { title: "Dcc Upload", link: "dcc-upload" },
     { title: "Pm darpan service", link: "pm-darpan-service" },
     { title: "Purchase Order Generation", link: "po-generation" },
-    { title: "Purchase Order Approval", link: "po-approval" },
+    // { title: "Purchase Order Approval", link: "po-approval" },
+    { title: "Purchase Order Approval", link: "single-prog-po-approval" },
     { title: "Purchase Order Cancelation", link: "po-cancelation" },
     {
       title: "Issue Management",

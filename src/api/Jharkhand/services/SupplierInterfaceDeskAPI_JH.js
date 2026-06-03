@@ -281,3 +281,15 @@ export const addSuppIntDeskDeliveryDetails = async (data) => {
         throw error;
     }
 };
+
+export const getSuppIntDeskGraphCounts = async (hospCode, suppId) => {
+    try {
+        const response = await fetchData(
+            `/api/v1/supplier-interface-desk/graph-data?hospitalCode=${hospCode}&supplierId=${suppId}`
+        );
+        return response.data;
+    } catch (err) {
+        console.error("Error fetching store name : ", err);
+        throw err;
+    }
+};

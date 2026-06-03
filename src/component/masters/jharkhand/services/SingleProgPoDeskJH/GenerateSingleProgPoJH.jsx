@@ -117,7 +117,8 @@ const GenerateSingleProgPoJH = (props) => {
         indentPoNo: "",
         quotationDate: "",
         quotationNo: "",
-        verifiedBy: ""
+        verifiedBy: "",
+        purchaseSourceId: ""
       }
     });
     setPoDetailsList([]);
@@ -426,9 +427,10 @@ const GenerateSingleProgPoJH = (props) => {
     getJHPoInitDataVerifyByCombo(998, storeId)?.then((res) => {
       if (res?.status === 1) {
         const val = res?.data?.varifiedBy[0]?.str_emp_no || "";
-        dispatcher({ type: "SET_FIELD", field: "verifiedBy", value: val });
+        const value = res?.data?.purchaseSourceValues[1]?.value || "";
+        dispatcher({ type: "SET_FIELDS", payload: { "verifiedBy": val, "purchaseSourceId": value } });
       } else {
-        dispatcher({ type: "SET_FIELD", field: "verifiedBy", value: "" });
+        dispatcher({ type: "SET_FIELDS", payload: { "verifiedBy": "", "purchaseSourceId": "" } });
       }
     })
   }
@@ -573,7 +575,7 @@ const GenerateSingleProgPoJH = (props) => {
       "strComboPOTypeId": formState?.poType || "",
       "strPoRefrenceNo": formState?.poRef,
       "strPoRefrenceNoText": formState?.poRef,
-      "strStrIndrx": strIndrx || "0",
+      "strStrIndrx":"0" ,//strIndrx || "0",
       "strIndentPeriodValue": formState?.poGenPeriod,
       "strPoDate": parseDate(formState?.poDate),
       "programmeId": parseInt(formState?.programmeName),
@@ -602,7 +604,7 @@ const GenerateSingleProgPoJH = (props) => {
       "strDDeliveryDays2": "0",
       "strDDeliveryDays3": "0",
       "strDDeliveryDays4": "0",
-      "strDPurchaseSource": "0",
+      "strDPurchaseSource": formState?.purchaseSourceId || "0",
       "strDQuotationNo": formState?.poType !== "21^2" ? "" : formState?.quotationNo, //only for local purchase
       "strDQuotationDate": formState?.poType !== "21^2" ? "" : formState?.quotationDate,//only for local purchase
       "strDRemarks": formState?.remarks,
@@ -621,9 +623,9 @@ const GenerateSingleProgPoJH = (props) => {
     saveJhGenerateNewPo(val)?.then((data) => {
       console.log('data', data)
       if (data?.status === 1) {
-        ToastAlert(data?.msg, 'success');
+        ToastAlert(data?.message, 'success');
       } else {
-        ToastAlert(data?.msg, 'error');
+        ToastAlert(data?.message, 'error');
       }
     })
   }
@@ -728,18 +730,17 @@ const GenerateSingleProgPoJH = (props) => {
     const rateContractExist =
       row?.contractType?.split("^")?.[1];
 
-    if (poType === "28" && rcType !== 1) {
+    // if (poType === "28") {
 
-      if (
-        rateContractExist === 1 ||
-        rateContractExist === "1"
-      ) {
-
-        alert(
-          "State Rate Contact exist for this item. You can generate PO with this contract type with remarks"
-        );
-      }
-    }
+    //   if (
+    //     rateContractExist === 1 ||
+    //     rateContractExist === "1"
+    //   ) {
+    //     alert(
+    //       "State Rate Contact exist for this item. You can generate PO with this contract type with remarks"
+    //     );
+    //   }
+    // }
 
     setStrIndrx(ind);
 
@@ -929,7 +930,6 @@ const GenerateSingleProgPoJH = (props) => {
                 name={"numDiscount"}
                 value={selectedRowId?.numDiscount || ""}
                 placeholder=""
-                value={selectedRowId?.numDiscount}
                 onChange={(e) => { handleManualChange("numDiscount", e?.target?.value); }}
                 onBlur={handleAllRateChange}
               />
@@ -975,7 +975,6 @@ const GenerateSingleProgPoJH = (props) => {
               className=""
               type="text"
               name={"strTax"}
-              value={selectedRowId?.strTax || ""}
               placeholder=""
               value={selectedRowId?.strTax}
               onChange={(e) => { handleManualChange("strTax", e?.target?.value); }}
@@ -1013,24 +1012,6 @@ const GenerateSingleProgPoJH = (props) => {
     ] : []),
   ]
 
-  console.log('formState', formState)
-  console.log('selectedRowId', selectedRowId)
-  console.log('totalOrderQuantity', totalOrderQuantity)
-  console.log('orderQuantity', orderQuantity)
-
-  // * 1.Store Name
-  //   * 2.Annual Qty # Order Qty # Accepted Qty # Issue Qty
-  //     * # Active Stock # Quarntine Stock # Sub - Store Stock
-  //       * # Pipe - Line Qty # Re - Order Level
-  //         * 3.Re - Order Level
-  //           * 4.Location
-  //             * 5.DDW_ID
-  //               * 6.Order Qty(SCHEDULE1 # SCHEDULE2 # SCHEDULE3 # SCHEDULE4)
-  //                 * 7.Programme Mapping Flag
-  //                   * 8.budget(hq)
-  //                     * 9. suggested qty
-  //                       * 10. budget consignee
-  //                         * 11. CURRENT STOCK
 
   return (
     <section className="rateContractAddJHK">

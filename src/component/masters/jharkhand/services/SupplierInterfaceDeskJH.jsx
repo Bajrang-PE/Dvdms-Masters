@@ -5,13 +5,15 @@ import DataTable from '../../../commons/Datatable';
 import { useDispatch } from 'react-redux';
 import { setSupplier } from '../../../../features/jharkhand/JH_Slice';
 import { showPopup } from '../../../../features/commons/popupSlice';
-import { getSuppIntDeskBankDetails, getSuppIntDeskListData, getSuppIntDeskSuppliersCmb } from '../../../../api/Jharkhand/services/SupplierInterfaceDeskAPI_JH';
+import { getSuppIntDeskBankDetails, getSuppIntDeskGraphCounts, getSuppIntDeskListData, getSuppIntDeskSuppliersCmb } from '../../../../api/Jharkhand/services/SupplierInterfaceDeskAPI_JH';
 import { MasterViewModal } from '../MasterViewModal';
 import DeliveryDetails from './SupplierInterfaceDeskJH/DeliveryDetails';
 import SuppIntDccRequest from './SupplierInterfaceDeskJH/SuppIntDccRequest';
 import BillAndReceiveDetails from './SupplierInterfaceDeskJH/BillAndReceiveDetails';
 import SuppIntBatchDetails from './SupplierInterfaceDeskJH/SuppIntBatchDetails';
 import SuppIntQrDetails from './SupplierInterfaceDeskJH/SuppIntQrDetails';
+import PieChart from '../../../commons/PieChart';
+import { chartColorArr } from '../../common/StaticData';
 
 
 const SupplierInterfaceDeskJH = () => {
@@ -37,13 +39,14 @@ const SupplierInterfaceDeskJH = () => {
     const [selectedRowRc, setSelectedRowRc] = useState(null);
     const [userSelection, setUserSelection] = useState("");
     const [bankListData, setBankListData] = useState([]);
+    const [pieChartData, setPieChartData] = useState([]);
 
     const componentsList = [
         { mappingKey: "batchDetails", componentName: (props) => (<SuppIntBatchDetails selectedData={selectedRowRc} actionType={'bankDetail'} />) },
         { mappingKey: "bankDetail", componentName: (props) => (<MasterViewModal data={bankListData} columns={bankColumns} openPage={'bankDetail'} />) },
         { mappingKey: "delivery", componentName: (props) => (<DeliveryDetails selectedData={selectedRowRc} actionType={'delivery'} />) },
         { mappingKey: "View", componentName: (props) => (<MasterViewModal data={bankListData} columns={bankColumns} openPage={'bankDetail'} />) },
-        { mappingKey: "dccReq", componentName: (props) => (<SuppIntDccRequest selectedData={selectedRowRc} actionType={'dccReq'} getListData={getListData}/>) },
+        { mappingKey: "dccReq", componentName: (props) => (<SuppIntDccRequest selectedData={selectedRowRc} actionType={'dccReq'} getListData={getListData} />) },
         { mappingKey: "recDtl", componentName: (props) => (<BillAndReceiveDetails selectedData={selectedRowRc} actionType={'recDtl'} />) },
         { mappingKey: "billDtl", componentName: (props) => (<BillAndReceiveDetails selectedData={selectedRowRc} actionType={'billDtl'} />) },
         { mappingKey: "qrDtl", componentName: (props) => (<SuppIntQrDetails selectedData={selectedRowRc} actionType={'qrDtl'} />) },
@@ -103,6 +106,28 @@ const SupplierInterfaceDeskJH = () => {
         })
     }
 
+    const getGraphCounts = (suppId) => {
+        getSuppIntDeskGraphCounts(998, suppId)?.then((res) => {
+            console.log('res', res)
+            if (res?.status === 1) {
+                let statusData = [];
+
+                res?.data.forEach((item, index) => {
+                    const { count, label, status } = item;
+                    statusData.push({
+                        name: label,
+                        y: Number(count),
+                        status: status,
+                        datapointColor: chartColorArr[index],
+                    });
+                });
+                setPieChartData(statusData);
+            } else {
+                setPieChartData([]);
+            }
+        })
+    }
+
     const getBankDetails = (suppId) => {
         getSuppIntDeskBankDetails(998, suppId)?.then((res) => {
             if (res?.status === 1) {
@@ -121,9 +146,15 @@ const SupplierInterfaceDeskJH = () => {
     useEffect(() => {
         if (suppName && activeStatus) {
             getListData(suppName, activeStatus);
+        }
+    }, [activeStatus])
+
+    useEffect(() => {
+        if (suppName) {
+            getGraphCounts(suppName);
             getBankDetails(suppName);
         }
-    }, [suppName, activeStatus])
+    }, [suppName])
 
     const columns = [
         { header: "PO No.", field: "hstnum_po_no" },
@@ -145,7 +176,7 @@ const SupplierInterfaceDeskJH = () => {
             { header: "Recovery Amt", field: "hstnum_recovery_amt" },
             { header: "Paid Amount", field: "supplyFlag" },
         ] : []),
-      
+
     ];
 
     const bankColumns = [
@@ -165,7 +196,7 @@ const SupplierInterfaceDeskJH = () => {
                 userSelection={userSelection}
                 componentsList={componentsList}
                 isLargeDataset={true}
-                filtersVisibleOnLoad={false}
+                filtersVisibleOnLoad={true}
             >
                 <div className="rateContract__filterSection">
                     <div className="rateContract__filterSection--filters">
@@ -190,7 +221,42 @@ const SupplierInterfaceDeskJH = () => {
                                 addOnClass="rateContract__container--dropdown"
                             />
                         </div>
+
+                        {pieChartData.length > 0 && (
+                            <div className="rateContract__status mb-4">
+                                {pieChartData?.map((data, index) => {
+                                    return (
+                                        <div
+                                            key={index}
+                                            className="rateContract__status--container"
+                                            style={{ backgroundImage: data.datapointColor }}
+                                            onClick={() => {
+                                                setActiveStatus(data.status?.toString());
+                                            }}
+                                        >
+                                            <h2
+                                                className="rateContract__heading text-center"
+                                                style={{ userSelect: "none" }}
+                                            >
+                                                {data.name}
+                                            </h2>
+                                            <h4
+                                                className="rateContract__heading--count"
+                                                style={{ userSelect: "none" }}
+                                            >
+                                                {data.y}
+                                            </h4>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
+                    {pieChartData.length > 0 && (
+                        <div className="rateContract__filterSection--chart">
+                            <PieChart data={pieChartData?.filter(dt => dt?.name !== "All" || dt?.status !== "0")} setStatus={setActiveStatus} />
+                        </div>
+                    )}
                 </div>
             </ServiceNavbar>
 

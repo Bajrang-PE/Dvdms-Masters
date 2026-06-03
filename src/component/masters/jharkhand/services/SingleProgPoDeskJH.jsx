@@ -3,18 +3,20 @@ import ServiceNavbar from '../../../commons/ServiceNavbar';
 import { ComboDropDown } from '../../../commons/FormElements';
 import DataTable from '../../../commons/Datatable';
 import { useDispatch } from 'react-redux';
-import { getSinglePoListData, getSinglePoStoreName } from '../../../../api/Jharkhand/services/SingleProgPoDeskAPI_JH';
+import { getSinglePoGraphCounts, getSinglePoListData, getSinglePoStoreName } from '../../../../api/Jharkhand/services/SingleProgPoDeskAPI_JH';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faEye, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { showPopup } from '../../../../features/commons/popupSlice';
 import SingleProgPoModifyJH from './SingleProgPoDeskJH/SingleProgPoModifyJH';
 import CancelSingleProgPoJH from './SingleProgPoDeskJH/CancelSingleProgPoJH';
 import GenerateSingleProgPoJH from './SingleProgPoDeskJH/GenerateSingleProgPoJH';
+import PieChart from '../../../commons/PieChart';
+import { chartColorArr } from '../../common/StaticData';
 
 const SingleProgPoDeskJH = () => {
 
   const statusList = [
-    // { label: "All", value: "0" },
+    { label: "Select", value: "" },
     { label: "Pending", value: "1" },
     { label: "Closed", value: "2" },
     { label: "In Process", value: "3" },
@@ -32,10 +34,9 @@ const SingleProgPoDeskJH = () => {
   const [tableData, setTableData] = useState([]);
   const [storeName, setStoreName] = useState();
   const [stores, setStores] = useState([]);
-  const [activeStatus, setActiveStatus] = useState("1");
+  const [activeStatus, setActiveStatus] = useState("");
   const [selectedStore, setSelectedStore] = useState({});
-
-  console.log('selectedStore', selectedStore)
+  const [pieChartData, setPieChartData] = useState([]);
 
   const componentsList = [
     { mappingKey: "Generate", componentName: (props) => (<GenerateSingleProgPoJH store={selectedStore} selectedData={selectedRowRc} actionType={'generate'} />) },
@@ -46,7 +47,7 @@ const SingleProgPoDeskJH = () => {
 
   const columns = [
     { header: "PO Prefix", field: "poPrefix" },
-    { header: "PO No.", field: "poNo" },
+    { header: "PO No.", field: "poNoWithType" },
     { header: "PO Date", field: "poDate" },
     { header: "PO Value", field: "poNetAmount" },
     { header: "Supplier Name", field: "supplier" },
@@ -107,6 +108,28 @@ const SingleProgPoDeskJH = () => {
     })
   }
 
+  const getGraphCounts = (storeId) => {
+    getSinglePoGraphCounts(998, storeId)?.then((res) => {
+      console.log('res', res)
+      if (res?.status === 1) {
+        let statusData = [];
+
+        res?.data.forEach((item, index) => {
+          const { count, label, status } = item;
+          statusData.push({
+            name: label,
+            y: Number(count),
+            status: status,
+            datapointColor: chartColorArr[index],
+          });
+        });
+        setPieChartData(statusData);
+      } else {
+        setPieChartData([]);
+      }
+    })
+  }
+
   useEffect(() => {
     getStoreDrpData();
   }, [])
@@ -115,9 +138,14 @@ const SingleProgPoDeskJH = () => {
     if (storeName && activeStatus) {
       getAllListData();
     }
-  }, [storeName, activeStatus])
+  }, [activeStatus])
 
-  console.log('first', tableData?.filter(dt=>dt?.poPrefix == "test2poref304"))
+  useEffect(() => {
+    if (storeName) {
+      getGraphCounts(storeName);
+    }
+  }, [storeName])
+
 
   return (
     <>
@@ -127,7 +155,7 @@ const SingleProgPoDeskJH = () => {
         userSelection={userSelection}
         componentsList={componentsList}
         isLargeDataset={true}
-        filtersVisibleOnLoad={false}
+        filtersVisibleOnLoad={true}
       >
         <div className="rateContract__filterSection">
           <div className="rateContract__filterSection--filters">
@@ -150,7 +178,41 @@ const SingleProgPoDeskJH = () => {
                 addOnClass="rateContract__container--dropdown"
               />
             </div>
+            {pieChartData.length > 0 && (
+              <div className="rateContract__status mb-4">
+                {pieChartData?.map((data, index) => {
+                  return (
+                    <div
+                      key={index}
+                      className="rateContract__status--container"
+                      style={{ backgroundImage: data.datapointColor }}
+                      onClick={() => {
+                        setActiveStatus(data.status?.toString());
+                      }}
+                    >
+                      <h2
+                        className="rateContract__heading text-center"
+                        style={{ userSelect: "none" }}
+                      >
+                        {data.name}
+                      </h2>
+                      <h4
+                        className="rateContract__heading--count"
+                        style={{ userSelect: "none" }}
+                      >
+                        {data.y}
+                      </h4>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
+          {pieChartData.length > 0 && (
+            <div className="rateContract__filterSection--chart">
+              <PieChart data={pieChartData?.filter(dt => dt?.name !== "All" || dt?.status !== "0")} setStatus={setActiveStatus} />
+            </div>
+          )}
         </div>
       </ServiceNavbar>
 

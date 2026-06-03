@@ -2,12 +2,13 @@ import React, { useEffect, useReducer, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { hidePopup } from '../../../../../features/commons/popupSlice';
 import { ComboDropDown } from '../../../../commons/FormElements';
-import { getSinglePoCancelPoData, modifySinglePoDwhPoCancelSave } from '../../../../../api/Jharkhand/services/SingleProgPoDeskAPI_JH';
 import { ToastAlert } from '../../../../../utils/Toast';
+import { rejectPoGenerationData } from '../../../../../api/Jharkhand/services/SingleProgPoApproval_JH';
+import { getSinglePoCancelPoData } from '../../../../../api/Jharkhand/services/SingleProgPoDeskAPI_JH';
 
-const CancelSingleProgPoJH = (props) => {
+const SinglePoRejectJH = (props) => {
 
-    const {store, selectedData } = props;
+    const { store, selectedData } = props;
     const initialState = {
         poType: "",
         poDate: '',
@@ -33,8 +34,9 @@ const CancelSingleProgPoJH = (props) => {
         }
     }
 
-     const { value: storeID, label: storeName } = store;
-     
+    const storeID = store?.value?.split("^")[0] || "";
+    const storeName = store?.label || "";
+
     const SEAT_ID = 14462;
     const dispatch = useDispatch();
     const [formState, dispatcher] = useReducer(addFormReducer, initialState);
@@ -58,7 +60,7 @@ const CancelSingleProgPoJH = (props) => {
         setErrors({ ...errors, [errname]: "" });
     };
 
-    const fetchCancelpoData = (poNo) => {
+    const fetchRejectPoData = (poNo) => {
         getSinglePoCancelPoData(998, storeID, poNo)?.then((res) => {
             if (res?.status === 1) {
                 const data = res?.data?.poDetails;
@@ -70,7 +72,7 @@ const CancelSingleProgPoJH = (props) => {
                 dispatcher({
                     type: "SET_FIELDS", payload: {
                         poType: data?.sststr_indenttype_name,
-                        poDate: selectedData[0]?.poDate,
+                        poDate: selectedData[0]?.strPoDate,
                         poNumber: data?.hstnum_po_no,
                         supplierName: data?.supp_name,
                         category: data?.sstnum_item_cat_name,
@@ -86,27 +88,27 @@ const CancelSingleProgPoJH = (props) => {
 
     useEffect(() => {
         if (selectedData?.length > 0) {
-            fetchCancelpoData(selectedData[0]?.poNo);
+            fetchRejectPoData(selectedData[0]?.numPoNO);
         }
     }, [selectedData])
 
-    const saveCancelDetails = () => {
+    const saveRejectDetails = () => {
         const val = {
             gnumHospitalCode: 998,
             hstnumStoreId: storeID,
             gnumSeatId: SEAT_ID,
             hstnumPoNo: formState?.poNumber,
-            cancelById: formState?.cancelBy,
+            strDCancelBy: formState?.cancelBy,
             cancelRemarks: formState?.remarks
         }
 
-        modifySinglePoDwhPoCancelSave(val)?.then((data) => {
+        rejectPoGenerationData(val)?.then((data) => {
             if (data?.status === 1) {
-                ToastAlert(data?.message,"success");
+                ToastAlert(data?.msg, "success");
                 handleClose();
                 handleReset();
             } else {
-                ToastAlert(data?.message,'error');
+                ToastAlert(data?.msg, 'error');
             }
         })
     }
@@ -124,7 +126,7 @@ const CancelSingleProgPoJH = (props) => {
         }
 
         if (isValid) {
-            saveCancelDetails();
+            saveRejectDetails();
         }
     }
 
@@ -132,7 +134,7 @@ const CancelSingleProgPoJH = (props) => {
     return (
         <section className="rateContractAddJHK">
             <h3 className="rateContractAddJHK__heading">
-                Cancel Purchase Order
+                Purchase Order Generation Desk (Reject)
             </h3>
 
             <div className="rateContractAddJHK__container">
@@ -189,14 +191,14 @@ const CancelSingleProgPoJH = (props) => {
 
 
             <div className="employeeMaster__container">
-                <h4 className="employeeMaster__container-heading">Cancel Details</h4>
+                <h4 className="employeeMaster__container-heading">Reject Details</h4>
 
                 <div>
                     <label
                         htmlFor="level"
                         className="rateContractAddJHK__label required-label"
                     >
-                        Cancel By
+                        Rejected By
                     </label>
                     <ComboDropDown
                         options={cancelByDrpData}
@@ -213,7 +215,7 @@ const CancelSingleProgPoJH = (props) => {
 
                 <div>
                     <label htmlFor="remarks" className="employeeMaster__label">
-                        Cancel Remarks :
+                        Rejected Remarks :
                     </label>
                     <textarea
                         id="remarks"
@@ -251,4 +253,4 @@ const CancelSingleProgPoJH = (props) => {
     );
 }
 
-export default CancelSingleProgPoJH
+export default SinglePoRejectJH

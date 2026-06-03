@@ -7,15 +7,17 @@ import { hidePopup } from '../../../../../features/commons/popupSlice';
 import { DatePickerComponent, InputField } from '../../../../commons/FormElements';
 import RichTextEditor from '../../../../commons/RichTextEditor';
 import { getSinglePoComponentDetails, getSinglePoDwhPoDetails, getSinglePoTestingData, modifySinglePoDwhPoModifySave } from '../../../../../api/Jharkhand/services/SingleProgPoDeskAPI_JH';
-import { parseDate } from '../../../../commons/utilFunctions';
+import { convertToISODate, parseDate } from '../../../../commons/utilFunctions';
 import { ToastAlert } from '../../../../../utils/Toast';
+import { faBackspace, faClose, faSave } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { approvePoGenerationData } from '../../../../../api/Jharkhand/services/SingleProgPoApproval_JH';
 
-const SingleProgPoModifyJH = (props) => {
-    const { store, selectedData, actionType, getAllListData } = props;
+const SinglePoVerifyJH = (props) => {
+    const { store, selectedData, actionType, onReject } = props;
 
-    console.log('selectedData', selectedData)
-
-    const { value: storeID, label: storeName } = store;
+    const storeID = store?.value?.split("^")[0] || "";
+    const storeName = store?.label || "";
 
     const rcDetailsColms = [
         { header: "Supplier", field: "supplier" },
@@ -76,8 +78,6 @@ const SingleProgPoModifyJH = (props) => {
     const [totalOrderQuantity, setTotalOrderQuantity] = useState(0);
     const [componentDetails, setComponentDetails] = useState([]);
 
-console.log('allPoData', allPoData)
-
     const handleReset = () => {
         dispatcher({ type: 'RESET_FORM' });
     }
@@ -131,8 +131,8 @@ console.log('allPoData', allPoData)
 
     useEffect(() => {
         if (selectedData?.length > 0 && storeID) {
-            getAllPoDataTesting(selectedData[0]?.poNo, storeID, selectedData[0]?.poDate)
-            getPoComponentDetails(selectedData[0]?.poTypeId, 3, storeID, selectedData[0]?.poNo)
+            getAllPoDataTesting(selectedData[0]?.numPoNO, storeID, selectedData[0]?.strPoDate)
+            getPoComponentDetails(selectedData[0]?.numPoTypeId, 3, storeID, selectedData[0]?.numPoNO)
         }
     }, [selectedData])
 
@@ -251,7 +251,8 @@ console.log('allPoData', allPoData)
         const tax = Number(formState?.tax || 0);
         const unit = Number(allPoData[0]?.poItemIdValues?.split('^')[1] || 0);
         const finalRate = rate * tax / 100 + rate;
-        if (selectedData[0]?.poTypeId == "21") {
+
+        if (selectedData[0]?.numPoTypeId == 21) {
             const totalpocost = totalQuantity * finalRate;
             const finalCost = totalpocost / unit;
             dispatcher({ type: "SET_FIELD", field: "totalPoCost", value: finalCost?.toFixed(2) || 0 });
@@ -261,66 +262,79 @@ console.log('allPoData', allPoData)
         }
     }
 
-    const saveModifyPoDetails = () => {
+    const handleApprovePo = () => {
         const val = {
-            "hstnumPoNo": formState?.poNumber,
-            "gnumHospitalCode": 998,
-            "hstnumStoreId": storeID,
-            "strVerifiedBy": allPoData[0]?.poDetails?.hststr_verify_by,
-            "strDRemarks": formState?.remarks,
-            "strPODetailsHidValue": poDetailsList?.map(dt => dt.slice(0, 6).join("^")) || [],
-            "strQrderQty1": orderQuantity || [],
-            "strQrderQty2": poDetailsList?.map((dt, index) => (dt[5]?.split('#')[1])) || [],
-            "strQrderQty3": poDetailsList?.map((dt, index) => (dt[5]?.split('#')[2])) || [],
-            "strQrderQty4": poDetailsList?.map((dt, index) => (dt[5]?.split('#')[3])) || [],
+            //list
+            "hstnumPoNo": selectedData[0]?.numPoNO || 0,
+            "hstnumPoStoreId": selectedData[0]?.numPoStoreId || 0,
 
-            "newStrPoTypeId": allPoData[0]?.poDetails?.sstnum_potype_id,
-            "strPOFinancialYear": allPoData[0]?.poDetails?.fin_year,
-            "strPoDate": parseDate(allPoData[0]?.poDetails?.po_date),
-            "programmeId": allPoData[0]?.poDetails?.hstnum_programme_id,
-            "fundingSourceId": allPoData[0]?.poDetails?.hstnum_funding_source_id,
-            "hstnumRcId": allPoData[0]?.poDetails?.rc_id,
-            "hstnumSupplierId": allPoData[0]?.poDetails?.hstnum_supplier_id,
-            "poItemIdValues": allPoData[0]?.poItemIdValues,
-            "strComboPOTypeId": allPoData[0]?.poDetails?.sstnum_potype_id,
-            "hstnumTax": allPoData[0]?.poDetails?.hstnum_tax,
-            "strItemManufacturerId": allPoData[0]?.poDetails?.hstnum_supplier_id,
-            "strDDeliveryDays": allPoData[0]?.deliveryDaysMap?.delivery_days1,//
-            "strDDeliveryDays2": allPoData[0]?.deliveryDaysMap?.delivery_days2,//
-            "strDDeliveryDays3": allPoData[0]?.deliveryDaysMap?.delivery_days3,//
-            "strDDeliveryDays4": allPoData[0]?.deliveryDaysMap?.delivery_days4,//
+            //poDetails
+            "hstnumPoTypeId": allPoData[0]?.poDetails?.sstnum_potype_id || 0,
+            "strPOFinancialYear": allPoData[0]?.poDetails?.fin_year || "",
+            "strPODate": allPoData[0]?.poDetails?.po_date || "",
+            "programmeId": allPoData[0]?.poDetails?.hstnum_programme_id || 0,
+            "fundingSourceId": allPoData[0]?.poDetails?.hstnum_funding_source_id || 0,
+            "hstnumRcId": allPoData[0]?.poDetails?.rc_id || 0,
+            "hstnumSupplierId": allPoData[0]?.poDetails?.hstnum_supplier_id || 0,
+            "hstnumTax": allPoData[0]?.poDetails?.hstnum_tax || 0,
+
+            //poItemIdValues
+            "poItemIdValues": allPoData[0]?.poItemIdValues || "",
+
+            //deliveryDaysMap
+            "strDDeliveryDays": allPoData[0]?.deliveryDaysMap?.delivery_days1 || "",
+            "strDDeliveryDays2": allPoData[0]?.deliveryDaysMap?.delivery_days2 || "",
+            "strDDeliveryDays3": allPoData[0]?.deliveryDaysMap?.delivery_days3 || "",
+            "strDDeliveryDays4": allPoData[0]?.deliveryDaysMap?.delivery_days4 || "",
+
+            //UI
+            "strPoRefrenceNoText": formState?.poRef || "",
+            "gnumHospitalCode": 998,
             "gnumSeatId": SEAT_ID,
-            // "strChk": allPoData[0]?.poDetails?.po_date,//
-            "strDPurchaseSource": allPoData[0]?.poDetails?.sstnum_purchase_source_id,
-            "strDQuotationNo": allPoData[0]?.poDetails?.quotation_no,
-            "strDQuotationDate": allPoData[0]?.poDetails?.quotation_date,
-            "strVerifiedDate": allPoData[0]?.poDetails?.verify_date,
-            "strPoRefrenceNo": allPoData[0]?.poDetails?.hstnum_ref_po_no,
-            "strPoRefrenceNoText": formState?.poRef,
-            "strNextPoDate": allPoData[0]?.poDetails?.next_po_date,
-            "strPurchaseCommitteMeetingDate": formState?.pCommitteeMeetDate,
-            "strRPPONo": '',//
-            "strIndentCellPOCombo": '',
-            "strDComponentId": componentDetails?.map((dt) => (dt?.hstnum_component_id?.toString())),
-            "strDComponentValue": componentDetails?.map((dt) => (dt?.nvl?.toString()))
+            "strDRemarks": formState?.remarks || "",
+            "strPurchaseCommitteMeetingDate": formState?.pCommitteeMeetDate || "",
+            "strDComponentValue": componentDetails?.map((dt) => (dt?.nvl?.toString())) || [],
+            "strDComponentId": componentDetails?.map((dt) => (dt?.hstnum_component_id?.toString())) || [],
+
+            //niche ki values batata hu kaha se leni hai.
+            "strVerifiedBy": allPoData[0]?.poDetails?.hststr_verify_by || "",
+            "strVerifiedDate": parseDate(new Date()),
+            "strPODetailsHidValue": poDetailsList?.length ? poDetailsList?.map((data) => data[0] + "^" + data[1] + "^" + data[1]?.split("#")[8] + "^" + data[3] + "^" + data[4] + "^" + data[5]) : [],
+            // "strComboPOTypeId": "",
+            "strItemManufacturerId": allPoData[0]?.poDetails?.hstnum_supplier_id || "",
+            "strQrderQty1": poDetailsList?.length ? poDetailsList?.map((data, index) => orderQuantity[index] ? orderQuantity[index] : data[5]?.split("#")[0]) : [],
+            "strQrderQty2": poDetailsList?.length ? poDetailsList?.map((data, index) => data[5]?.split("#")[1]) : [],
+            "strQrderQty3": poDetailsList?.length ? poDetailsList?.map((data, index) => data[5]?.split("#")[2]) : [],
+            "strQrderQty4": poDetailsList?.length ? poDetailsList?.map((data, index) => data[5]?.split("#")[3]) : [],
+            "strDPurchaseSource": allPoData[0]?.poDetails?.sstnum_purchase_source_id || "",
+            "strDQuotationNo": allPoData[0]?.poDetails?.quotation_no || "",
+            "strDQuotationDate": allPoData[0]?.poDetails?.quotation_date || "",
+            "strNextPoDate": allPoData[0]?.poDetails?.next_po_date || "",
+            "strRPPONo": "",//
+            "strIndentCellPOCombo": "",//
+            "hstnumStoreId": storeID,
         }
+
         console.log('val', val)
-        modifySinglePoDwhPoModifySave(val)?.then((data) => {
-            if (data?.status === 1) {
-                ToastAlert("Po Modified successfully", "success");
-                handleClose();
-                handleReset();
-                getAllListData();
+
+        approvePoGenerationData(val)?.then((res) => {
+            console.log('res', res)
+            if (res?.status === 1) {
+                ToastAlert(res?.msg, "success");
             } else {
-                ToastAlert(data?.message, "error");
+                ToastAlert(res?.msg, "error");
             }
         })
+    }
+
+    const handleRejectPo = () => {
+        onReject("reject");
     }
 
     const handleModifyPo = () => {
         let isValid = true;
         if (isValid) {
-            saveModifyPoDetails();
+            handleApprovePo();
         }
     }
 
@@ -412,12 +426,14 @@ console.log('allPoData', allPoData)
         },
     ]
 
-    console.log('formState', formState)
+    console.log('formState', formState);
+    console.log('selectedData', selectedData);
+    console.log('allpodata', allPoData);
 
     return (
         <section className="rateContractAddJHK">
             <h3 className="rateContractAddJHK__heading">
-                {`${actionType === "View" ? "Purchase Order View Form ( Centrally Rc )" : "Purchase Order Modify Form ( Centrally Rc )"}`}
+                {`${actionType === "View" ? "Purchase Order View Form" : "Purchase Order Approval Form"}`}
             </h3>
 
             <div className="rateContractAddJHK__container">
@@ -560,7 +576,7 @@ console.log('allPoData', allPoData)
                 </div>
 
                 <div>
-                    {actionType === "Modify" ?
+                    {actionType === "verify" ?
                         <>
                             <label htmlFor="tenderNo" className="employeeMaster__label required-label">
                                 PO Reference
@@ -584,7 +600,7 @@ console.log('allPoData', allPoData)
                 </div>
 
                 <div>
-                    {actionType === "Modify" ?
+                    {actionType === "verify" ?
                         <DatePickerComponent
                             selectedDate={formState.pCommitteeMeetDate}
                             setSelectedDate={(e) => handleDateChange(e, "pCommitteeMeetDate")}
@@ -602,7 +618,7 @@ console.log('allPoData', allPoData)
                 </div>
 
                 <div>
-                    {actionType === "Modify" ?
+                    {actionType === "verify" ?
                         <>
                             <label htmlFor="remarks" className="employeeMaster__label">
                                 Remarks :
@@ -636,7 +652,7 @@ console.log('allPoData', allPoData)
                             <label htmlFor="tAndc" className="employeeMaster__label">
                                 {data?.component}:
                             </label>
-                            {actionType === "Modify" ?
+                            {actionType === "verify" ?
                                 <RichTextEditor
                                     id={data?.component}
                                     name={data?.component}
@@ -650,7 +666,7 @@ console.log('allPoData', allPoData)
                                 />
                             }
                         </div>
-                        {actionType === "Modify" &&
+                        {actionType === "verify" &&
                             <div className='pt-2'>
                                 <label className="employeeMaster__label mb-0">
                                     Acceptance :
@@ -671,13 +687,17 @@ console.log('allPoData', allPoData)
             </div>
 
             <div className="bankmaster__container-controls">
-                {actionType === "Modify" &&
-                    <button className="bankmaster__container-controls-btn" onClick={handleModifyPo}>Save</button>
-                }
+
+                {actionType !== "View" && <>
+                    <button className="bankmaster__container-controls-btn" onClick={handleApprovePo}><FontAwesomeIcon icon={faSave} className="text-warning" size='lg' />Approve</button>
+
+                    <button className="bankmaster__container-controls-btn" onClick={handleRejectPo}><FontAwesomeIcon icon={faClose} className="text-danger" size='lg' />Reject</button>
+                </>}
                 <button
                     className="bankmaster__container-controls-btn"
                     onClick={handleClose}
                 >
+                    <FontAwesomeIcon icon={faBackspace} className="text-danger mr-1" size='lg' />
                     Close
                 </button>
             </div>
@@ -693,4 +713,4 @@ console.log('allPoData', allPoData)
     );
 }
 
-export default SingleProgPoModifyJH
+export default SinglePoVerifyJH

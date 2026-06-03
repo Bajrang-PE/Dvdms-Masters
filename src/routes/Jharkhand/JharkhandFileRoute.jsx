@@ -1,7 +1,8 @@
 import { lazy } from "react";
 import { Route } from "react-router-dom";
-import DccUploadJH from "../../component/masters/jharkhand/services/DccUpload/DccUploadJH";
-import ChallanProcessJh from "../../component/masters/jharkhand/services/ChallanProcess/ChallanProcessJH";
+const DccUploadJH = lazy(() => import("../../component/masters/jharkhand/services/DccUpload/DccUploadJH"));
+const ChallanProcessJh = lazy(() => import("../../component/masters/jharkhand/services/ChallanProcess/ChallanProcessJH"));
+const SinglePoApprovalListJH = lazy(() => import("../../component/masters/jharkhand/services/SingleProgPoApprovalJH/SinglePoApprovalListJH"));
 const RateContractJH = lazy(() => import("../../component/masters/jharkhand/services/RateContract"));
 const BankMasterJH = lazy(() => import("../../component/masters/jharkhand/admin/lists/BankMasterJH"));
 const SingleProgPoDeskJH = lazy(() => import("../../component/masters/jharkhand/services/SingleProgPoDeskJH"));
@@ -16,6 +17,7 @@ export const JharkhandFileRoute = (
         <Route path="/supplier-interface-desk" element={<SupplierInterfaceDeskJH />} />
         <Route path="/dcc-upload" element={<DccUploadJH />} />
         <Route path="/challan-process" element={<ChallanProcessJh />} />
+        <Route path="/single-prog-po-approval" element={<SinglePoApprovalListJH />} />
 
         {/* -------------------MASTERS-------------------------------------------------------------------- */}
         <Route path="/bank-master" element={<BankMasterJH />} />

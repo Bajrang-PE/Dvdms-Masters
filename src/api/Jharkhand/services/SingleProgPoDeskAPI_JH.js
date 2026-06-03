@@ -39,7 +39,7 @@ export const getSinglePoItemCmbData = async (hospitalCode, authType) => {
 export const getSinglePoCancelPoData = async (hospitalCode, storeId, poNo) => {
     try {
         const response = await fetchData(
-            `/api/v1/single-po-gen/cancel-purchase-order?hospCode=${hospitalCode}&StoreId=${storeId}&poNo=${poNo}`
+            `/api/v1/single-po-gen/cancel-purchase-order?hospCode=${hospitalCode}&storeId=${storeId}&poNo=${poNo}`
         );
         return response.data;
     } catch (err) {
@@ -87,7 +87,7 @@ export const getSinglePoFundingSrcCmbWithGst = async (hosCode, storeId, budgetCl
 export const getSinglePoTestingData = async (data) => {
     try {
         const response = await fetchPostData(
-            `/api/v1/single-po-gen/testing`, data
+            `/api/v1/single-po-gen/po-modify-details`, data
         );
         return response.data;
     } catch (err) {
@@ -271,6 +271,18 @@ export const getJHSinglePoGstNo = async (hospitalCode, storeId) => {
     try {
         const response = await fetchData(
             `/api/v1/single-po-gen/gst-no?hospCode=${hospitalCode}&storeId=${storeId}`
+        );
+        return response.data;
+    } catch (err) {
+        console.error("Error fetching store name : ", err);
+        throw err;
+    }
+};
+
+export const getSinglePoGraphCounts = async (hospCode, storeId) => {
+    try {
+        const response = await fetchData(
+            `/api/v1/single-po-gen/graph-data?hospCode=${hospCode}&storeId=${storeId}`
         );
         return response.data;
     } catch (err) {
