@@ -9,12 +9,23 @@ import { UnifiedContext } from "../context/UnifiedContext";
 
 const MenuCard = ({ icon, title, menu, borderClr }) => {
   const [activeIndex, setActiveIndex] = useState(null);
-  const { openTab } = useContext(UnifiedContext);
+  const { openTab, getMenuByStateAndSeatId, globalMenuData } = useContext(UnifiedContext);
   const { stateCode } = useParams();
+  const user = localStorage.getItem("data");
+  const userDt = JSON.parse(user);
+  const { username, userId, state } = userDt || null;
 
   const toggle = (i) => {
     setActiveIndex(activeIndex === i ? null : i);
   };
+
+  useEffect(() => {
+    if (stateCode) {
+      getMenuByStateAndSeatId("hp-usm-api", 9981);
+    }
+  }, [stateCode])
+
+  console.log('globalMenuData', globalMenuData)
 
   return (
     <div
@@ -108,7 +119,7 @@ const MenuPage = () => {
   }, []);
 
   const services = [
-     { title: "Central Purchase Order Generation", link: "central-purchase-order" },
+    { title: "Central Purchase Order Generation", link: "central-purchase-order" },
     { title: "Rate Contract", link: "rate-contract" },
     { title: "Challan Process", link: "challan-process" },
     { title: "Single Program Po Desk", link: "single-prog-po-desk" },

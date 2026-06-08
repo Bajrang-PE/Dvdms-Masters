@@ -126,7 +126,7 @@ const PoApprovalVerifyHP = (props) => {
     }, [selectedData])
 
     const getRCDetailsList = (rcId) => {
-        fetchData(`/hp-api/rate-contracts?hospitalCode=998&rcId=${rcId}`)?.then((res) => {
+        fetchData(`/hp-po-api/rate-contracts?hospitalCode=998&rcId=${rcId}`)?.then((res) => {
             if (res?.data?.status === 1) {
                 setRcDetailsList(res?.data?.data?.content)
                 const poDt = [{ storeName: storeName, anualDmdQty: 0, QtyPipeline: 0, currentStock: 0, reorderLevel: 0, suggestedQty: formState?.suggestedQty, orderQty: formState?.poOrdQty }]

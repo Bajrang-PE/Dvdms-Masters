@@ -126,7 +126,6 @@ const SinglePoVerifyJH = (props) => {
             updated[rowId] = value;
             return updated;
         });
-
     };
 
     useEffect(() => {
@@ -426,9 +425,7 @@ const SinglePoVerifyJH = (props) => {
         },
     ]
 
-    console.log('formState', formState);
-    console.log('selectedData', selectedData);
-    console.log('allpodata', allPoData);
+
 
     return (
         <section className="rateContractAddJHK">

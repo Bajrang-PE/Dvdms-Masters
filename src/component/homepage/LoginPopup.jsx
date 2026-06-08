@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   FaUser,
   FaLock,
@@ -9,13 +9,13 @@ import {
   FaTimes,
 } from "react-icons/fa";
 import { useLocation, useNavigate } from "react-router-dom";
-import { fetchPostData } from "../../utils/ApiHook";
+import { fetchPostData, fetchData, fetchPostConfigData } from "../../utils/ApiHook";
+import { ToastAlert } from "../../utils/Toast";
 
 const LoginPopup = ({ showLogin, setShowLogin, logoUrl }) => {
   const [password, setPassword] = useState("");
-  const [captcha, setCaptcha] = useState("F 3 6 k");
   const [showPassword, setShowPassword] = useState(false);
-  const [captchaText, setCaptchaText] = useState("");
+
   const [error, setError] = useState({
     usernameErr: "",
     passwordErr: "",
@@ -27,11 +27,35 @@ const LoginPopup = ({ showLogin, setShowLogin, logoUrl }) => {
   const user = localStorage.getItem("data");
   const userDt = JSON.parse(user);
   const { username, userId, state } = userDt || null;
+  const [captchaValue, setCaptchaValue] = useState("");
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [captchaImage, setCaptchaImage] = useState("");
 
-  // const handleLogin = (password) => {
-  //   // here you can validate password with API
-  //   navigate("/dashboard", { state: { username, stateCode } });
-  // };
+
+  const fetchCaptcha = async () => {
+    try {
+      const res = await fetchData("/auth/captcha");
+      if (res?.data?.status === 1) {
+        setCaptchaImage(res?.data?.data?.captchaUri || "");
+        setCaptchaToken(res?.data?.data?.captchaToken || "");
+      } else {
+        setCaptchaImage("");
+        setCaptchaToken("");
+      }
+    } catch (err) {
+      console.error("Captcha Error:", err);
+      setCaptchaImage("");
+      setCaptchaToken("");
+    }
+  };
+
+  useEffect(() => {
+    if (showLogin) {
+      fetchCaptcha();
+      setCaptchaValue("");
+      setError("");
+    }
+  }, [showLogin]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -46,18 +70,25 @@ const LoginPopup = ({ showLogin, setShowLogin, logoUrl }) => {
         setError((prev) => ({ ...prev, passwordErr: "Please enter password" }));
         isValid = false;
       }
-      if (!captchaText?.trim() || captchaText?.trim() === "") {
+      if (!captchaValue?.trim() || captchaValue?.trim() === "") {
         setError((prev) => ({ ...prev, captchaErr: "Please enter captcha!" }));
         isValid = false;
       }
+
       if (isValid) {
         const val = {
-          gnumUserid: userId || "",
-          gstrLoginId: username || "",
-          password: password || "", //"Assam!2019"
+          username: username?.trim() || "",
+          password: password?.trim() || "",
+          captchaValue: captchaValue?.trim() || "",
         };
 
-        fetchPostData("/auth/login-by-password", val).then((resp) => {
+        fetchPostConfigData("/auth/login", val, {
+          headers: {
+            "Content-Type": "application/json",
+            "X-STATE-CODE": state,
+            Authorization: `Bearer ${captchaToken}`,
+          },
+        }).then((resp) => {
           if (resp?.data?.status === 1) {
             const datas = {
               state: resp?.data?.data?.stateCode,
@@ -65,8 +96,10 @@ const LoginPopup = ({ showLogin, setShowLogin, logoUrl }) => {
               username: username,
               isLogin: "true",
             };
-            localStorage.setItem("data", JSON.stringify(datas));
+            sessionStorage.setItem('accessToken',resp?.data?.data?.token)
+            ToastAlert(resp?.data?.msg, 'success');
             navigate(`/home/${datas.state}/menus`);
+            localStorage.setItem("data", JSON.stringify(datas));
           } else {
             console.log(resp?.message);
           }
@@ -84,26 +117,19 @@ const LoginPopup = ({ showLogin, setShowLogin, logoUrl }) => {
   };
 
   const refreshCaptcha = () => {
-    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
-    let newCaptcha = "";
-    for (let i = 0; i < 5; i++) {
-      newCaptcha += chars.charAt(Math.floor(Math.random() * chars.length));
-      if (i < 4) newCaptcha += " ";
-    }
-    setCaptcha(newCaptcha);
+    setCaptchaValue("");
+    fetchCaptcha();
   };
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-300 ${
-        showLogin ? "opacity-100" : "opacity-0 pointer-events-none"
-      }`}
+      className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-300 ${showLogin ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
       style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
     >
       <div
-        className={`bg-white rounded-lg shadow-xl w-full max-w-md transform transition-all duration-300 ${
-          showLogin ? "scale-100" : "scale-95"
-        }`}
+        className={`bg-white rounded-lg shadow-xl w-full max-w-md transform transition-all duration-300 ${showLogin ? "scale-100" : "scale-95"
+          }`}
       >
         <div className="flex justify-between items-center border-b p-2">
           <div className="flex items-center">
@@ -186,16 +212,25 @@ const LoginPopup = ({ showLogin, setShowLogin, logoUrl }) => {
                   type="text"
                   className="w-full px-4 py-2 border border-gray-400 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-800"
                   placeholder="Enter Captcha"
-                  value={captchaText}
+                  value={captchaValue}
                   onChange={(e) => {
-                    setCaptchaText(e.target.value);
+                    setCaptchaValue(e.target.value);
                   }}
                 />
               </div>
 
               <div className="flex items-center space-x-2">
-                <div className="bg-gray-200 px-4 py-2 rounded-lg font-mono text-gray-700 select-none">
-                  {captcha}
+                <div className="bg-gray-200 px-1 py-1 rounded-lg font-mono text-gray-700 select-none">
+                  <img
+                    src={captchaImage}
+                    alt="captcha"
+                    className=""
+                    style={{
+                      width: "100%",
+                      height: "50px",
+                      objectFit: "fill"
+                    }}
+                  />
                 </div>
                 <button
                   type="button"

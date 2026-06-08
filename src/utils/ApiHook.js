@@ -1,58 +1,60 @@
 import axios from "axios";
+import { ToastAlert } from "./Toast";
 
-const BaseUrl = '  http://10.226.27.173:8087'; //vish 8087
+// const BaseUrl = '  http://10.226.27.173:8087'; //vish 8087
 // const BaseUrl = 'http://10.226.17.6:8084';
 // const BaseUrl = 'http://10.226.29.202:8091';
 
 // const BaseUrl = "http://10.226.29.29:8080/"; //AD AS
-// const BaseUrl = "http://10.226.30.86:8091"; //Main Gateway
+// const BaseUrl = "http://10.226.30.45:8080"; //Main Gateway
 // const BaseUrl = "http://10.226.30.45:9002"; //HP prd
 
 // axios.defaults.baseURL = '';
-axios.defaults.baseURL = BaseUrl;
+axios.defaults.baseURL = '';
 
-// const getAccessToken = () => {
-//     return sessionStorage.getItem('accessToken');
-// };
+const getAccessToken = () => {
+  return sessionStorage.getItem('accessToken');
+};
 
 // const getCsrfToken = () => {
 //     return Cookies.get('csrfToken');
 // };
 
 // Set the Authorization header globally using an interceptor
-// axios.interceptors.request.use(
-//     (config) => {
-//         const accessToken = getAccessToken();
-//         const CsrfToken = getCsrfToken();
-//         if (accessToken) {
-//             config.headers['Authorization'] = `Bearer ${accessToken}`;
-//             config.headers['X-CSRF-TOKEN'] = CsrfToken;
-//         }
-//         return config;
-//     },
-//     (error) => {
-//         return Promise.reject(error);
-//     }
-// );
+axios.interceptors.request.use(
+  (config) => {
+    const accessToken = getAccessToken();
+    // const CsrfToken = getCsrfToken();
+    if (accessToken) {
+      config.headers['Authorization'] = `Bearer ${accessToken}`;
+      // config.headers['X-CSRF-TOKEN'] = CsrfToken;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
-// axios.interceptors.response.use(
-//     async (response) => {
-//         if (response?.data?.status && response?.data?.status === 401) {
-//             ToastAlert('Session expired. Please log in again.', 'error');
-//         } else {
-//             return response;
-//         }
-//     },
-//     async (error) => {
-//         if (error.response) {
-//             const { status, data } = error.response;
-//             if (status === 401 || status === 403) {
-//                 ToastAlert(data?.error, 'error');
-//             }
-//         }
-//         return Promise.reject(error);
-//     }
-// );
+axios.interceptors.response.use(
+  async (response) => {
+    if (response?.data?.status && response?.data?.status === 401) {
+      ToastAlert('Session expired. Please log in again.', 'error');
+    } else {
+      return response;
+    }
+  },
+  async (error) => {
+    if (error.response) {
+      const { status, data } = error.response;
+      console.log('error', error)
+      if (status === 401 || status === 403) {
+        ToastAlert(data?.msg, 'error');
+      }
+    }
+    return Promise.reject(error);
+  }
+);
 
 export const fetchData = async (url, params = null) => {
   try {
@@ -84,6 +86,16 @@ export const fetchPostData = async (url, data) => {
         "Content-Type": "application/json",
       },
     });
+    return response;
+  } catch (error) {
+    console.error("Error in fetchPostData:", error);
+    throw error;
+  }
+};
+
+export const fetchPostConfigData = async (url, data, config) => {
+  try {
+    const response = await axios.post(url, data, config);
     return response;
   } catch (error) {
     console.error("Error in fetchPostData:", error);

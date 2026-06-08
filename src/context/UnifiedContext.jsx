@@ -1,5 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { fetchData } from "../utils/ApiHook";
 
 export const UnifiedContext = createContext()
 
@@ -32,6 +33,7 @@ const UnifiedContextApi = ({ children }) => {
 
     const [tabs, setTabs] = useState(savedTabs);
     const [activeTab, setActiveTab] = useState(savedActiveTab);
+    const [globalMenuData, setGlobalMenuData] = useState([]);
 
     useEffect(() => {
         localStorage.setItem('menuTabs', JSON.stringify(tabs));
@@ -65,10 +67,27 @@ const UnifiedContextApi = ({ children }) => {
         });
     };
 
+    const getMenuByStateAndSeatId = async (stateCode) => {
+
+        try {
+            const response = await fetchData(`/${stateCode}/menus`)
+            console.log('response', response)
+            if (response?.data?.status === 1) {
+                setGlobalMenuData(response?.data?.data || []);
+            } else {
+                setGlobalMenuData([]);
+            }
+
+        } catch (error) {
+            console.error('API Err', error)
+            setGlobalMenuData([]);
+        }
+
+    }
 
     return (
         <UnifiedContext.Provider value={{
-            activeTab, setActiveTab, tabs, setTabs, openTab, closeTab
+            activeTab, setActiveTab, tabs, setTabs, openTab, closeTab, getMenuByStateAndSeatId, globalMenuData
         }}>
             {children}
         </UnifiedContext.Provider>

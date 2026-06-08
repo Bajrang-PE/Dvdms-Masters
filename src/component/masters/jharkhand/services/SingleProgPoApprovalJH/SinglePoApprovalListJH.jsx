@@ -9,6 +9,7 @@ import SinglePoVerifyJH from './SinglePoVerifyJH';
 import { getPoApprovalGraphData, getPoApprovalListData, getPoStatusComboData, getPoStoreNameComboData } from '../../../../../api/Jharkhand/services/SingleProgPoApproval_JH';
 import SinglePoRejectJH from './SinglePoRejectJH';
 import { chartColorArr } from '../../../common/StaticData';
+import SinglePoExtendJH from './SinglePoExtendJH';
 
 const columns = [
     { header: "PO Prefix", field: "strPoPrefix" },
@@ -41,6 +42,7 @@ const SinglePoApprovalListJH = () => {
         { mappingKey: "verify", componentName: () => <SinglePoVerifyJH store={selectedStore} selectedData={selectedRowRc} actionType={'verify'} onReject={onRejectAction} /> },
         { mappingKey: "reject", componentName: () => <SinglePoRejectJH store={selectedStore} selectedData={selectedRowRc} actionType={'reject'} /> },
         { mappingKey: "View", componentName: (props) => (<SinglePoVerifyJH store={selectedStore} selectedData={selectedRowRc} actionType={"View"} />) },
+        { mappingKey: "extend", componentName: (props) => (<SinglePoExtendJH store={selectedStore} selectedData={selectedRowRc} actionType={"extend"} />) },
     ];
 
     console.log('selectedRowRc', selectedRowRc)
@@ -56,7 +58,7 @@ const SinglePoApprovalListJH = () => {
             ] : []),
 
             ...(poStatus === "IN_PROCESS" ? [
-                { label: "Po Amend", onClick: (() => { handleActionComp('poamend') }), icon: " " },
+                // { label: "Po Amend", onClick: (() => { handleActionComp('poamend') }), icon: " " },
                 { label: "Extend", onClick: (() => { handleActionComp('extend') }), icon: " " },
             ] : []),
 
