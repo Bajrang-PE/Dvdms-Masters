@@ -3,7 +3,7 @@ import { Route } from "react-router-dom";
 
 const RateContractHP = lazy(() => import("../../component/masters/himachal/services/RateContractHP"));
 const PoGenerationHP = lazy(() => import("../../component/masters/himachal/services/PoGenerationHP"));
-const PoApprovalListHP = lazy(() => import("../../component/masters/himachal/services/poApproval/poApprovalListHP"));
+const PoApprovalListHP = lazy(() => import("../../component/masters/himachal/services/poApproval/PoApprovalListHP"));
 const PoCancelationHP = lazy(() => import("../../component/masters/himachal/services/poCancelation/PoCancelationHP"));
 const SupplierInterfaceList = lazy(() => import("../../component/masters/himachal/services/SupplierInterface/SupplierInterfaceList"));
 
