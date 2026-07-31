@@ -39,6 +39,7 @@ const MenuTopBar = (props) => {
 
   const logout = () => {
     localStorage?.clear();
+    sessionStorage?.clear();
     navigate("/");
   };
 

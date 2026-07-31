@@ -1,11 +1,11 @@
 import { lazy } from "react";
 import { Route } from "react-router-dom";
-import RateContractHP from "../../component/masters/himachal/services/RateContractHP";
-import PoGenerationHP from "../../component/masters/himachal/services/PoGenerationHP";
-import PoApprovalListHP from "../../component/masters/himachal/services/poApproval/poApprovalListHP";
-import PoCancelationHP from "../../component/masters/himachal/services/poCancelation/PoCancelationHP";
-import SupplierInterfaceList from "../../component/masters/himachal/services/SupplierInterface/SupplierInterfaceList";
-// const RateContractJH = lazy(() => import("../../component/masters/jharkhand/services/RateContract"));
+
+const RateContractHP = lazy(() => import("../../component/masters/himachal/services/RateContractHP"));
+const PoGenerationHP = lazy(() => import("../../component/masters/himachal/services/PoGenerationHP"));
+const PoApprovalListHP = lazy(() => import("../../component/masters/himachal/services/poApproval/poApprovalListHP"));
+const PoCancelationHP = lazy(() => import("../../component/masters/himachal/services/poCancelation/PoCancelationHP"));
+const SupplierInterfaceList = lazy(() => import("../../component/masters/himachal/services/SupplierInterface/SupplierInterfaceList"));
 
 export const HimachalFileRoute = (
     <>
@@ -14,7 +14,7 @@ export const HimachalFileRoute = (
         <Route path="/po-generation" element={<PoGenerationHP />} />
         <Route path="/po-approval" element={<PoApprovalListHP />} />
         <Route path="/po-cancelation" element={<PoCancelationHP />} />
-        <Route path="/supplier-interface-desk" element={<SupplierInterfaceList  />} />
+        <Route path="/supplier-interface-desk" element={<SupplierInterfaceList />} />
 
 
         {/* -------------------MASTERS-------------------------------------------------------------------- */}

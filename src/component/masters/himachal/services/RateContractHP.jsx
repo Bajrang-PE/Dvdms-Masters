@@ -1,18 +1,20 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { Suspense, useEffect, useRef, useState } from 'react'
 import ServiceNavbar from '../../../commons/ServiceNavbar';
 import { ComboDropDown } from '../../../commons/FormElements';
-import DataTable from '../../../commons/Datatable';
 import { useDispatch } from 'react-redux';
 import { setContractDetails, setStore } from '../../../../features/himachal/Himachal_Slice';
-import RateContractTenderHP from './rateContract/RateContractTenderHP';
-import RateContractAddHP from './rateContract/RateContractAddHP';
 import { showPopup } from '../../../../features/commons/popupSlice';
-import PieChart from '../../../commons/PieChart';
 import { cencelHpRcDetail, getHpRcContractTypesCmb, getHpRcDrugNamesCmb, getHpRcGraphDataCounts, getHpRcListData, getHpRcStatusCmb, getHpRcStoreNameCmb, getHpRcSuppliersCmb } from '../../../../api/Himachal/services/rateContractAPI_HP';
 import { chartColorArr } from '../../common/StaticData';
 import { parseDate } from '../../../commons/utilFunctions';
-import RcModifyViewFormHP from './rateContract/RcModifyViewFormHP';
 import { ToastAlert } from '../../../../utils/Toast';
+import LoadingSpinner from '../../../commons/LoadingSpinner';
+
+const DataTable = lazy(() => import("../../../commons/Datatable"));
+const PieChart = lazy(() => import("../../../commons/PieChart"));
+const RcModifyViewFormHP = lazy(() => import("./rateContract/RcModifyViewFormHP"));
+const RateContractTenderHP = lazy(() => import("./rateContract/RateContractTenderHP"));
+const RateContractAddHP = lazy(() => import("./rateContract/RateContractAddHP"));
 
 const columns = [
     { header: "Supplier Name", field: "strSupplierName" },
@@ -398,20 +400,24 @@ const RateContractHP = () => {
 
                     {pieChartData.length > 0 && (
                         <div className="rateContract__filterSection--chart">
-                            <PieChart data={pieChartData?.filter(dt => dt?.name !== "All" || dt?.status !== "0")} setStatus={setActiveStatus} />
+                            <Suspense fallback={<LoadingSpinner />}>
+                                <PieChart data={pieChartData?.filter(dt => dt?.name !== "All" || dt?.status !== "0")} setStatus={setActiveStatus} />
+                            </Suspense>
                         </div>
                     )}
                 </div>
             </ServiceNavbar>
             {activeStatus &&
                 <div>
-                    <DataTable
-                        masterName={"Rate Contract"}
-                        ref={dataTableRef}
-                        columns={columns}
-                        data={rcListData}
-                        handleRowSelect={handleRowSelect}
-                    />
+                    <Suspense fallback={<LoadingSpinner />}>
+                        <DataTable
+                            masterName={"Rate Contract"}
+                            ref={dataTableRef}
+                            columns={columns}
+                            data={rcListData}
+                            handleRowSelect={handleRowSelect}
+                        />
+                    </Suspense>
                 </div>
             }
         </>

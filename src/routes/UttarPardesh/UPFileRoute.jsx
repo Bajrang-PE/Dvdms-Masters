@@ -1,6 +1,7 @@
 import { lazy } from "react";
 import { Route } from "react-router-dom";
-import RateContract from "../../component/masters/UP/services/RateContract/RateContract";
+
+const RateContract = lazy(()=>import("../../component/masters/UP/services/RateContract/RateContract"))
 
 
 export const UPFileRoute = (

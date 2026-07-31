@@ -1,8 +1,11 @@
+import { lazy, Suspense } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
-import AssamHomePage from "./statePages/AssamHomePage";
-import JharkhandHomePage from "./statePages/JharkhandHomePage";
-import HimachalHomePage from "./statePages/HimachalHomePage";
-import UPHomePage from "./statePages/UPHomePage";
+import LoadingSpinner from "../component/commons/LoadingSpinner";
+
+const AssamHomePage = lazy(() => import("./statePages/AssamHomePage"));
+const JharkhandHomePage = lazy(() => import("./statePages/JharkhandHomePage"));
+const HimachalHomePage = lazy(() => import("./statePages/HimachalHomePage"));
+const UPHomePage = lazy(() => import("./statePages/UPHomePage"));
 
 export default function HomeWrapper() {
   const { stateCode } = useParams();
@@ -14,5 +17,10 @@ export default function HomeWrapper() {
     UP: <UPHomePage />,
   };
 
-  return statePages[stateCode] || <div>Invalid State</div>;
+  // return statePages[stateCode] || <div>Invalid State</div>;
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      {statePages[stateCode] || <div>Invalid State</div>}
+    </Suspense>
+  );
 }

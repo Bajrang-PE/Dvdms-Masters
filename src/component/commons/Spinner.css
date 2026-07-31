@@ -1,0 +1,141 @@
+/* .loader-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 250px;
+    gap: 12px;
+}
+
+.loader {
+    display: flex;
+    gap: 8px;
+}
+
+.loader span {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #1677ff;
+    animation: bounce 0.6s infinite alternate;
+}
+
+.loader span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.loader span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+.loader-wrapper p {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+}
+
+@keyframes bounce {
+    from {
+        transform: translateY(0);
+        opacity: 0.5;
+    }
+    to {
+        transform: translateY(-12px);
+        opacity: 1;
+    }
+} */
+
+/* .orbit-container {
+    min-height: 250px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 18px;
+}
+
+.orbit {
+    width: 70px;
+    height: 70px;
+    border: 2px solid rgba(22, 119, 255, 0.15);
+    border-radius: 50%;
+    position: relative;
+    animation: rotate 1.8s linear infinite;
+}
+
+.planet {
+    width: 14px;
+    height: 14px;
+    background: #1677ff;
+    border-radius: 50%;
+    position: absolute;
+    top: -7px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 0 15px rgba(22, 119, 255, 0.5);
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+} */
+
+.chart-loader-wrapper {
+    min-height: 250px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+}
+
+.chart-loader {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 60px;
+}
+
+.chart-loader span {
+    width: 10px;
+    background: #1677ff;
+    border-radius: 20px;
+    animation: bars 1s ease-in-out infinite;
+}
+
+.chart-loader span:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.chart-loader span:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.chart-loader span:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.chart-loader span:nth-child(4) {
+    animation-delay: 0.45s;
+}
+
+.chart-loader span:nth-child(5) {
+    animation-delay: 0.6s;
+}
+
+@keyframes bars {
+    0%, 100% {
+        height: 15px;
+        opacity: 0.5;
+    }
+
+    50% {
+        height: 55px;
+        opacity: 1;
+    }
+}

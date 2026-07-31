@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import Header from '../component/mainPage2/Header';
-import Hero from '../component/mainPage2/Hero';
-import About from '../component/mainPage2/About';
-import Services from '../component/mainPage2/Services';
-import Features from '../component/mainPage2/Features';
-import States from '../component/mainPage2/States';
-import Footer from '../component/mainPage2/Footer';
-import LoginModal from '../component/mainPage2/LoginModal';
-import '../css/mainPage.css';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
+const Header = lazy(() => import("../component/mainPage2/Header"));
+const Hero = lazy(() => import("../component/mainPage2/Hero"));
+const About = lazy(() => import("../component/mainPage2/About"));
+const Services = lazy(() => import("../component/mainPage2/Services"));
+const Features = lazy(() => import("../component/mainPage2/Features"));
+const States = lazy(() => import("../component/mainPage2/States"));
+const Footer = lazy(() => import("../component/mainPage2/Footer"));
 import { fetchPostData } from '../utils/ApiHook';
+import '../css/mainPage.css';
+import LoadingSpinner from '../component/commons/LoadingSpinner';
+import LoginModal from "../component/mainPage2/LoginModal";
 
 function MainPage2() {
     const [showLoginModal, setShowLoginModal] = useState(false);
@@ -39,6 +40,7 @@ function MainPage2() {
 
     return (
         <div className="App">
+            {/* <Suspense fallback={<LoadingSpinner />}> */}
             <Header openLoginModal={openLoginModal} />
             <Hero openLoginModal={openLoginModal} />
             <About />
@@ -53,6 +55,7 @@ function MainPage2() {
                     onClose={closeLoginModal}
                 />
             }
+            {/* </Suspense> */}
         </div>
     );
 }

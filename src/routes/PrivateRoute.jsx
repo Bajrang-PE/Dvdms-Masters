@@ -11,7 +11,6 @@ export default function PrivateRoute() {
     return userDt?.state === stateCode && userDt?.isLogin === "true";
   };
 
-
   if (!hasStateAccess(stateCode)) return <NotFoundPage />;
 
   return (

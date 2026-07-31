@@ -2,12 +2,12 @@ import React, { lazy, Suspense } from "react";
 import { Route, Routes, useParams } from "react-router-dom";
 import { JharkhandFileRoute } from "./Jharkhand/JharkhandFileRoute";
 import { AssamFileRoute } from "./Assam/AssamFileRoute";
-import HimachalPrivateRoute from "./Himachal/HimachalPrivateRoute";
 import { HimachalFileRoute } from "./Himachal/HimachalFileRoute";
 import { STATE_CONFIG } from "../utils/StateConfig";
-import UPPrivateRoute from "./UttarPardesh/UPPrivateRoute";
 import { UPFileRoute } from "./UttarPardesh/UPFileRoute";
 
+const UPPrivateRoute = lazy(() => import("./UttarPardesh/UPPrivateRoute"));
+const HimachalPrivateRoute = lazy(() => import("./Himachal/HimachalPrivateRoute"));
 const LoadingSpinner = lazy(() => import("../component/commons/LoadingSpinner"));
 const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
 const AssamPrivateRoute = lazy(() => import("./Assam/AssamPrivateRoute"));

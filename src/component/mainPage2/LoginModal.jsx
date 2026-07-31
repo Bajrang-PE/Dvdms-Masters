@@ -241,7 +241,7 @@ const LoginModal = ({ show, onClose }) => {
                         />
                       ) : (
                         <span className="text-muted small">
-                          Loading...
+                          Not Available
                         </span>
                       )}
                     </div>
